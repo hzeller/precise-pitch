@@ -61,6 +61,8 @@ public class PitchDisplay extends Activity {
         accidentalGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
+            	flatDisplay.setVisibility(View.INVISIBLE);
+            	sharpDisplay.setVisibility(View.INVISIBLE);
                 switch (checkedId) {
                     case R.id.flatRadio:
                         keyDisplay = KeyDisplay.DISPLAY_FLAT;
@@ -117,9 +119,10 @@ public class PitchDisplay extends Activity {
             } else {
                 // No valid data to display. Set most elements invisible.
                 frequencyDisplay.setText("");
-                noteDisplay.setText("");
-                flatDisplay.setVisibility(View.INVISIBLE);
-                sharpDisplay.setVisibility(View.INVISIBLE);
+                final int ghostColor = Color.rgb(40,  40,  40);
+                noteDisplay.setTextColor(ghostColor);
+                flatDisplay.setTextColor(ghostColor);
+                sharpDisplay.setTextColor(ghostColor);
                 prevNote.setText("");
                 nextNote.setText("");
                 offsetCentView.setValue(100);  // out of range, not displayed.
