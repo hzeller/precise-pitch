@@ -1,13 +1,132 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-<TextView
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:text="Hello World, PitchDisplay"
-    />
-</LinearLayout>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context=".PitchDisplay"
+    android:background="#000000">
 
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/noteDisplay"
+            android:editable="false"
+            android:height="200dp"
+            android:width="150dp"
+            android:textSize="180dp"
+            android:text="C"
+            android:singleLine="false"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:textColor="#ffffff"
+            android:gravity="center_vertical|center_horizontal"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="440.1"
+            android:id="@+id/frequencyDisplay"
+            android:textAlignment="center"
+            android:textColor="#ffffff"
+            android:textSize="16dp"
+            android:layout_below="@+id/noteDisplay"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="♯"
+            android:id="@+id/sharpText"
+            android:textColor="#ffffff"
+            android:layout_alignTop="@+id/noteDisplay"
+            android:layout_toRightOf="@+id/noteDisplay"
+            android:textSize="80dp"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="♭"
+            android:id="@+id/flatText"
+            android:textSize="80dp"
+            android:textIsSelectable="true"
+            android:textColor="#ffffff"
+            android:layout_alignBottom="@+id/noteDisplay"
+            android:layout_toRightOf="@+id/noteDisplay"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="-20dB"
+            android:id="@+id/decibelView"
+            android:layout_alignTop="@+id/frequencyDisplay"
+            android:layout_alignRight="@+id/flatText"
+            android:textColor="#ffffff"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="B#"
+            android:id="@+id/nextLower"
+            android:textColor="#ffffff"
+            android:layout_alignTop="@+id/centView"
+            android:layout_toLeftOf="@+id/centView"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Db"
+            android:id="@+id/nextHigher"
+            android:textColor="#ffffff"
+            android:layout_alignTop="@+id/centView"
+            android:layout_toRightOf="@+id/centView"/>
+
+    <RadioGroup
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="horizontal"
+            android:layout_alignParentTop="true"
+            android:layout_alignLeft="@+id/centThreshold"
+            android:layout_toLeftOf="@+id/frequencyDisplay"
+            android:layout_alignBottom="@+id/centThreshold"
+            android:id="@+id/accidentalSelection">
+
+        <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="♭"
+                android:id="@+id/flatRadio"
+                android:layout_gravity="center_horizontal|top"
+                android:width="80dp"
+                android:textColor="#ffffff"/>
+
+        <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="♯"
+                android:id="@+id/sharpRadio"
+                android:layout_gravity="center_horizontal|top"
+                android:textColor="#ffffff"
+                android:width="80dp"/>
+    </RadioGroup>
+
+    <view
+        android:id="@+id/centView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/sharpText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="80dp"
+        class="net.zllr.precisepitch.CenterOffsetView" />
+
+</RelativeLayout>
