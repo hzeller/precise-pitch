@@ -48,7 +48,7 @@ public class PitchDisplay extends Activity {
         decibelView = (TextView) findViewById(R.id.decibelView);
         noteDisplay = (TextView) findViewById(R.id.noteDisplay);
         noteDisplay.setKeepScreenOn(true);
-        noteDisplay.setText(".");
+        noteDisplay.setText("");
         offsetCentView = (CenterOffsetView) findViewById(R.id.centView);
         offsetCentView.setRange(50);
         offsetCentView.setQuantization(10);
