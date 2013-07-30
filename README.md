@@ -1,4 +1,5 @@
-![icon]
+![icon] Precise Pitch
+---------------------
 
 My first Android development experiment, so don't 
 expect anything useful here :)
