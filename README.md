@@ -1,3 +1,5 @@
+![icon]
+
 My first Android development experiment, so don't 
 expect anything useful here :)
 
@@ -14,3 +16,4 @@ Connect your debug enabled phone and type:
     ant debug && ant installd
 
 
+[icon]: https://github.com/hzeller/precise-pitch/raw/master/res/drawable-hdpi/ic_launcher_pp.png
