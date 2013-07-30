@@ -84,7 +84,8 @@ public class CenterOffsetView extends View {
             final int textHeight = (int) (kHeight * 0.8);
             p.setTextSize(textHeight);
             p.setTextAlign(Paint.Align.CENTER);
-            canvas.drawText(String.format("%.0f", value), kWidth/2, kHeight + kHeight/2 + 2, p);
+            canvas.drawText(String.format("%+.0fc", value),
+                            kWidth/2, kHeight + kHeight/2 + 2, p);
         }
     }
 }
