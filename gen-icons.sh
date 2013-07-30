@@ -8,10 +8,14 @@
 
 BASE_DRAWABLE=res/drawable
 
-declare -A resolutions=( ["xhdpi"]="96" ["hdpi"]="72" ["mdpi"]="48")
+declare -A resolutions=( ["xhdpi"]="96" ["hdpi"]="72" \
+                         ["mdpi"]="48" ["ldpi"]="36")
 for res in "${!resolutions[@]}"; do
     SIZE="${resolutions[$res]}"
-    inkscape --export-png=${BASE_DRAWABLE}-${res}/app_icon.png \
+    FILE=${BASE_DRAWABLE}-${res}/ic_launcher_pp.png
+    inkscape --export-png=${FILE}.tmp \
 	     --export-width=$SIZE --export-height=$SIZE precise-pitch.svg
+    pngcrush -e "" ${FILE}.tmp >/dev/null 2>&1
+    rm -f ${FILE}.tmp
 done
 
