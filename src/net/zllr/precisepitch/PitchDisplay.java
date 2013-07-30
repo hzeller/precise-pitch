@@ -90,8 +90,8 @@ public class PitchDisplay extends Activity {
         pitchPoster.start();
     }
 
-    // Whenever MicrophonePitchPoster has a new note value available, it will post it to the
-    // message queue, received here.
+    // Whenever MicrophonePitchPoster has a new note value available, it will
+    // post it to the message queue, received here.
     private final class UIUpdateHandler extends Handler {
         public void handleMessage(Message msg) {
             final MicrophonePitchPoster.PitchData data
@@ -125,9 +125,11 @@ public class PitchDisplay extends Activity {
                 nextNote.setText("");
                 offsetCentView.setValue(100);  // out of range, not displayed.
             }
-            if (data != null) {
-                decibelView.setVisibility(data.decibel > -60 ? View.VISIBLE : View.INVISIBLE);
+            if (data != null && data.decibel > -60) {
+                decibelView.setVisibility(View.VISIBLE);
                 decibelView.setText(String.format("%.0fdB", data.decibel));
+            } else {
+                decibelView.setVisibility(View.INVISIBLE);
             }
         }
     }

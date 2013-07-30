@@ -53,12 +53,12 @@ class MicrophonePitchPoster extends Thread {
         }
     }
 
-    // Runnable main method.
+    // Runnable/Thread main method.
     @Override
     public void run() {
         audiorecorder.startRecording();
 
-        sampleLoop();
+        samplingLoop();
 
         audiorecorder.stop();
         audiorecorder.release();
@@ -69,7 +69,7 @@ class MicrophonePitchPoster extends Thread {
         }
     }
 
-    private void sampleLoop() {
+    private void samplingLoop() {
         final short buffer[] = new short[sampleCount];
         final double samples[] = new double[sampleCount];
         while (isSamplingRunning()) {
