@@ -17,4 +17,4 @@ Connect your debug enabled phone and type:
     ant debug && ant installd
 
 
-[icon]: https://github.com/hzeller/precise-pitch/raw/master/res/drawable-hdpi/ic_launcher_pp.png
+[icon]: https://github.com/hzeller/precise-pitch/raw/master/res/drawable-mdpi/ic_launcher_pp.png
