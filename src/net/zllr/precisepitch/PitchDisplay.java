@@ -9,8 +9,8 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class PitchDisplay extends Activity {
     private TextView frequencyDisplay;
@@ -53,9 +53,8 @@ public class PitchDisplay extends Activity {
         offsetCentView.setRange(50);
         offsetCentView.setQuantization(10);
         addAccidentalListener();        
-        ensurePosterRunning();
     }
-
+    
     private void addAccidentalListener() {
         final RadioGroup accidentalGroup = (RadioGroup) findViewById(R.id.accidentalSelection);
         accidentalGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -76,20 +75,19 @@ public class PitchDisplay extends Activity {
         ((RadioButton) findViewById(R.id.sharpRadio)).setChecked(true);
     }
 
-    private void ensurePosterRunning() {
-        MicrophonePitchPoster poster = (MicrophonePitchPoster) getLastNonConfigurationInstance();
-        if (poster == null || !poster.isAlive()) {
-            pitchPoster = new MicrophonePitchPoster(30);
-            pitchPoster.start();
-        } else {
-            pitchPoster = poster;
-        }
-        final Handler handler = new UIUpdateHandler();
-        pitchPoster.setHandler(handler);
+    @Override
+    protected void onPause() {
+        super.onPause();
+        pitchPoster.stopSampling();
+        pitchPoster = null;
     }
 
-    public Object onRetainNonConfigurationInstance() {
-        return pitchPoster;  // some magic to make certain things survive lifecycle changes.
+    @Override
+    protected void onResume() {
+        super.onResume();
+        pitchPoster = new MicrophonePitchPoster(30);
+        pitchPoster.setHandler(new UIUpdateHandler());
+        pitchPoster.start();
     }
 
     // Whenever MicrophonePitchPoster has a new note value available, it will post it to the
@@ -132,12 +130,5 @@ public class PitchDisplay extends Activity {
                 decibelView.setText(String.format("%.0fdB", data.decibel));
             }
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.pitch_display, menu);
-        return true;
     }
 }

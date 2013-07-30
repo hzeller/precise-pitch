@@ -8,7 +8,7 @@ import android.os.Handler;
 import java.io.Serializable;
 
 class MicrophonePitchPoster extends Thread {
-    public static final class PitchData implements Serializable {
+    public static final class PitchData {
         public PitchData(double f, int n, double c, double d) {
             frequency = f;
             note = n;
@@ -34,22 +34,45 @@ class MicrophonePitchPoster extends Thread {
                                         AudioFormat.CHANNEL_IN_MONO,
                                         AudioFormat.ENCODING_PCM_16BIT,
                                         internalBufferSize);
-        doSampling = true;
+        state = SamplingState.RUNNING;
+        stateLock = new Object();
     }
 
     // Set handler for messages generated from this runnable.
     public void setHandler(Handler handler) { this.handler = handler; }
 
-    public synchronized void stopSampling() {
-        doSampling = false;
+    public void stopSampling() {
+    	try {
+            synchronized (stateLock) {
+                state = SamplingState.STOP_REQUESTED;
+                while (state != SamplingState.STOPPED)
+                    stateLock.wait();  // This should be fairly quick.
+            }
+        } catch (InterruptedException e) {
+            // So be it.
+        }
     }
 
     // Runnable main method.
+    @Override
     public void run() {
+        audiorecorder.startRecording();
+
+        sampleLoop();
+
+        audiorecorder.stop();
+        audiorecorder.release();
+        audiorecorder = null;
+        synchronized (stateLock) {
+            state = SamplingState.STOPPED;
+            stateLock.notify();
+        }
+    }
+
+    private void sampleLoop() {
         final short buffer[] = new short[sampleCount];
         final double samples[] = new double[sampleCount];
-        audiorecorder.startRecording();
-        while (shouldSample()) {
+        while (isSamplingRunning()) {
             int read = 0;
             while (read < buffer.length) {
                 int r = audiorecorder.read(buffer, read, buffer.length - read);
@@ -67,9 +90,14 @@ class MicrophonePitchPoster extends Thread {
                 handler.sendMessage(handler.obtainMessage(0, nc));
             }
         }
+        handler = null;
     }
 
-    private synchronized boolean shouldSample() { return doSampling; }
+    private boolean isSamplingRunning() {
+    	synchronized (stateLock) {
+            return state == SamplingState.RUNNING;
+        }
+    }
 
     private PitchData createPitchData(double frequency, int maxValue) {
         final double base = kPitchA / 8; // The A just below our C string (55Hz)
@@ -94,5 +122,11 @@ class MicrophonePitchPoster extends Thread {
     private DyWaPitchTrack pitchTracker;
     private AudioRecord audiorecorder;
     private Handler handler;   // This is the handler we post NoteCents to.
-    private boolean doSampling;
+    enum SamplingState {
+        RUNNING,
+        STOP_REQUESTED,
+        STOPPED;
+    }
+    private SamplingState state;
+    private final Object stateLock;
 }
