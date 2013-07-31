@@ -42,16 +42,19 @@ public class CenterOffsetView extends View {
     }
 
     public void setRange(double range) {
+        if (range == this.range) return;
         this.range = range;
         invalidate();
     }
 
     public void setValue(double value) {
+        if (value == this.value) return;
         this.value = value;
         invalidate();
     }
 
     public void setQuantization(int q) {
+        if (q == this.quantization) return;
         if (q < 1) throw new IllegalArgumentException("Quantization needs to be >= 1: " + q);
         this.quantization = q;
         invalidate();
