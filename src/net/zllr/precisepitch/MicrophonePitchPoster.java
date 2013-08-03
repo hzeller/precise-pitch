@@ -41,6 +41,9 @@ class MicrophonePitchPoster extends Thread {
     // Set handler for messages generated from this runnable.
     public void setHandler(Handler handler) { this.handler = handler; }
 
+    // Returns information how many samples are gathered.
+    public int getSampleCount() { return sampleCount; }
+
     public void stopSampling() {
     	try {
             synchronized (stateLock) {

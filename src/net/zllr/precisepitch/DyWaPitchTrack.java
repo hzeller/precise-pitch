@@ -6,6 +6,10 @@
    Copyright (c) 2010 Antoine Schmitt
    Translated to Java by Henner Zeller
 
+   Based on
+   "Real-Time Time-Domain Pitch Tracking Using Wavelets"
+   http://courses.physics.illinois.edu/phys406/NSF_REU_Reports/2005_reu/Real-Time_Time-Domain_Pitch_Tracking_Using_Wavelets.pdf
+
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
    in the Software without restriction, including without limitation the rights
