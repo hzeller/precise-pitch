@@ -21,9 +21,11 @@ public class PitchDisplay extends Activity {
     private TextView prevNote;
     private TextView nextNote;
     private CenterOffsetView offsetCentView;
+    private StaffView staff;
 
     private int centThreshold = 20;
     private MicrophonePitchPoster pitchPoster;
+    private StaffView staffView;
 
     private enum KeyDisplay {
         DISPLAY_FLAT,
@@ -49,6 +51,7 @@ public class PitchDisplay extends Activity {
         noteDisplay = (TextView) findViewById(R.id.noteDisplay);
         noteDisplay.setKeepScreenOn(true);
         noteDisplay.setText("");
+        staffView = (StaffView) findViewById(R.id.staffView);
         offsetCentView = (CenterOffsetView) findViewById(R.id.centView);
         offsetCentView.setRange(50);
         offsetCentView.setQuantization(10);
@@ -65,9 +68,11 @@ public class PitchDisplay extends Activity {
                 switch (checkedId) {
                     case R.id.flatRadio:
                         keyDisplay = KeyDisplay.DISPLAY_FLAT;
+                        staffView.setKeyDisplay(0);
                         break;
                     case R.id.sharpRadio:
                         keyDisplay = KeyDisplay.DISPLAY_SHARP;
+                        staffView.setKeyDisplay(1);
                         break;
                 }
             }
@@ -102,7 +107,7 @@ public class PitchDisplay extends Activity {
             if (data != null && data.decibel > -20) {
                 frequencyDisplay.setText(String.format(data.frequency < 200 ? "%.1fHz" : "%.0fHz",
                                                        data.frequency));
-                final String printNote = noteNames[keyDisplay.ordinal()][data.note];
+                final String printNote = noteNames[keyDisplay.ordinal()][data.note % 12];
                 noteDisplay.setText(printNote.substring(0, 1));
                 final String accidental = printNote.length() > 1 ? printNote.substring(1) : "";
                 flatDisplay.setVisibility("b".equals(accidental) ? View.VISIBLE : View.INVISIBLE);
@@ -116,6 +121,7 @@ public class PitchDisplay extends Activity {
                 flatDisplay.setTextColor(c);
                 sharpDisplay.setTextColor(c);
                 offsetCentView.setValue((int) data.cent);
+                staffView.pushNote(data.note);
             } else {
                 // No valid data to display. Set most elements invisible.
                 frequencyDisplay.setText("");
@@ -126,6 +132,7 @@ public class PitchDisplay extends Activity {
                 prevNote.setText("");
                 nextNote.setText("");
                 offsetCentView.setValue(100);  // out of range, not displayed.
+                staffView.pushNote(-1);
             }
             if (data != null && data.decibel > -60) {
                 decibelView.setVisibility(View.VISIBLE);

@@ -7,7 +7,11 @@ import android.os.Handler;
 
 import java.io.Serializable;
 
+// Samples the microphone continuously and provides PitchData updates to the
+// handler.
 class MicrophonePitchPoster extends Thread {
+    static final boolean kDebug = false;
+
     public static final class PitchData {
         public PitchData(double f, int n, double c, double d) {
             frequency = f;
@@ -15,10 +19,16 @@ class MicrophonePitchPoster extends Thread {
             cent = c;
             decibel = d;
         }
+
+        // Raw frequency.
         public final double frequency;
-        public final int note;        // 0 == 'A', 11 = 'Ab'/'G#'; 12: unknown.
-        public final double cent;     // how far off we are in cent.
-        public final double decibel;  // input level
+
+        // (note % 12) returns a range from 0 (A) to 11 (Ab/G#).
+        // The absolute range starts with 0 (low A, 55Hz), 12 = 110Hz ...
+        public final int note;
+
+        public final double cent;     // How far off we are in cent.
+        public final double decibel;  // input level in decibel.
     }
 
     public MicrophonePitchPoster(int minFrequency) {
@@ -59,19 +69,37 @@ class MicrophonePitchPoster extends Thread {
     // Runnable/Thread main method.
     @Override
     public void run() {
-        audiorecorder.startRecording();
+        if (kDebug) {
+            dummyLoop();
+        } else {
+            audiorecorder.startRecording();
 
-        samplingLoop();
+            samplingLoop();
 
-        audiorecorder.stop();
-        audiorecorder.release();
-        audiorecorder = null;
+            audiorecorder.stop();
+            audiorecorder.release();
+            audiorecorder = null;
+        }
         synchronized (stateLock) {
             state = SamplingState.STOPPED;
             stateLock.notify();
         }
     }
 
+    private void dummyLoop() {
+        final float minPitch = 65.2f;
+        final float maxPitch = 440f;
+        float pitch = minPitch;
+        while (isSamplingRunning()) {
+            try { Thread.sleep(1200); } catch (InterruptedException e) {}
+            final PitchData nc = createPitchData(pitch, 32766);
+            if (handler != null) {
+                handler.sendMessage(handler.obtainMessage(0, nc));
+            }
+            pitch *= 1.059464;
+            if (pitch > maxPitch) pitch = minPitch;
+        }
+    }
     private void samplingLoop() {
         final short buffer[] = new short[sampleCount];
         final double samples[] = new double[sampleCount];
@@ -112,12 +140,11 @@ class MicrophonePitchPoster extends Thread {
         }
 
         // Press into regular scale
-        double scale = cent_above_base % 1200.0;
-        scale /= 100.0;
+        double scale = cent_above_base / 100.0;
         final int rounded = (int) Math.round(scale);
         final double cent = 100 * (scale - rounded);
         final double vu_db = 20 * (Math.log(maxValue / 32768.0) / Math.log(10));
-        return new PitchData(frequency, rounded % 12, cent, vu_db);
+        return new PitchData(frequency, rounded, cent, vu_db);
     }
 
     private static final double kPitchA = 440.0; // Hz.
