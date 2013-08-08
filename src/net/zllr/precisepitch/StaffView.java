@@ -88,12 +88,35 @@ class StaffView extends View {
         }
         if (currentNote < 0)
             return;
+        final int notePos = getNotePosition();
         final int centerY = origin + 4 * lineDistance
-                - (getNotePosition() * lineDistance/2);
+                - (notePos * lineDistance/2);
         final int centerX = canvas.getWidth() / 3;
-        RectF oval = new RectF(centerX - 0.7f * lineDistance, centerY - 0.5f * lineDistance,
-                               centerX + 0.7f * lineDistance, centerY + 0.5f * lineDistance);
-        canvas.drawOval(oval, notePaint);
+        final float noteLeft = centerX - 0.7f * lineDistance;
+        final float noteRight = centerX + 0.7f * lineDistance;
+        RectF oval = new RectF(noteLeft, centerY - 0.5f * lineDistance,
+                               noteRight, centerY + 0.5f * lineDistance);
+        canvas.drawOval(oval, notePaint);  // this should be a bit rotated.
+        if (notePos < 4) {
+            canvas.drawLine(noteRight, centerY, noteRight, centerY - 3.2f * lineDistance,
+                            notePaint);
+        } else {
+            canvas.drawLine(noteLeft, centerY, noteLeft, centerY + 3.2f * lineDistance,
+                            notePaint);
+        }
+
+        final float helpLeft = centerX - lineDistance;
+        final float helpRight = centerX + lineDistance;
+        for (int i = notePos / 2; i < 0; ++i) {
+            canvas.drawLine(helpLeft, origin + 4 * lineDistance - i * lineDistance,
+                            helpRight, origin + 4 * lineDistance - i * lineDistance,
+                            staffPaint);
+        }
+        for (int i = 4; i <= notePos / 2; ++i) {
+            canvas.drawLine(helpLeft, origin + 4 * lineDistance - i * lineDistance,
+                            helpRight, origin + 4 * lineDistance - i * lineDistance,
+                            staffPaint);
+        }
         String notename = noteNames[keyDisplay][currentNote % 12];
         if (notename.length() > 1) {
             String accidental = "";
