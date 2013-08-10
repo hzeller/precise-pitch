@@ -2,10 +2,7 @@
 package net.zllr.precisepitch;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.RectF;
+import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -23,7 +20,6 @@ class StaffView extends View {
         { "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Hb" /* H = G + 1 */},
         { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" },
     };
-    private int keyDisplay;
 
     public StaffView(Context context) {
         this(context, null);
@@ -35,15 +31,11 @@ class StaffView extends View {
         staffPaint.setColor(Color.BLACK);
         staffPaint.setStrokeWidth(staffHeight / (5 * 10));  // 10% between lines
 
-        notePaint = new Paint();
-        notePaint.setColor(Color.BLACK);
-        notePaint.setStrokeWidth(staffHeight / 100);
-        notePaint.setStyle(Paint.Style.FILL);
-        notePaint.setTextSize(2.5f * lineDistance);
-
         backgroundColor = new Paint();
         backgroundColor.setColor(Color.WHITE);
         currentNote = 10;
+
+        noteBody = new NoteRenderer(lineDistance);
     }
 
     @Override
@@ -91,22 +83,15 @@ class StaffView extends View {
         final int notePos = getNotePosition();
         final int centerY = origin + 4 * lineDistance
                 - (notePos * lineDistance/2);
-        final int centerX = canvas.getWidth() / 3;
-        final float noteLeft = centerX - 0.7f * lineDistance;
-        final float noteRight = centerX + 0.7f * lineDistance;
-        RectF oval = new RectF(noteLeft, centerY - 0.5f * lineDistance,
-                               noteRight, centerY + 0.5f * lineDistance);
-        canvas.drawOval(oval, notePaint);  // this should be a bit rotated.
-        if (notePos < 4) {
-            canvas.drawLine(noteRight, centerY, noteRight, centerY - 3.2f * lineDistance,
-                            notePaint);
-        } else {
-            canvas.drawLine(noteLeft, centerY, noteLeft, centerY + 3.2f * lineDistance,
-                            notePaint);
-        }
+        final int centerX = 2 * canvas.getWidth() / 3;
+        final float barLength = 3.2f * lineDistance;
+        final String noteName = noteNames[keyDisplay][currentNote % 12];
+        final float noteOffset
+                = noteBody.draw(canvas, centerX, centerY,
+                                noteName, notePos < 4 ? barLength : -barLength);
 
-        final float helpLeft = centerX - lineDistance;
-        final float helpRight = centerX + lineDistance;
+        final float helpLeft = centerX - 1.8f * noteOffset;
+        final float helpRight = centerX + 1.8f * noteOffset;
         for (int i = notePos / 2; i < 0; ++i) {
             canvas.drawLine(helpLeft, origin + 4 * lineDistance - i * lineDistance,
                             helpRight, origin + 4 * lineDistance - i * lineDistance,
@@ -117,23 +102,94 @@ class StaffView extends View {
                             helpRight, origin + 4 * lineDistance - i * lineDistance,
                             staffPaint);
         }
-        String notename = noteNames[keyDisplay][currentNote % 12];
-        if (notename.length() > 1) {
-            String accidental = "";
-            switch (notename.charAt(1)) {
-                case '#': accidental = "♯"; break;
-                case 'b': accidental = "♭"; break;
-            }
-            canvas.drawText(accidental,
-                            centerX + 0.7f * lineDistance,
-                            centerY + 0.5f * lineDistance,
-                            notePaint);
-        }
     }
 
+    private static class NoteRenderer {
+        public NoteRenderer(float height) {
+            notePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            notePaint.setColor(Color.BLACK);
+            notePaint.setStrokeWidth(0);
+            notePaint.setStyle(Paint.Style.FILL);
+            notePaint.setTextSize(1.8f * lineDistance);
+
+            barPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            barPaint.setColor(Color.BLACK);
+            barPaint.setStyle(Paint.Style.STROKE);
+            barPaint.setStrokeWidth(staffHeight / 70);
+
+            // Unscientific attempt to make it look pleasing.
+            float ovalWidth = 1.4f * height;
+            float ovalHeight = 0.95f * height;
+            float angle = -30.0f;
+            noteOffsetX = (0.85f * ovalWidth) / 2.0f;
+            noteOffsetY = (0.3f * ovalHeight) / 2.0f;
+
+            Bitmap ovalTemplate = Bitmap.createBitmap((int)ovalWidth,
+                                                      (int)ovalWidth,
+                                                      Bitmap.Config.ALPHA_8);
+            Canvas c = new Canvas(ovalTemplate);
+
+            Matrix tiltMatrix = new Matrix();
+            tiltMatrix.postRotate(angle, ovalTemplate.getWidth()/2.0f,
+                                  ovalTemplate.getHeight()/2.0f);
+            c.setMatrix(tiltMatrix);
+            float offsetY = (ovalTemplate.getHeight() - ovalHeight)/2.0f;
+            RectF r = new RectF(0, offsetY, ovalWidth, ovalHeight + offsetY);
+            c.drawOval(r, notePaint);
+            noteBitmap = ovalTemplate;
+        }
+
+        // Draw note body into canas, centered around "centerX" and "centerY".
+        // The length of the bar to drawl is given in "barLength";
+        // pointing upwards if positive, downwards if negative.
+        public float draw(Canvas c, float centerX, float centerY,
+                         String notename, float barLength) {
+            final float noteLeft = centerX - noteOffsetX;
+            final float noteRight = centerX + noteOffsetX;
+            c.drawBitmap(noteBitmap,
+                         centerX - 0.5f * noteBitmap.getWidth(),
+                         centerY - 0.5f * noteBitmap.getHeight(),
+                         notePaint);
+            if (barLength > 0) {
+                c.drawLine(noteRight, centerY - noteOffsetY,
+                           noteRight, centerY - barLength, barPaint);
+            } else {
+                c.drawLine(noteLeft, centerY + noteOffsetY,
+                           noteLeft, centerY - barLength, barPaint);
+            }
+            if (notename.length() > 1) {
+                float accidentalOffsetY = 0.0f;
+                String accidental = "";
+                switch (notename.charAt(1)) {
+                    case '#':
+                        accidental = "♯";
+                        accidentalOffsetY = 0.5f * noteBitmap.getHeight();
+                        break;
+                    case 'b':
+                        accidental = "♭";
+                        accidentalOffsetY = 0.3f * noteBitmap.getHeight();
+                        break;
+                }
+                c.drawText(accidental,
+                           centerX - 4.0f * noteOffsetX,
+                           centerY + accidentalOffsetY,
+                           notePaint);
+            }
+            return noteOffsetX;
+        }
+
+        private final Paint notePaint;
+        private final Paint barPaint;
+        private final Bitmap noteBitmap;
+        private final float noteOffsetX;
+        private final float noteOffsetY;
+    }
+
+    private final NoteRenderer noteBody;
     private final Paint staffPaint;
-    private final Paint notePaint;
     private final Paint backgroundColor;
+
+    private int keyDisplay;
     private int currentNote;
 }
 

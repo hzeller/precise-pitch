@@ -10,7 +10,9 @@ import java.io.Serializable;
 // Samples the microphone continuously and provides PitchData updates to the
 // handler.
 class MicrophonePitchPoster extends Thread {
-    static final boolean kDebug = false;
+    // If positive, create notes with that time in-between. If negative,
+    // do the real pitch detection.
+    static final int kDebugMs = -1;
 
     public static final class PitchData {
         public PitchData(double f, int n, double c, double d) {
@@ -69,8 +71,8 @@ class MicrophonePitchPoster extends Thread {
     // Runnable/Thread main method.
     @Override
     public void run() {
-        if (kDebug) {
-            dummyLoop();
+        if (kDebugMs > 0) {
+            dummyLoop(kDebugMs);
         } else {
             audiorecorder.startRecording();
 
@@ -86,12 +88,12 @@ class MicrophonePitchPoster extends Thread {
         }
     }
 
-    private void dummyLoop() {
+    private void dummyLoop(int waitMs) {
         final float minPitch = 65.2f;
         final float maxPitch = 440f;
         float pitch = minPitch;
         while (isSamplingRunning()) {
-            try { Thread.sleep(1200); } catch (InterruptedException e) {}
+            try { Thread.sleep(waitMs); } catch (InterruptedException e) {}
             final PitchData nc = createPitchData(pitch, 32766);
             if (handler != null) {
                 handler.sendMessage(handler.obtainMessage(0, nc));
