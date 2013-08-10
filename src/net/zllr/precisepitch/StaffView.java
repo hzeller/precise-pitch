@@ -71,7 +71,6 @@ class StaffView extends View {
 
     protected void onDraw(Canvas canvas) {
         canvas.drawPaint(backgroundColor);
-        final int lineDistance = staffHeight / 7;
         final int origin = (canvas.getHeight() - 4 * lineDistance) / 2
                 + lineDistance;  // need more space at the top.
         for (int i = 0; i < 5; ++i) {
