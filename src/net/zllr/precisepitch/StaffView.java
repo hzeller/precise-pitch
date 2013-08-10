@@ -130,19 +130,23 @@ class StaffView extends View {
         final String noteName = noteNames[keyDisplay][currentNote.pitch % 12];
         final float noteOffset
                 = noteBody.draw(canvas, centerX, centerY,
-                                noteName, notePos < 4 ? barLength : -barLength);
+                                noteName, notePos < 4 ? barLength : -barLength,
+                                currentNote.color);
 
+        // The help-lines.
+        final Paint helpLinePaint = new Paint(staffPaint);
+        helpLinePaint.setColor(currentNote.color);
         final float helpLeft = centerX - 1.8f * noteOffset;
         final float helpRight = centerX + 1.8f * noteOffset;
-        for (int i = notePos / 2; i < 0; ++i) {
+        for (int i = notePos / 2; i < 0; ++i) {  // below lowest line
             canvas.drawLine(helpLeft, origin + 4 * lineDistance - i * lineDistance,
                             helpRight, origin + 4 * lineDistance - i * lineDistance,
-                            staffPaint);
+                            helpLinePaint);
         }
-        for (int i = 4; i <= notePos / 2; ++i) {
+        for (int i = 5; i <= notePos / 2; ++i) {  // above highest line
             canvas.drawLine(helpLeft, origin + 4 * lineDistance - i * lineDistance,
                             helpRight, origin + 4 * lineDistance - i * lineDistance,
-                            staffPaint);
+                            helpLinePaint);
         }
     }
 
@@ -150,14 +154,15 @@ class StaffView extends View {
         public NoteRenderer(float height) {
             notePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             notePaint.setColor(Color.BLACK);
-            notePaint.setStrokeWidth(0);
             notePaint.setStyle(Paint.Style.FILL);
+            notePaint.setStrokeWidth(staffHeight / 70);
             notePaint.setTextSize(1.8f * lineDistance);
 
-            barPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            barPaint.setColor(Color.BLACK);
-            barPaint.setStyle(Paint.Style.STROKE);
-            barPaint.setStrokeWidth(staffHeight / 70);
+            // Drawing some oval in a bitmap. We use that later for the note.
+            final Paint ovalPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            ovalPaint.setColor(Color.BLACK);
+            ovalPaint.setStrokeWidth(0);
+            ovalPaint.setStyle(Paint.Style.FILL);
 
             // Unscientific attempt to make it look pleasing.
             float ovalWidth = 1.4f * height;
@@ -177,7 +182,7 @@ class StaffView extends View {
             c.setMatrix(tiltMatrix);
             float offsetY = (ovalTemplate.getHeight() - ovalHeight)/2.0f;
             RectF r = new RectF(0, offsetY, ovalWidth, ovalHeight + offsetY);
-            c.drawOval(r, notePaint);
+            c.drawOval(r, ovalPaint);
             noteBitmap = ovalTemplate;
         }
 
@@ -185,19 +190,23 @@ class StaffView extends View {
         // The length of the bar to drawl is given in "barLength";
         // pointing upwards if positive, downwards if negative.
         public float draw(Canvas c, float centerX, float centerY,
-                          String noteName, float barLength) {
+                          String noteName, float barLength,
+                          int color) {
             final float noteLeft = centerX - noteOffsetX;
             final float noteRight = centerX + noteOffsetX;
+
+            final Paint localNotePaint = new Paint(notePaint);
+            localNotePaint.setColor(color);
             c.drawBitmap(noteBitmap,
                          centerX - 0.5f * noteBitmap.getWidth(),
                          centerY - 0.5f * noteBitmap.getHeight(),
-                         notePaint);
+                         localNotePaint);
             if (barLength > 0) {
                 c.drawLine(noteRight, centerY - noteOffsetY,
-                           noteRight, centerY - barLength, barPaint);
+                           noteRight, centerY - barLength, localNotePaint);
             } else {
                 c.drawLine(noteLeft, centerY + noteOffsetY,
-                           noteLeft, centerY - barLength, barPaint);
+                           noteLeft, centerY - barLength, localNotePaint);
             }
             if (noteName.length() > 1) {
                 float accidentalOffsetY = 0.0f;
@@ -215,13 +224,12 @@ class StaffView extends View {
                 c.drawText(accidental,
                            centerX - 4.0f * noteOffsetX,
                            centerY + accidentalOffsetY,
-                           notePaint);
+                           localNotePaint);
             }
             return noteOffsetX;
         }
 
         private final Paint notePaint;
-        private final Paint barPaint;
         private final Bitmap noteBitmap;
         private final float noteOffsetX;
         private final float noteOffsetY;

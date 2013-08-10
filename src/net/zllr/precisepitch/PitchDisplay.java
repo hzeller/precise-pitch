@@ -130,14 +130,14 @@ public class PitchDisplay extends Activity {
                 sharpDisplay.setVisibility("#".equals(accidental) ? View.VISIBLE : View.INVISIBLE);
                 nextNote.setText(noteNames[keyDisplay.ordinal()][(data.note + 1) % 12]);
                 prevNote.setText(noteNames[keyDisplay.ordinal()][(data.note + 11) % 12]);
-                final int c = Math.abs(data.cent) > centThreshold
-                        ? Color.rgb(255, 50, 50)
-                        : Color.rgb(50, 255, 50);
+                final boolean inTune = Math.abs(data.cent) <= centThreshold;
+                final int c = inTune ? Color.rgb(50, 255, 50) : Color.rgb(255,50, 50);
                 noteDisplay.setTextColor(c);
                 flatDisplay.setTextColor(c);
                 sharpDisplay.setTextColor(c);
                 offsetCentView.setValue((int) data.cent);
-                staffView.pushNote(new StaffView.Note(data.note, 4, Color.BLACK));
+                staffView.pushNote(new StaffView.Note(data.note, 4,
+                                                      inTune ? Color.BLACK : Color.rgb(200, 0, 0)));
             } else {
                 // No valid data to display. Set most elements invisible.
                 frequencyDisplay.setText("");
