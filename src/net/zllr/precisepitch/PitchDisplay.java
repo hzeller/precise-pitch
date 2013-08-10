@@ -136,8 +136,9 @@ public class PitchDisplay extends Activity {
                 flatDisplay.setTextColor(c);
                 sharpDisplay.setTextColor(c);
                 offsetCentView.setValue((int) data.cent);
-                staffView.pushNote(new StaffView.Note(data.note, 4,
-                                                      inTune ? Color.BLACK : Color.rgb(200, 0, 0)));
+                if (lastPitch == null || lastPitch.note != data.note) {
+                    staffView.pushNote(new StaffView.Note(data.note, 4, Color.BLACK));
+                }
             } else {
                 // No valid data to display. Set most elements invisible.
                 frequencyDisplay.setText("");
@@ -148,7 +149,6 @@ public class PitchDisplay extends Activity {
                 prevNote.setText("");
                 nextNote.setText("");
                 offsetCentView.setValue(100);  // out of range, not displayed.
-                staffView.pushNote(null);
             }
             if (data != null && data.decibel > -60) {
                 decibelView.setVisibility(View.VISIBLE);
@@ -156,6 +156,9 @@ public class PitchDisplay extends Activity {
             } else {
                 decibelView.setVisibility(View.INVISIBLE);
             }
+            lastPitch = data;
         }
+
+        private MicrophonePitchPoster.PitchData lastPitch;
     }
 }

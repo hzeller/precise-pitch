@@ -106,7 +106,7 @@ public final class DyWaPitchTrack {
             amplitudeThreshold = amplitudeMax*maxThresholdRatio;
 	}
 	
-	// levels, start without downsampling..
+	// levels, start without down-sampling..
 	int curLevel = 0;
 	double curModeDistance = -1.;
 	

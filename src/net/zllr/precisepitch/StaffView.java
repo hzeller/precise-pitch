@@ -22,6 +22,10 @@ import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 class StaffView extends View {
     public static final class Note {
         // Immutable struct to represent a note to display.
@@ -42,10 +46,10 @@ class StaffView extends View {
         // 0 for low A at 55Hz, 1 for A#.. 36 for A at 440Hz
         public final int pitch;
 
-        // 1=full note 4 1/4 note ... 1/16 note. Ignored for now, only 1/4 work
+        // 1=full note 4=1/4 note ... Ignored for now, only 1/4 work.
         public final int duration;
 
-        // Color to display.
+        // Color to display. Standard Android color representation.
         public final int color;
     }
 
@@ -75,8 +79,9 @@ class StaffView extends View {
 
         backgroundColor = new Paint();
         backgroundColor.setColor(Color.WHITE);
-        currentNote = new Note(10, 4, Color.RED);
 
+        notes = new ArrayList<Note>();
+        setNotesPerStaff(4);
         noteBody = new NoteRenderer(lineDistance);
     }
 
@@ -96,57 +101,89 @@ class StaffView extends View {
             invalidate();
         }
     }
-    // Push a note, 0 being 55Hz A, -1 invalid.
+
     public void pushNote(Note note) {
-        if ((note != null && !note.equals(currentNote))
-                || (note == null && currentNote != null)) {
-            currentNote = note;  // TODO: keep short history.
-            invalidate();
+        notes.add(note);
+        int tooMany = notes.size() - notesPerStaff;
+        while (tooMany > 1) {  // we allow for one more to do animations.
+            notes.remove(0);
+            tooMany--;
         }
+        invalidate();
     }
 
-    private int getNotePosition() {
-        final int octave = currentNote.pitch / 12;
-        final String noteName = noteNames[keyDisplay][currentNote.pitch % 12];
+    public void setNotesPerStaff(int maxnotes) {
+        this.notesPerStaff = maxnotes;
+    }
+
+    public void setNotes(Collection<Note> newNotes) {
+        notes.clear();
+        notes.addAll(newNotes);
+        invalidate();
+    }
+
+    private int getNotePosition(Note n) {
+        final int octave = n.pitch / 12;
+        final String noteName = noteNames[keyDisplay][n.pitch % 12];
         final int position = (noteName.charAt(0) - 'A') + 7 * octave;
         return position - 6;  // relative to lowest line.
     }
 
     protected void onDraw(Canvas canvas) {
         canvas.drawPaint(backgroundColor);
-        final int origin = (canvas.getHeight() - 4 * lineDistance) / 2
+        final int originY = (canvas.getHeight() - 4 * lineDistance) / 2
                 + lineDistance;  // need more space at the top.
+
+        // Draw staff.
         for (int i = 0; i < 5; ++i) {
-            final int posY = origin + i * lineDistance;
+            final int posY = originY + i * lineDistance;
             canvas.drawLine(0, posY, canvas.getWidth(), posY, staffPaint);
         }
-        if (currentNote == null)
-            return;
-        final int notePos = getNotePosition();
-        final int centerY = origin + 4 * lineDistance
-                - (notePos * lineDistance/2);
-        final int centerX = 2 * canvas.getWidth() / 3;
-        final float barLength = 3.2f * lineDistance;
-        final String noteName = noteNames[keyDisplay][currentNote.pitch % 12];
-        final float noteOffset
-                = noteBody.draw(canvas, centerX, centerY,
-                                noteName, notePos < 4 ? barLength : -barLength,
-                                currentNote.color);
 
-        // The help-lines.
-        final Paint helpLinePaint = new Paint(staffPaint);
-        helpLinePaint.setColor(currentNote.color);
-        final float helpLeft = centerX - 1.8f * noteOffset;
-        final float helpRight = centerX + 1.8f * noteOffset;
-        for (int i = notePos / 2; i < 0; ++i) {  // below lowest line
-            canvas.drawLine(helpLeft, origin + 4 * lineDistance - i * lineDistance,
-                            helpRight, origin + 4 * lineDistance - i * lineDistance,
-                            helpLinePaint);
+        if (notesPerStaff == 0)
+            return;
+
+        // We want notes not to be spaced too much apart
+        int maxNoteDistance = noteBody.getWidth() * 3;
+        int noteDistance = canvas.getWidth() / notesPerStaff;
+        if (noteDistance > maxNoteDistance)
+            noteDistance = maxNoteDistance;
+        int posX = noteDistance;
+        // TODO: add animation offset.
+        int animationDistance = noteDistance;
+        if (notes.size() > notesPerStaff) {
+            posX -= animationDistance + 20;
         }
-        for (int i = 5; i <= notePos / 2; ++i) {  // above highest line
-            canvas.drawLine(helpLeft, origin + 4 * lineDistance - i * lineDistance,
-                            helpRight, origin + 4 * lineDistance - i * lineDistance,
-                            helpLinePaint);
+        for (Note n : notes) {
+            final int centerX = posX;
+            posX += noteDistance;
+            if (n == null)
+                continue;
+            final int notePos = getNotePosition(n);
+            final int centerY = originY + 4 * lineDistance
+                    - (notePos * lineDistance/2);
+            final float barLength = 3.2f * lineDistance;
+            final String noteName = noteNames[keyDisplay][n.pitch % 12];
+            final float noteOffset
+                    = noteBody.draw(canvas, centerX, centerY,
+                                    noteName, notePos < 4 ? barLength : -barLength,
+                                    n.color);
+
+            // The help-lines.
+            final Paint helpLinePaint = new Paint(staffPaint);
+            helpLinePaint.setColor(n.color);
+            final float helpLeft = centerX - 1.8f * noteOffset;
+            final float helpRight = centerX + 1.8f * noteOffset;
+            for (int i = notePos / 2; i < 0; ++i) {  // below lowest line
+                canvas.drawLine(helpLeft, originY + 4 * lineDistance - i * lineDistance,
+                                helpRight, originY + 4 * lineDistance - i * lineDistance,
+                                helpLinePaint);
+            }
+            for (int i = 5; i <= notePos / 2; ++i) {  // above highest line
+                canvas.drawLine(helpLeft, originY + 4 * lineDistance - i * lineDistance,
+                                helpRight, originY + 4 * lineDistance - i * lineDistance,
+                                helpLinePaint);
+            }
         }
     }
 
@@ -186,9 +223,13 @@ class StaffView extends View {
             noteBitmap = ovalTemplate;
         }
 
+        // Rough box a raw note fits into (but without accidental.)
+        public int getWidth() { return noteBitmap.getWidth(); }
+
         // Draw note body into canvas, centered around "centerX" and "centerY".
         // The length of the bar to drawl is given in "barLength";
         // pointing upwards if positive, downwards if negative.
+        // Returns width of head.
         public float draw(Canvas c, float centerX, float centerY,
                           String noteName, float barLength,
                           int color) {
@@ -201,6 +242,7 @@ class StaffView extends View {
                          centerX - 0.5f * noteBitmap.getWidth(),
                          centerY - 0.5f * noteBitmap.getHeight(),
                          localNotePaint);
+
             if (barLength > 0) {
                 c.drawLine(noteRight, centerY - noteOffsetY,
                            noteRight, centerY - barLength, localNotePaint);
@@ -240,6 +282,7 @@ class StaffView extends View {
     private final Paint backgroundColor;
 
     private int keyDisplay;
-    private Note currentNote;
+    private int notesPerStaff;
+    private ArrayList<Note> notes;
 }
 

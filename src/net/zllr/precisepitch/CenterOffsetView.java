@@ -27,7 +27,7 @@ import android.view.View;
 //
 // The (green) center circle represents frequency being 'in-tune', while the
 // (red) off-center circles indicate if and how far off the pitch is.
-// It attempts to mimick LEDs in a regular physical tuner.
+// It attempts to mimic LEDs in a regular physical tuner.
 public class CenterOffsetView extends View {
     private static final int kWidth = 580;  // TODO: make property
     private static final int kHeight = 50;
