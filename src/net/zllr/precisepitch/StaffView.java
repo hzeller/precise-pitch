@@ -24,7 +24,6 @@ import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 class StaffView extends View {
     public static final class Note {
@@ -53,10 +52,6 @@ class StaffView extends View {
         public final int color;
     }
 
-    // TODO: the following as result of measuring.
-    private static int staffHeight = 300;
-    private static int lineDistance = staffHeight / 7;
-
     // The note name is essentially encoding the 8 positions on the staff, with an additional
     // character describing if this is sharp or flat. For the 'flat' version, we encode
     // 9 positions on the staff as it is essentially the first note of the next octave.
@@ -67,6 +62,12 @@ class StaffView extends View {
         { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" },
     };
 
+    // The range we want to display. We want to display from 65Hz low C (2.5 lines
+    // below staff to 440Hz A (4 lines above staff)
+    private static final int kLowDisplayRange  = 3;  // below lowest line
+    private static final int kHighDisplayRange = 4;  // above highest line
+    private static final int kTotalDisplayRange = kLowDisplayRange + 4 + kHighDisplayRange;
+
     public StaffView(Context context) {
         this(context, null);
     }
@@ -75,24 +76,20 @@ class StaffView extends View {
         super(context, attributes);
         staffPaint = new Paint();
         staffPaint.setColor(Color.BLACK);
-        staffPaint.setStrokeWidth(staffHeight / (5 * 10));  // 10% between lines
 
         backgroundColor = new Paint();
         backgroundColor.setColor(Color.WHITE);
 
         notes = new ArrayList<Note>();
         setNotesPerStaff(4);
-        noteBody = new NoteRenderer(lineDistance);
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // We want to fill everything.
-        int measureWidth = MeasureSpec.getSize(widthMeasureSpec);
-        int measureHeight = MeasureSpec.getSize(heightMeasureSpec);
-        if (measureHeight > 3 * staffHeight)
-            measureHeight = 3 * staffHeight;
-        setMeasuredDimension(measureWidth, measureHeight);
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        int lineDistance = h / kTotalDisplayRange;
+        noteRenderer = new NoteRenderer(lineDistance);
+        staffPaint.setStrokeWidth(lineDistance / 10);  // 10% between lines
     }
 
     public void setKeyDisplay(int k) {
@@ -131,8 +128,12 @@ class StaffView extends View {
 
     protected void onDraw(Canvas canvas) {
         canvas.drawPaint(backgroundColor);
-        final int originY = (canvas.getHeight() - 4 * lineDistance) / 2
-                + lineDistance;  // need more space at the top.
+        // Interesting thing to find out: for some reason canvas.getHeight()
+        // and this.getHeight() are different on the Android 2.3 device.
+        // I would've expected that we get a canvas of the same size ?
+        final int lineDistance = getHeight() / kTotalDisplayRange;
+        final int originY = (getHeight() - 4 * lineDistance
+                                     - kLowDisplayRange * lineDistance);
 
         // Draw staff.
         for (int i = 0; i < 5; ++i) {
@@ -144,7 +145,7 @@ class StaffView extends View {
             return;
 
         // We want notes not to be spaced too much apart
-        int maxNoteDistance = noteBody.getWidth() * 3;
+        int maxNoteDistance = noteRenderer.getWidth() * 3;
         int noteDistance = canvas.getWidth() / notesPerStaff;
         if (noteDistance > maxNoteDistance)
             noteDistance = maxNoteDistance;
@@ -165,7 +166,7 @@ class StaffView extends View {
             final float barLength = 3.2f * lineDistance;
             final String noteName = noteNames[keyDisplay][n.pitch % 12];
             final float noteOffset
-                    = noteBody.draw(canvas, centerX, centerY,
+                    = noteRenderer.draw(canvas, centerX, centerY,
                                     noteName, notePos < 4 ? barLength : -barLength,
                                     n.color);
 
@@ -192,8 +193,8 @@ class StaffView extends View {
             notePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             notePaint.setColor(Color.BLACK);
             notePaint.setStyle(Paint.Style.FILL);
-            notePaint.setStrokeWidth(staffHeight / 70);
-            notePaint.setTextSize(1.8f * lineDistance);
+            notePaint.setStrokeWidth(height / 10);
+            notePaint.setTextSize(1.8f * height);
 
             // Drawing some oval in a bitmap. We use that later for the note.
             final Paint ovalPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -277,10 +278,10 @@ class StaffView extends View {
         private final float noteOffsetY;
     }
 
-    private final NoteRenderer noteBody;
     private final Paint staffPaint;
     private final Paint backgroundColor;
 
+    private NoteRenderer noteRenderer;   // changes when size changes.
     private int keyDisplay;
     private int notesPerStaff;
     private ArrayList<Note> notes;
