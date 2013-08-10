@@ -23,6 +23,32 @@ import android.util.AttributeSet;
 import android.view.View;
 
 class StaffView extends View {
+    public static final class Note {
+        // Immutable struct to represent a note to display.
+        public Note(int pitch, int duration, int color) {
+            this.pitch = pitch;
+            this.duration = duration;
+            this.color = color;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other == null || !(other instanceof Note))
+                return false;
+            Note on = (Note) other;
+            return on.pitch == pitch && on.duration == pitch && on.color == color;
+        }
+
+        // 0 for low A at 55Hz, 1 for A#.. 36 for A at 440Hz
+        public final int pitch;
+
+        // 1=full note 4 1/4 note ... 1/16 note. Ignored for now, only 1/4 work
+        public final int duration;
+
+        // Color to display.
+        public final int color;
+    }
+
     // TODO: the following as result of measuring.
     private static int staffHeight = 300;
     private static int lineDistance = staffHeight / 7;
@@ -30,7 +56,7 @@ class StaffView extends View {
     // The note name is essentially encoding the 8 positions on the staff, with an additional
     // character describing if this is sharp or flat. For the 'flat' version, we encode
     // 9 positions on the staff as it is essentially the first note of the next octave.
-    // The letters are purely encoding these positions and are choosen as letters for easier
+    // The letters are purely encoding these positions and are chosen as letters for easier
     // debug output, but they don't have any other meaning otherwise.
     private static final String noteNames[][] = {
         { "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Hb" /* H = G + 1 */},
@@ -49,7 +75,7 @@ class StaffView extends View {
 
         backgroundColor = new Paint();
         backgroundColor.setColor(Color.WHITE);
-        currentNote = 10;
+        currentNote = new Note(10, 4, Color.RED);
 
         noteBody = new NoteRenderer(lineDistance);
     }
@@ -71,17 +97,18 @@ class StaffView extends View {
         }
     }
     // Push a note, 0 being 55Hz A, -1 invalid.
-    public void pushNote(int note) {
-        if (note != currentNote) {
+    public void pushNote(Note note) {
+        if ((note != null && !note.equals(currentNote))
+                || (note == null && currentNote != null)) {
             currentNote = note;  // TODO: keep short history.
             invalidate();
         }
     }
 
     private int getNotePosition() {
-        final int octave = currentNote / 12;
-        final String notename = noteNames[keyDisplay][currentNote % 12];
-        final int position = (notename.charAt(0) - 'A') + 7 * octave;
+        final int octave = currentNote.pitch / 12;
+        final String noteName = noteNames[keyDisplay][currentNote.pitch % 12];
+        final int position = (noteName.charAt(0) - 'A') + 7 * octave;
         return position - 6;  // relative to lowest line.
     }
 
@@ -93,14 +120,14 @@ class StaffView extends View {
             final int posY = origin + i * lineDistance;
             canvas.drawLine(0, posY, canvas.getWidth(), posY, staffPaint);
         }
-        if (currentNote < 0)
+        if (currentNote == null)
             return;
         final int notePos = getNotePosition();
         final int centerY = origin + 4 * lineDistance
                 - (notePos * lineDistance/2);
         final int centerX = 2 * canvas.getWidth() / 3;
         final float barLength = 3.2f * lineDistance;
-        final String noteName = noteNames[keyDisplay][currentNote % 12];
+        final String noteName = noteNames[keyDisplay][currentNote.pitch % 12];
         final float noteOffset
                 = noteBody.draw(canvas, centerX, centerY,
                                 noteName, notePos < 4 ? barLength : -barLength);
@@ -154,11 +181,11 @@ class StaffView extends View {
             noteBitmap = ovalTemplate;
         }
 
-        // Draw note body into canas, centered around "centerX" and "centerY".
+        // Draw note body into canvas, centered around "centerX" and "centerY".
         // The length of the bar to drawl is given in "barLength";
         // pointing upwards if positive, downwards if negative.
         public float draw(Canvas c, float centerX, float centerY,
-                         String notename, float barLength) {
+                          String noteName, float barLength) {
             final float noteLeft = centerX - noteOffsetX;
             final float noteRight = centerX + noteOffsetX;
             c.drawBitmap(noteBitmap,
@@ -172,10 +199,10 @@ class StaffView extends View {
                 c.drawLine(noteLeft, centerY + noteOffsetY,
                            noteLeft, centerY - barLength, barPaint);
             }
-            if (notename.length() > 1) {
+            if (noteName.length() > 1) {
                 float accidentalOffsetY = 0.0f;
                 String accidental = "";
-                switch (notename.charAt(1)) {
+                switch (noteName.charAt(1)) {
                     case '#':
                         accidental = "♯";
                         accidentalOffsetY = 0.5f * noteBitmap.getHeight();
@@ -205,6 +232,6 @@ class StaffView extends View {
     private final Paint backgroundColor;
 
     private int keyDisplay;
-    private int currentNote;
+    private Note currentNote;
 }
 
