@@ -18,7 +18,7 @@
         android:theme="@android:style/Theme.NoTitleBar" >
         <activity
             android:name="net.zllr.precisepitch.PrecisePitchHome"
-            android:label="@string/title_activity_precise_pitch_home" >
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,7 +27,7 @@
         </activity>
         <activity
             android:name="net.zllr.precisepitch.PitchDisplay"
-            android:label="@string/app_name" >
+            android:label="@string/title_activity_precise_pitch_home" >
         </activity>
         <activity
             android:name="net.zllr.precisepitch.FingerboardHeatMap"
