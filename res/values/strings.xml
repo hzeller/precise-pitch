@@ -5,5 +5,6 @@
     <string name="title_activity_precise_pitch_home">Precise Pitch</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_fingerboard_heat_map">Fingerboard Heat Map</string>
+    <string name="practice_note_sequences">Practice Note Sequences</string>
 
 </resources>

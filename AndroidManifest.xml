@@ -33,6 +33,10 @@
             android:name="net.zllr.precisepitch.FingerboardHeatMap"
             android:label="@string/title_activity_fingerboard_heat_map" >
         </activity>
+        <activity
+                android:name="net.zllr.precisepitch.PracticeActivity"
+                android:label="@string/practice_note_sequences" >
+        </activity>
     </application>
 
 </manifest>
