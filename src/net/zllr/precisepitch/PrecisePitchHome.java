@@ -18,7 +18,7 @@ public class PrecisePitchHome extends Activity implements OnItemClickListener {
     private static final String entries[][] = {
         {"Pitch Display", "Live tuner view", "net.zllr.precisepitch.PitchDisplay"},
         {"Practice", "Play a sequence of notes", "PracticeActivity"},
-        {"Study", "See histograms and heat maps", "StudyActivity"},
+        {"Study", "See histograms and heat maps", "net.zllr.precisepitch.FingerboardHeatMap"},
         {"Play", "Two player game", "GameActivity"},
     };
     
