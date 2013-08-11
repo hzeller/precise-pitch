@@ -22,8 +22,10 @@ import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 class StaffView extends View {
     public static final class Note {
@@ -80,8 +82,54 @@ class StaffView extends View {
         backgroundColor = new Paint();
         backgroundColor.setColor(Color.WHITE);
 
-        notes = new ArrayList<Note>();
+        notes = new ArrayDeque<Note>();
         setNotesPerStaff(4);
+    }
+
+    // Set number of notes to be displayed along the length of the staff.
+    public void setNotesPerStaff(int maxnotes) {
+        this.notesPerStaff = maxnotes;
+    }
+
+    // Set how the key is displayed. 0=flat, 1=sharp.
+    public void setKeyDisplay(int k) {
+        if (k != keyDisplay) {
+            keyDisplay = k;
+            invalidate();
+        }
+    }
+
+    // Push note to the end of the list.
+    public void pushNote(Note note) {
+        notes.addLast(note);
+        // We leave one more than notesPerStaff, so that we can animate it out.
+        // Later, we can actually consider to leave many more notes and allow
+        // for scrolling.
+        while (notes.size() > notesPerStaff + 1) {
+            notes.removeFirst();
+        }
+        invalidate();
+    }
+
+    // Replace last note.
+    public void replaceLastNote(Note n) {
+        if (notes.size() > 0) {
+            notes.removeLast();
+            notes.addLast(n);
+        }
+    }
+
+    // Clear display.
+    public void clear() {
+        notes.clear();
+    }
+
+    // Set a collection of notes to be displayed. Shows only the last
+    // notestPerStaff notes.
+    public void setNotes(Collection<Note> newNotes) {
+        notes.clear();
+        notes.addAll(newNotes);
+        invalidate();
     }
 
     @Override
@@ -90,33 +138,6 @@ class StaffView extends View {
         int lineDistance = h / kTotalDisplayRange;
         noteRenderer = new NoteRenderer(lineDistance);
         staffPaint.setStrokeWidth(lineDistance / 10);  // 10% between lines
-    }
-
-    public void setKeyDisplay(int k) {
-        if (k != keyDisplay) {
-            keyDisplay = k;
-            invalidate();
-        }
-    }
-
-    public void pushNote(Note note) {
-        notes.add(note);
-        int tooMany = notes.size() - notesPerStaff;
-        while (tooMany > 0) {  // we allow for one more to do animations.
-            notes.remove(0);
-            tooMany--;
-        }
-        invalidate();
-    }
-
-    public void setNotesPerStaff(int maxnotes) {
-        this.notesPerStaff = maxnotes;
-    }
-
-    public void setNotes(Collection<Note> newNotes) {
-        notes.clear();
-        notes.addAll(newNotes);
-        invalidate();
     }
 
     private int getNotePosition(Note n) {
@@ -146,18 +167,30 @@ class StaffView extends View {
 
         // We want notes not to be spaced too much apart
         int maxNoteDistance = noteRenderer.getWidth() * 3;
-        int noteDistance = canvas.getWidth() / notesPerStaff;
-        if (noteDistance > maxNoteDistance)
+        int minNoteDistance = (int) (noteRenderer.getWidth() * 1.8f);
+        int notesToDisplay = notesPerStaff;
+        int noteDistance = getWidth() / notesPerStaff;
+
+        if (noteDistance > maxNoteDistance) {
             noteDistance = maxNoteDistance;
-        int posX = noteDistance / 2;
-        // TODO: add animation offset.
-        int animationDistance = noteDistance;
-        if (notes.size() > notesPerStaff) {
-            posX -= animationDistance + 20;
         }
-        for (Note n : notes) {
+        if (noteDistance < minNoteDistance) {
+            noteDistance = minNoteDistance;
+            notesToDisplay = Math.max(getWidth() / noteDistance, 1);
+        }
+
+        // Rightmost position to display.
+        int posX = (noteDistance * Math.min(notesToDisplay, notes.size()) // rightmost note.
+                - (noteDistance / 2)  // center is here
+                + (getWidth() - notesToDisplay * noteDistance)/2);  // center globally
+
+        // TODO: add animation offset.
+        //int animationDistance = 0;
+        Iterator<Note> it = notes.descendingIterator();
+        while (it.hasNext() && posX > -noteDistance) {
+            Note n = it.next();
             final int centerX = posX;
-            posX += noteDistance;
+            posX -= noteDistance;
             if (n == null)
                 continue;
             final int notePos = getNotePosition(n);
@@ -284,6 +317,6 @@ class StaffView extends View {
     private NoteRenderer noteRenderer;   // changes when size changes.
     private int keyDisplay;
     private int notesPerStaff;
-    private ArrayList<Note> notes;
+    private ArrayDeque<Note> notes;
 }
 
