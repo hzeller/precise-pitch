@@ -21,12 +21,8 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.os.Handler;
 import android.os.Message;
-import android.view.Menu;
 import android.view.View;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 public class PitchDisplay extends Activity {
     private TextView frequencyDisplay;
@@ -42,6 +38,7 @@ public class PitchDisplay extends Activity {
     private int centThreshold = 20;
     private MicrophonePitchPoster pitchPoster;
     private StaffView staffView;
+    private ImageView earIcon;
 
     private enum KeyDisplay {
         DISPLAY_FLAT,
@@ -58,6 +55,7 @@ public class PitchDisplay extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        earIcon = (ImageView) findViewById(R.id.earIcon);
         frequencyDisplay = (TextView) findViewById(R.id.frequencyDisplay);
         flatDisplay = (TextView) findViewById(R.id.flatText);
         sharpDisplay = (TextView) findViewById(R.id.sharpText);
@@ -117,11 +115,23 @@ public class PitchDisplay extends Activity {
     // Whenever MicrophonePitchPoster has a new note value available, it will
     // post it to the message queue, received here.
     private final class UIUpdateHandler extends Handler {
+        private final static int kMaxWait = 32;
+
+        private void setFadableComponentAlpha(float alpha) {
+            noteDisplay.setAlpha(alpha);
+            flatDisplay.setAlpha(alpha);
+            sharpDisplay.setAlpha(alpha);
+            offsetCentView.setAlpha(alpha);
+            frequencyDisplay.setAlpha(alpha);
+            prevNote.setAlpha(alpha);
+            nextNote.setAlpha(alpha);
+        }
+
         public void handleMessage(Message msg) {
             final MicrophonePitchPoster.PitchData data
                 = (MicrophonePitchPoster.PitchData) msg.obj;
 
-            if (data != null && data.decibel > -20) {
+            if (data != null && data.decibel > -30) {
                 frequencyDisplay.setText(String.format(data.frequency < 200 ? "%.1fHz" : "%.0fHz",
                                                        data.frequency));
                 final String printNote = noteNames[keyDisplay.ordinal()][data.note % 12];
@@ -136,21 +146,19 @@ public class PitchDisplay extends Activity {
                 noteDisplay.setTextColor(c);
                 flatDisplay.setTextColor(c);
                 sharpDisplay.setTextColor(c);
+                setFadableComponentAlpha(1.0f);
                 offsetCentView.setValue((int) data.cent);
                 if (lastPitch == null || lastPitch.note != data.note) {
                     staffView.pushNote(new StaffView.Note(data.note, 4, Color.BLACK));
                 }
+                fadeCountdown = kMaxWait;
             } else {
-                // No valid data to display. Set most elements invisible.
-                frequencyDisplay.setText("");
-                final int ghostColor = Color.rgb(40,  40,  40);
-                noteDisplay.setTextColor(ghostColor);
-                flatDisplay.setTextColor(ghostColor);
-                sharpDisplay.setTextColor(ghostColor);
-                prevNote.setText("");
-                nextNote.setText("");
-                offsetCentView.setValue(100);  // out of range, not displayed.
+                --fadeCountdown;
+                if (fadeCountdown < 0) fadeCountdown = 0;
+                setFadableComponentAlpha(1.0f * fadeCountdown / kMaxWait);
             }
+            earIcon.setVisibility(data != null && data.decibel > -30
+                                  ? View.VISIBLE : View.INVISIBLE);
             if (data != null && data.decibel > -60) {
                 decibelView.setVisibility(View.VISIBLE);
                 decibelView.setText(String.format("%.0fdB", data.decibel));
@@ -161,5 +169,6 @@ public class PitchDisplay extends Activity {
         }
 
         private MicrophonePitchPoster.PitchData lastPitch;
+        private int fadeCountdown;
     }
 }
