@@ -22,10 +22,7 @@ import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.View;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
 class StaffView extends View {
     public static final class Note {
@@ -82,8 +79,21 @@ class StaffView extends View {
         backgroundColor = new Paint();
         backgroundColor.setColor(Color.WHITE);
 
-        notes = new ArrayDeque<Note>();
         setNotesPerStaff(4);
+    }
+
+    // Set model. A list of notes to display.
+    public void setNoteModel(List<Note> model) {
+        if (model != notes) {
+            notes = model;
+            onModelChanged();
+        }
+    }
+
+    // Call this method whenever the model changed (number of notes or
+    // any element in the model.
+    public void onModelChanged() {
+        invalidate();
     }
 
     // Set number of notes to be displayed along the length of the staff.
@@ -97,39 +107,6 @@ class StaffView extends View {
             keyDisplay = k;
             invalidate();
         }
-    }
-
-    // Push note to the end of the list.
-    public void pushNote(Note note) {
-        notes.addLast(note);
-        // We leave one more than notesPerStaff, so that we can animate it out.
-        // Later, we can actually consider to leave many more notes and allow
-        // for scrolling.
-        while (notes.size() > notesPerStaff + 1) {
-            notes.removeFirst();
-        }
-        invalidate();
-    }
-
-    // Replace last note.
-    public void replaceLastNote(Note n) {
-        if (notes.size() > 0) {
-            notes.removeLast();
-            notes.addLast(n);
-        }
-    }
-
-    // Clear display.
-    public void clear() {
-        notes.clear();
-    }
-
-    // Set a collection of notes to be displayed. Shows only the last
-    // notestPerStaff notes.
-    public void setNotes(Collection<Note> newNotes) {
-        notes.clear();
-        notes.addAll(newNotes);
-        invalidate();
     }
 
     @Override
@@ -162,7 +139,7 @@ class StaffView extends View {
             canvas.drawLine(0, posY, canvas.getWidth(), posY, staffPaint);
         }
 
-        if (notesPerStaff == 0)
+        if (notesPerStaff == 0 || notes == null)
             return;
 
         // We want notes not to be spaced too much apart
@@ -184,11 +161,12 @@ class StaffView extends View {
                 - (noteDistance / 2)  // center of note is here
                 + (getWidth() - notesToDisplay * noteDistance)/2);  // center globally
 
-        // TODO: add animation offset.
-        //int animationDistance = 0;
-        Iterator<Note> it = notes.descendingIterator();
-        while (it.hasNext() && posX > -noteDistance) {
-            Note n = it.next();
+        // TODO: add animation offset (should be a float-value 0..1).
+        // TODO: scrolling: start from some arbitrary pos.
+        //       right now, we do the most common thing: show the last notes.
+        ListIterator<Note> it = notes.listIterator();
+        while (it.hasPrevious() && posX > -noteDistance) {
+            Note n = it.previous();
             final int centerX = posX;
             posX -= noteDistance;
             if (n == null)
@@ -317,6 +295,6 @@ class StaffView extends View {
     private NoteRenderer noteRenderer;   // changes when size changes.
     private int keyDisplay;
     private int notesPerStaff;
-    private ArrayDeque<Note> notes;
+    private List<Note> notes;
 }
 
