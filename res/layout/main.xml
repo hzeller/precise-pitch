@@ -127,12 +127,6 @@
         class="net.zllr.precisepitch.CenterOffsetView"
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/noteDisplay"/>
-    <view android:layout_width="83dp"
-          android:layout_height="161dp"
-          class="net.zllr.precisepitch.StaffView" android:id="@+id/staffView"
-          android:layout_alignParentLeft="true"
-          android:layout_below="@+id/centView"
-          android:layout_alignBottom="@+id/frequencyDisplay"/>
     <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

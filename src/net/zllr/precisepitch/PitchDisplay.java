@@ -33,11 +33,9 @@ public class PitchDisplay extends Activity {
     private TextView prevNote;
     private TextView nextNote;
     private CenterOffsetView offsetCentView;
-    private StaffView staff;
 
     private int centThreshold = 20;
     private MicrophonePitchPoster pitchPoster;
-    private StaffView staffView;
     private ImageView earIcon;
 
     private enum KeyDisplay {
@@ -65,8 +63,6 @@ public class PitchDisplay extends Activity {
         noteDisplay = (TextView) findViewById(R.id.noteDisplay);
         noteDisplay.setKeepScreenOn(true);
         noteDisplay.setText("");
-        staffView = (StaffView) findViewById(R.id.staffView);
-        staffView.setNotesPerStaff(1);
         offsetCentView = (CenterOffsetView) findViewById(R.id.centView);
         offsetCentView.setRange(50);
         offsetCentView.setQuantization(10);
@@ -83,11 +79,9 @@ public class PitchDisplay extends Activity {
                 switch (checkedId) {
                     case R.id.flatRadio:
                         keyDisplay = KeyDisplay.DISPLAY_FLAT;
-                        staffView.setKeyDisplay(0);
                         break;
                     case R.id.sharpRadio:
                         keyDisplay = KeyDisplay.DISPLAY_SHARP;
-                        staffView.setKeyDisplay(1);
                         break;
                 }
             }
@@ -152,9 +146,6 @@ public class PitchDisplay extends Activity {
                 sharpDisplay.setTextColor(c);
                 setFadableComponentAlpha(1.0f);
                 offsetCentView.setValue((int) data.cent);
-                if (lastPitch == null || lastPitch.note != data.note) {
-                    staffView.pushNote(new StaffView.Note(data.note, 4, Color.BLACK));
-                }
                 fadeCountdown = kMaxWait;
             } else {
                 --fadeCountdown;
