@@ -67,7 +67,7 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="-20dB"
             android:id="@+id/decibelView"
-            android:textColor="#ffffff"
+            android:textColor="#808080"
             android:layout_alignRight="@+id/sharpText"
             android:layout_below="@+id/frequencyDisplay"/>
 
