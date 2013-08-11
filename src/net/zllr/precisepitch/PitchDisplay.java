@@ -117,14 +117,20 @@ public class PitchDisplay extends Activity {
     private final class UIUpdateHandler extends Handler {
         private final static int kMaxWait = 32;
 
+        // Old Android versions don't seem to have the 'setAlpha()' method.
+        private void setAlphaOnText(TextView v, float alpha) {
+            int alpha_bits = ((int) (0xFF * alpha)) << 24;
+            v.setTextColor(v.getCurrentTextColor() & 0xFFFFFF | alpha_bits);
+        }
+
         private void setFadableComponentAlpha(float alpha) {
-            noteDisplay.setAlpha(alpha);
-            flatDisplay.setAlpha(alpha);
-            sharpDisplay.setAlpha(alpha);
-            offsetCentView.setAlpha(alpha);
-            frequencyDisplay.setAlpha(alpha);
-            prevNote.setAlpha(alpha);
-            nextNote.setAlpha(alpha);
+            setAlphaOnText(noteDisplay, alpha);
+            setAlphaOnText(flatDisplay, alpha);
+            setAlphaOnText(sharpDisplay, alpha);
+            setAlphaOnText(frequencyDisplay, alpha);
+            setAlphaOnText(prevNote, alpha);
+            setAlphaOnText(nextNote, alpha);
+            offsetCentView.setFadeAlpha(alpha);
         }
 
         public void handleMessage(Message msg) {

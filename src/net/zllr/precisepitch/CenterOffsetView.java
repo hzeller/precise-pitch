@@ -37,6 +37,7 @@ public class CenterOffsetView extends View {
     private final Paint filledGreenCirclePaint;
     private final Paint centAnnotationPaint;
 
+    private int alphaChannel = 255;
     private double range = 50;
     private double value;
     private int quantization = 5;
@@ -66,6 +67,15 @@ public class CenterOffsetView extends View {
         setRange(45);
         setQuantization(10);
         setValue(0);
+    }
+
+    // Old Androids don't have setAlpha(). So do something like that here.
+    public void setFadeAlpha(float alpha) {
+        int newAlphaChannel = Math.min((int) (255 * alpha), 255);
+        if (newAlphaChannel != alphaChannel) {
+            alphaChannel = newAlphaChannel;
+            invalidate();
+        }
     }
 
     // Range being displayed. A range of 45 covers -45 .. +45.
@@ -100,6 +110,11 @@ public class CenterOffsetView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        filledRedCirclePaint.setColor(Color.argb(alphaChannel, 200, 0, 0));
+        filledGreenCirclePaint.setColor(Color.argb(alphaChannel, 40, 255, 40));
+        emptyCirclePaint.setColor(Color.argb(alphaChannel, 63, 63, 63));
+        centAnnotationPaint.setColor(Color.argb(alphaChannel, 255, 255, 255));
+
         final int steps = (int) (range / quantization);
         final int radius = kHeight/2 - 5;
         final int widthSteps = (kWidth/2 - 2 * radius) / steps;
