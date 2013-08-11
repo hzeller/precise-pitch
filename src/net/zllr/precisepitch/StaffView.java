@@ -99,6 +99,7 @@ class StaffView extends View {
     // Set number of notes to be displayed along the length of the staff.
     public void setNotesPerStaff(int maxnotes) {
         this.notesPerStaff = maxnotes;
+        invalidate();
     }
 
     // Set how the key is displayed. 0=flat, 1=sharp.
@@ -164,7 +165,7 @@ class StaffView extends View {
         // TODO: add animation offset (should be a float-value 0..1).
         // TODO: scrolling: start from some arbitrary pos.
         //       right now, we do the most common thing: show the last notes.
-        ListIterator<Note> it = notes.listIterator();
+        ListIterator<Note> it = notes.listIterator(notes.size());
         while (it.hasPrevious() && posX > -noteDistance) {
             Note n = it.previous();
             final int centerX = posX;
