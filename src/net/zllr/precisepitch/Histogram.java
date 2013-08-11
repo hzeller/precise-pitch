@@ -1,7 +1,7 @@
 package net.zllr.precisepitch;
 
 public class Histogram {
-    private final int MAX_NOTE = 56;
+    private static final int MAX_NOTE = 56;
     private double histdata[][];
     
     public Histogram() {
