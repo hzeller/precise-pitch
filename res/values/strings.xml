@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">Precise Pitch</string>
+    <string name="title_activity_precise_pitch_home">Precise Pitch</string>
+    <string name="action_settings">Settings</string>
+
 </resources>
