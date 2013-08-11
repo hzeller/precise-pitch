@@ -8,15 +8,12 @@
         android:id="@+id/homeListEntryText1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Large"
-        android:text="Activity Name" />
+        style="@android:style/TextAppearance.Large" />
     
     <TextView
         android:id="@+id/homeListEntryText2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Small"
-        android:text="Brief description of activity"
-        />
+        style="@android:style/TextAppearance.Small" />
 
 </LinearLayout>
