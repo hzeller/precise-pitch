@@ -181,7 +181,7 @@ class StaffView extends View {
 
         // Rightmost position to display.
         int posX = (noteDistance * Math.min(notesToDisplay, notes.size()) // rightmost note.
-                - (noteDistance / 2)  // center is here
+                - (noteDistance / 2)  // center of note is here
                 + (getWidth() - notesToDisplay * noteDistance)/2);  // center globally
 
         // TODO: add animation offset.
