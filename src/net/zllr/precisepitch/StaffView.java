@@ -102,7 +102,7 @@ class StaffView extends View {
     public void pushNote(Note note) {
         notes.add(note);
         int tooMany = notes.size() - notesPerStaff;
-        while (tooMany > 1) {  // we allow for one more to do animations.
+        while (tooMany > 0) {  // we allow for one more to do animations.
             notes.remove(0);
             tooMany--;
         }
@@ -149,7 +149,7 @@ class StaffView extends View {
         int noteDistance = canvas.getWidth() / notesPerStaff;
         if (noteDistance > maxNoteDistance)
             noteDistance = maxNoteDistance;
-        int posX = noteDistance;
+        int posX = noteDistance / 2;
         // TODO: add animation offset.
         int animationDistance = noteDistance;
         if (notes.size() > notesPerStaff) {

@@ -68,6 +68,7 @@ public class PitchDisplay extends Activity {
         noteDisplay.setKeepScreenOn(true);
         noteDisplay.setText("");
         staffView = (StaffView) findViewById(R.id.staffView);
+        staffView.setNotesPerStaff(1);
         offsetCentView = (CenterOffsetView) findViewById(R.id.centView);
         offsetCentView.setRange(50);
         offsetCentView.setQuantization(10);
