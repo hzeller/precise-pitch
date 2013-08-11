@@ -108,8 +108,6 @@ public class PitchDisplay extends Activity {
         pitchPoster = new MicrophonePitchPoster(60);
         pitchPoster.setHandler(new UIUpdateHandler());
         pitchPoster.start();
-        Toast.makeText(this, pitchPoster.getSampleCount() + " Samples",
-                       Toast.LENGTH_SHORT).show();
     }
 
     // Whenever MicrophonePitchPoster has a new note value available, it will
