@@ -67,9 +67,9 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="-20dB"
             android:id="@+id/decibelView"
-            android:layout_alignTop="@+id/frequencyDisplay"
-            android:layout_alignRight="@+id/flatText"
-            android:textColor="#ffffff"/>
+            android:textColor="#ffffff"
+            android:layout_alignRight="@+id/sharpText"
+            android:layout_below="@+id/frequencyDisplay"/>
 
     <TextView
             android:layout_width="wrap_content"
@@ -133,5 +133,12 @@
           android:layout_alignParentLeft="true"
           android:layout_below="@+id/centView"
           android:layout_alignBottom="@+id/frequencyDisplay"/>
+    <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/earIcon"
+            android:src="@drawable/ear"
+            android:layout_alignRight="@+id/sharpText"
+            android:layout_below="@+id/noteDisplay"/>
 
 </RelativeLayout>

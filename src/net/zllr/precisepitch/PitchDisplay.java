@@ -22,10 +22,7 @@ import android.app.Activity;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 public class PitchDisplay extends Activity {
     private TextView frequencyDisplay;
@@ -41,6 +38,7 @@ public class PitchDisplay extends Activity {
     private int centThreshold = 20;
     private MicrophonePitchPoster pitchPoster;
     private StaffView staffView;
+    private ImageView earIcon;
 
     private enum KeyDisplay {
         DISPLAY_FLAT,
@@ -57,6 +55,7 @@ public class PitchDisplay extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        earIcon = (ImageView) findViewById(R.id.earIcon);
         frequencyDisplay = (TextView) findViewById(R.id.frequencyDisplay);
         flatDisplay = (TextView) findViewById(R.id.flatText);
         sharpDisplay = (TextView) findViewById(R.id.sharpText);
@@ -158,6 +157,8 @@ public class PitchDisplay extends Activity {
                 if (fadeCountdown < 0) fadeCountdown = 0;
                 setFadableComponentAlpha(1.0f * fadeCountdown / kMaxWait);
             }
+            earIcon.setVisibility(data != null && data.decibel > -30
+                                  ? View.VISIBLE : View.INVISIBLE);
             if (data != null && data.decibel > -60) {
                 decibelView.setVisibility(View.VISIBLE);
                 decibelView.setText(String.format("%.0fdB", data.decibel));
