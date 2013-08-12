@@ -14,8 +14,11 @@
                   android:layout_height="0px"
                   android:layout_width="match_parent">
         <!-- for first test: have a couple of buttons -->
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content">
         <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0px"
+                android:layout_weight="2"
                 android:layout_height="wrap_content"
                 android:text="Random"
                 android:id="@+id/newRandom"
@@ -24,26 +27,55 @@
                 android:layout_below="@+id/practiceStaff"/>
 
         <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0px"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Cm"
+                android:text="C"
                 android:id="@+id/newCMajor"
                 android:layout_marginTop="10dp"
                 android:layout_below="@+id/practiceStaff"
-                android:layout_toRightOf="@+id/newRandom"
-                android:paddingStart="30dp"
-                android:paddingEnd="30dp"/>
+                android:layout_toRightOf="@+id/newRandom"/>
 
         <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0px"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Gm"
+                android:text="G"
                 android:id="@+id/newGMajor"
                 android:layout_marginTop="10dp"
                 android:layout_below="@+id/practiceStaff"
-                android:layout_toRightOf="@+id/newCMajor"
-                android:paddingEnd="30dp"
-                android:paddingStart="30dp"/>
+                android:layout_toRightOf="@+id/newCMajor"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="D"
+                android:id="@+id/newDMajor"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/practiceStaff"
+                android:layout_toRightOf="@+id/newGMajor"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="F"
+                android:id="@+id/newFMajor"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/practiceStaff"
+                android:layout_toRightOf="@+id/newDMajor"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Bb"
+                android:id="@+id/newBbMajor"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/practiceStaff"
+                android:layout_toRightOf="@+id/newFMajor"/>
+        </LinearLayout>
 
         <view
                 android:layout_width="wrap_content"
