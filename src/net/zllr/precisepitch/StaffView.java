@@ -48,7 +48,8 @@ class StaffView extends View {
         public final int duration;
 
         // Color to display. Standard Android color representation.
-        public final int color;
+        // (should have a setter)
+        public int color;
     }
 
     // The note name is essentially encoding the 8 positions on the staff, with an additional

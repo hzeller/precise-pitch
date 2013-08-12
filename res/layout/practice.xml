@@ -15,7 +15,8 @@
                   android:layout_width="match_parent">
         <!-- for first test: have a couple of buttons -->
         <LinearLayout android:layout_width="match_parent"
-                      android:layout_height="wrap_content">
+                      android:layout_height="wrap_content"
+                      android:id="@+id/linearLayout">
         <Button
                 android:layout_width="0px"
                 android:layout_weight="2"
@@ -107,15 +108,17 @@
                 android:layout_below="@+id/practiceInstructions"
                 android:layout_centerHorizontal="true"
                 android:paddingEnd="40dp"
-                android:paddingStart="40dp"/>
+                android:paddingStart="40dp"
+                android:layout_alignRight="@+id/linearLayout"
+                android:layout_alignLeft="@+id/linearLayout"/>
 
         <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Restart"
                 android:id="@+id/practiceRestartButton"
-                android:layout_toRightOf="@+id/practiceStartButton"
-                android:layout_alignTop="@+id/practiceStartButton"/>
+                android:layout_alignRight="@+id/linearLayout"
+                android:layout_below="@+id/practiceStartButton"/>
 
     </RelativeLayout>
 </LinearLayout>
