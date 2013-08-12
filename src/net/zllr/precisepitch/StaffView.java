@@ -175,7 +175,9 @@ class StaffView extends View {
             final int notePos = getNotePosition(n);
             final int centerY = originY + 4 * lineDistance
                     - (notePos * lineDistance/2);
-            final float barLength = 3.2f * lineDistance;
+            float barLength = (notePos < 12)
+                    ? 3.2f * lineDistance
+                    : (notePos - 5) * lineDistance / 2;
             final String noteName = noteNames[keyDisplay][n.pitch % 12];
             final float noteOffset
                     = noteRenderer.draw(canvas, centerX, centerY,
