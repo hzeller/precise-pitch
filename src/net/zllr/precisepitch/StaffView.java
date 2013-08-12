@@ -64,7 +64,7 @@ class StaffView extends View {
     // The range we want to display. We want to display from 65Hz low C (2.5 lines
     // below staff to 440Hz A (4 lines above staff)
     private static final int kLowDisplayRange  = 3;  // below lowest line
-    private static final int kHighDisplayRange = 4;  // above highest line
+    private static final int kHighDisplayRange = 5;  // above highest line
     private static final int kTotalDisplayRange = kLowDisplayRange + 4 + kHighDisplayRange;
 
     public StaffView(Context context) {
@@ -175,9 +175,10 @@ class StaffView extends View {
             final int notePos = getNotePosition(n);
             final int centerY = originY + 4 * lineDistance
                     - (notePos * lineDistance/2);
-            float barLength = (notePos < 12)
-                    ? 3.2f * lineDistance
-                    : (notePos - 5) * lineDistance / 2;
+
+            float barLength = 3.2f * lineDistance;
+            barLength = Math.max(barLength, (notePos - 4) * lineDistance / 2);
+            barLength = Math.max(barLength, (4 - notePos) * lineDistance / 2);
             final String noteName = noteNames[keyDisplay][n.pitch % 12];
             final float noteOffset
                     = noteRenderer.draw(canvas, centerX, centerY,
