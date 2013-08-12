@@ -64,7 +64,7 @@ class StaffView extends View {
     // The range we want to display. We want to display from 65Hz low C (2.5 lines
     // below staff to 440Hz A (4 lines above staff)
     private static final int kLowDisplayRange  = 3;  // below lowest line
-    private static final int kHighDisplayRange = 5;  // above highest line
+    private static final int kHighDisplayRange = 4;  // above highest line
     private static final int kTotalDisplayRange = kLowDisplayRange + 4 + kHighDisplayRange;
 
     public StaffView(Context context) {

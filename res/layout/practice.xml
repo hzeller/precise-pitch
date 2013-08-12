@@ -5,17 +5,43 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <view android:layout_height="0px"
-          android:layout_weight="1"
+    <view android:layout_weight="1"
+          android:layout_height="0px"
           class="net.zllr.precisepitch.StaffView" android:id="@+id/practiceStaff"
-          android:layout_width="match_parent"
-          android:layout_gravity="left|center_vertical"/>
+          android:layout_width="match_parent"/>
 
-    <!-- fill the rest for now -->
-    <view
-            class="android.view.View"
-            android:layout_width="match_parent"
-            android:layout_height="0px"
-            android:layout_weight="2"
-            android:layout_gravity="center"/>
+    <RelativeLayout android:layout_weight="2"
+                  android:layout_height="0px"
+                  android:layout_width="match_parent">
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New Game"
+                android:id="@+id/newPracticeSequence"
+                android:layout_marginTop="10dp"
+                android:layout_alignLeft="@+id/practiceStaff"
+                android:layout_below="@+id/practiceStaff"/>
+
+        <view
+                android:layout_width="wrap_content"
+                android:layout_height="22dp"
+                android:layout_marginTop="10dp"
+                class="net.zllr.precisepitch.CenterOffsetView"
+                android:id="@+id/practiceLedDisplay"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/newPracticeSequence"/>
+
+        <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="(instructions)"
+                android:id="@+id/textView"
+                android:layout_gravity="center"
+                android:textSize="30dp"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/practiceLedDisplay"
+                android:layout_marginTop="10dp"
+                android:textIsSelectable="false"/>
+
+    </RelativeLayout>
 </LinearLayout>

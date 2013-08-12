@@ -15,12 +15,14 @@ public class PracticeActivity extends Activity {
         setContentView(R.layout.practice);
 
         staff = (StaffView) findViewById(R.id.practiceStaff);
-        staff.setNotesPerStaff(5);
+        staff.setNotesPerStaff(8);
         ArrayList<StaffView.Note> notes = new ArrayList<StaffView.Note>();
+        staff.setNoteModel(notes);
+        notes.add(new StaffView.Note(3, 4, Color.BLACK));
         notes.add(new StaffView.Note(7, 4, Color.BLACK));
         notes.add(new StaffView.Note(17, 4, Color.RED));
         notes.add(new StaffView.Note(12, 4, Color.BLUE));
-        staff.setNoteModel(notes);
+        notes.add(new StaffView.Note(30, 4, Color.GREEN));
         staff.onModelChanged();
     }
 
