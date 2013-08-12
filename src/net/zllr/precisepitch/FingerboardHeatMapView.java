@@ -18,9 +18,11 @@ public class FingerboardHeatMapView extends View {
     
     private Paint p;
     
+    private static final float STRING_LENGTH = 4.69f;
+    
     private static final float fb_verts[] = {
-        0.80f, 4.00f,
-        0.20f, 4.00f,
+        0.80f, 4.20f,
+        0.20f, 4.20f,
         0.70f, 0.20f,
         0.30f, 0.20f,
     };
@@ -49,6 +51,14 @@ public class FingerboardHeatMapView extends View {
         0.28f, 0.16f,
         0.37f, 0.16f,
         
+        0.37f, 0.00f,
+        0.37f, 0.16f,
+        0.63f, 0.00f,
+        
+        0.37f, 0.16f,
+        0.63f, 0.00f,
+        0.63f, 0.16f,
+        
         0.63f, 0.16f,
         0.63f, 0.00f,
         0.72f, 0.00f,
@@ -61,9 +71,13 @@ public class FingerboardHeatMapView extends View {
     private static final int scroll_colors[] = {
         0xffD96B00, 0xffD96B00, 0xffD96B00,
         0xffD96B00, 0xffD96B00, 0xffD96B00,
+        0xff532000, 0xff532000, 0xff532000,
+        0xff532000, 0xff532000, 0xff532000,
         0xffD96B00, 0xffD96B00, 0xffD96B00,
         0xffD96B00, 0xffD96B00, 0xffD96B00,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0,
     };
     
     
@@ -110,14 +124,26 @@ public class FingerboardHeatMapView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         
-        canvas.scale((float)canvas.getWidth(), (float)canvas.getHeight());
+        canvas.scale((float)canvas.getWidth(), (float)canvas.getWidth());
         canvas.drawColor(Color.WHITE);
         
-        drawFingerBoard(canvas);
-        
+        drawCello(canvas);
+        drawFrets(canvas);
     }
     
-    private void drawFingerBoard(Canvas c) {
+    private void drawFrets(Canvas c) {
+        p.setColor(0x7F0000FF);
+        p.setStrokeWidth(0.005f);
+        for (int i = 0; i < 56; i++) {
+            float yFretPos =
+                    STRING_LENGTH -
+                    (STRING_LENGTH / (float)Math.pow(1.05946309436, (double)i))
+                    + 0.2f;
+            c.drawLine(0.08f, yFretPos, 0.92f, yFretPos, p);
+        }
+    }
+    
+    private void drawCello(Canvas c) {
         p.setColor(Color.BLUE);
         
         c.drawVertices(VertexMode.TRIANGLE_STRIP,
@@ -147,13 +173,12 @@ public class FingerboardHeatMapView extends View {
         // Strings
         p.setColor(Color.GRAY);
         p.setStrokeWidth(0.015f);
-        c.drawLine(0.38f, -0.01f, 0.3f, 4.01f, p);
+        c.drawLine(0.38f, -0.01f, 0.3f, 4.21f, p);
         p.setStrokeWidth(0.010f);
-        c.drawLine(0.46f, -0.01f, 0.433f, 4.01f, p);
+        c.drawLine(0.46f, -0.01f, 0.433f, 4.21f, p);
         p.setStrokeWidth(0.008f);
-        c.drawLine(0.54f, -0.01f, 0.566f, 4.01f, p);
+        c.drawLine(0.54f, -0.01f, 0.566f, 4.21f, p);
         p.setStrokeWidth(0.006f);
-        c.drawLine(0.62f, -0.01f, 0.7f, 4.01f, p);
-        
+        c.drawLine(0.62f, -0.01f, 0.7f, 4.21f, p);
     }
 }
