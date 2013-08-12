@@ -43,7 +43,7 @@ public class PracticeActivity extends Activity {
         setContentView(R.layout.practice);
 
         staff = (StaffView) findViewById(R.id.practiceStaff);
-        staff.setNotesPerStaff(9);
+        staff.setNotesPerStaff(8);
 
         // For now we have a couple of buttons to create some basics, but
         // these should be replaced by: (a) Spinner (for choosing scales and randomTune)
