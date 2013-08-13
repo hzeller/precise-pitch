@@ -1,3 +1,21 @@
+/*
+ * Copyright 2013 Henner Zeller <h.zeller@acm.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Beware, this is a bit hacky right now
+
 package net.zllr.precisepitch;
 
 import android.app.Activity;
@@ -13,10 +31,11 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class PracticeActivity extends Activity {
+    private static final String BUNDLE_KEY_MODEL = "PracticeActivity.model";
+
     private static final int kMajorScaleSequence[] = { 2, 2, 1, 2, 2, 2, 1 };
     private static final int kCentThreshold = 20;
 
@@ -24,7 +43,7 @@ public class PracticeActivity extends Activity {
     private static final int successNoteColor = Color.rgb(0, 180, 0);
     private static final int playNoteColor  = Color.BLACK;
 
-    private final ArrayList<StaffView.Note> noteModel;
+    private ArrayList<StaffView.Note> noteModel;
     private StaffView staff;
     private Button randomTune;
     private Button cmajor;
@@ -36,18 +55,14 @@ public class PracticeActivity extends Activity {
     private Button startbutton;
     private TextView instructions;
     private Button restartbutton;
-    private MicrophonePitchPoster pitchPoster;
-    private long startPracticeTime;
+    private PitchFollowGame game;
 
     private enum State {
         EMPTY_SCALE,     // initial state or after 'clear'
         WAIT_FOR_START,  // when notes are visible. Start button visible.
+                         // TODO: should be automatic when !isEmpty()
         PRACTICE,        // The game.
         FINISHED         // finished assignment.
-    }
-
-    public PracticeActivity() {
-        noteModel = new ArrayList<StaffView.Note>();
     }
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,27 +102,43 @@ public class PracticeActivity extends Activity {
         restartbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                stopSampling();
+                setActivityState(State.FINISHED);
                 setActivityState(State.EMPTY_SCALE);
                 setActivityState(State.WAIT_FOR_START);  // We already have notes
             }
         });
         instructions = (TextView) findViewById(R.id.practiceInstructions);
 
+        if (savedInstanceState != null) {
+            noteModel = (ArrayList<StaffView.Note>) savedInstanceState.getSerializable(BUNDLE_KEY_MODEL);
+        }
+        if (noteModel == null) {
+            noteModel = new ArrayList<StaffView.Note>();
+        }
         staff.setNoteModel(noteModel);
         staff.setKeyDisplay(1);
-        setActivityState(State.EMPTY_SCALE);
+        staff.ensureNoteInView(0);
+        setActivityState(State.EMPTY_SCALE);  // need to walk this state first.
+        if (!noteModel.isEmpty()) {
+            setActivityState(State.WAIT_FOR_START);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (pitchPoster != null) {
+        if (game != null) {
+            game.stop();
             setActivityState(State.FINISHED);
         }
     }
 
-        // Kinda hardcoded now :)
+    @Override
+    protected void onSaveInstanceState(Bundle saveState) {
+        saveState.putSerializable(BUNDLE_KEY_MODEL, noteModel);
+    }
+
+    // Kinda hardcoded now :)
     private final class NoteGenerationListener implements View.OnClickListener {
         public void onClick(View button) {
             boolean wantsFlat = false;
@@ -146,27 +177,9 @@ public class PracticeActivity extends Activity {
     }
 
     private void doPractice() {
-        if (noteModel.size() == 0) return;
+        if (noteModel.isEmpty()) return;
         setActivityState(State.PRACTICE);
-        // Todo: put all things related to the game into thing.
-        pitchPoster = new MicrophonePitchPoster(60);
-        pitchPoster.setHandler(new PitchFollowHandler(noteModel));
-        pitchPoster.start();
-        startPracticeTime = System.currentTimeMillis();
-    }
-
-    private void endPractice() {
-        stopSampling();
-        long duration = System.currentTimeMillis() - startPracticeTime;
-        instructions.setText(String.format("%3.1f seconds!", duration / 1000.0));
-        setActivityState(State.FINISHED);
-    }
-
-    private void stopSampling() {
-        if (pitchPoster != null) {
-            pitchPoster.stopSampling();
-            pitchPoster = null;
-        }
+        game = new PitchFollowGame(noteModel);
     }
 
     // Some abstraction of progress.
@@ -175,8 +188,8 @@ public class PracticeActivity extends Activity {
         int getCurrentProgress();
     }
 
-    private class PitchFollowHandler extends Handler implements ProgressProvider {
-        PitchFollowHandler(List<StaffView.Note> model) {
+    private class PitchFollowGame extends Handler implements ProgressProvider {
+        PitchFollowGame(List<StaffView.Note> model) {
             highlightAnnotator = new HighlightAnnotator(this);
             running = true;
             this.model = model;
@@ -185,11 +198,21 @@ public class PracticeActivity extends Activity {
             }
             modelPos = -1;
             checkNextNote();
+
+            pitchPoster = new MicrophonePitchPoster(60);
+            pitchPoster.setHandler(this);
+            pitchPoster.start();
+            startPracticeTime = System.currentTimeMillis();
         }
 
         // --- interface ProgressProvider
         public int getMaxProgress() { return kHoldTime; }
         public int getCurrentProgress() { return ticksInTune; }
+        public void stop() {
+            if (!running) return;
+            running = false;
+            pitchPoster.stopSampling();
+        }
 
         public void handleMessage(Message msg) {
             if (!running)
@@ -236,8 +259,8 @@ public class PracticeActivity extends Activity {
 
             ++modelPos;
             if (modelPos >= model.size()) {
-                running = false;
-                endPractice();
+                stop();
+                showPracticeResults();
                 staff.onModelChanged();  // post the last change.
                 return;
             }
@@ -249,7 +272,15 @@ public class PracticeActivity extends Activity {
             staff.onModelChanged();
         }
 
+        private void showPracticeResults() {
+            final long duration = System.currentTimeMillis() - startPracticeTime;
+            instructions.setText(String.format("%3.1f seconds!", duration / 1000.0));
+            setActivityState(State.FINISHED);
+        }
+
         private final static int kHoldTime = 15;
+        private final MicrophonePitchPoster pitchPoster;
+        private final long startPracticeTime;
         private final HighlightAnnotator highlightAnnotator;
         private final List<StaffView.Note> model;
         private int modelPos;
@@ -293,7 +324,10 @@ public class PracticeActivity extends Activity {
                 setGeneratorButtonsVisibility(View.INVISIBLE);
                 break;
             case FINISHED:
-                stopSampling();
+                if (game != null) {
+                    game.stop();
+                    game = null;
+                }
                 startbutton.setVisibility(View.INVISIBLE);
                 restartbutton.setVisibility(View.VISIBLE);
                 ledview.setVisibility(View.INVISIBLE);
