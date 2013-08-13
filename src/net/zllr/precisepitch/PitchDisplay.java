@@ -25,6 +25,9 @@ import android.view.View;
 import android.widget.*;
 
 public class PitchDisplay extends Activity {
+    private static final int kCentThreshold = 20;  // TODO: make configurable
+    private static final boolean kShowTechInfo = false;
+
     private TextView frequencyDisplay;
     private TextView noteDisplay;
     private TextView flatDisplay;
@@ -34,7 +37,6 @@ public class PitchDisplay extends Activity {
     private TextView nextNote;
     private CenterOffsetView offsetCentView;
 
-    private int centThreshold = 20;
     private MicrophonePitchPoster pitchPoster;
     private ImageView earIcon;
 
@@ -54,18 +56,23 @@ public class PitchDisplay extends Activity {
         setContentView(R.layout.main);
 
         earIcon = (ImageView) findViewById(R.id.earIcon);
-        frequencyDisplay = (TextView) findViewById(R.id.frequencyDisplay);
         flatDisplay = (TextView) findViewById(R.id.flatText);
         sharpDisplay = (TextView) findViewById(R.id.sharpText);
         prevNote = (TextView) findViewById(R.id.nextLower);
         nextNote = (TextView) findViewById(R.id.nextHigher);
-        decibelView = (TextView) findViewById(R.id.decibelView);
         noteDisplay = (TextView) findViewById(R.id.noteDisplay);
         noteDisplay.setKeepScreenOn(true);
         noteDisplay.setText("");
         offsetCentView = (CenterOffsetView) findViewById(R.id.centView);
         offsetCentView.setRange(50);
         offsetCentView.setQuantization(10);
+
+        int techVisibility = kShowTechInfo ? View.VISIBLE : View.INVISIBLE;
+        frequencyDisplay = (TextView) findViewById(R.id.frequencyDisplay);
+        frequencyDisplay.setVisibility(techVisibility);
+        decibelView = (TextView) findViewById(R.id.decibelView);
+        decibelView.setVisibility(techVisibility);
+
         addAccidentalListener();        
     }
     
@@ -139,7 +146,7 @@ public class PitchDisplay extends Activity {
                 sharpDisplay.setVisibility("#".equals(accidental) ? View.VISIBLE : View.INVISIBLE);
                 nextNote.setText(noteNames[keyDisplay.ordinal()][(data.note + 1) % 12]);
                 prevNote.setText(noteNames[keyDisplay.ordinal()][(data.note + 11) % 12]);
-                final boolean inTune = Math.abs(data.cent) <= centThreshold;
+                final boolean inTune = Math.abs(data.cent) <= kCentThreshold;
                 final int c = inTune ? Color.rgb(50, 255, 50) : Color.rgb(255,50, 50);
                 noteDisplay.setTextColor(c);
                 flatDisplay.setTextColor(c);
@@ -155,10 +162,9 @@ public class PitchDisplay extends Activity {
             earIcon.setVisibility(data != null && data.decibel > -30
                                   ? View.VISIBLE : View.INVISIBLE);
             if (data != null && data.decibel > -60) {
-                decibelView.setVisibility(View.VISIBLE);
                 decibelView.setText(String.format("%.0fdB", data.decibel));
             } else {
-                decibelView.setVisibility(View.INVISIBLE);
+                decibelView.setText("");
             }
             lastPitch = data;
         }
