@@ -177,6 +177,7 @@ public class PracticeActivity extends Activity {
     private class PitchFollowHandler extends Handler implements ProgressProvider {
         PitchFollowHandler(List<StaffView.Note> model) {
             highlightAnnotator = new HighlightAnnotator(this);
+            running = true;
             iterator = model.iterator();
             for (StaffView.Note n : model) {
                 n.color = futureNoteColor;
@@ -189,6 +190,8 @@ public class PracticeActivity extends Activity {
         public int getCurrentProgress() { return ticksInTune; }
 
         public void handleMessage(Message msg) {
+            if (!running)
+                return;  // Received a sample, but we're done already.
             final MicrophonePitchPoster.PitchData data
                     = (MicrophonePitchPoster.PitchData) msg.obj;
             int beforeTicks = ticksInTune;
@@ -227,6 +230,7 @@ public class PracticeActivity extends Activity {
                 currentNote.annotator = null;
             }
             if (!iterator.hasNext()) {
+                running = false;
                 endPractice();
                 staff.onModelChanged();  // post the last change.
                 return;
@@ -243,6 +247,7 @@ public class PracticeActivity extends Activity {
         final Iterator<StaffView.Note> iterator;
         StaffView.Note currentNote;
         int ticksInTune;
+        boolean running;
     }
 
     private void setGeneratorButtonsVisibility(int visibility) {
