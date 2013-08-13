@@ -55,7 +55,7 @@ public class PracticeActivity extends Activity {
         setContentView(R.layout.practice);
 
         staff = (StaffView) findViewById(R.id.practiceStaff);
-        staff.setNotesPerStaff(8);
+        staff.setNotesPerStaff(16);
 
         // For now we have a couple of buttons to create some basics, but
         // these should be replaced by: (a) Spinner (for choosing scales and randomTune)
@@ -117,22 +117,22 @@ public class PracticeActivity extends Activity {
                 currentStartNote = noteModel.get(0).pitch;
             noteModel.clear();
             if (button == randomTune) {
-                for (int i = 0; i < 8; ++i) {
+                for (int i = 0; i < 16; ++i) {
                     noteModel.add(new StaffView.Note(
                             3 + (int) (16 * Math.random()),
                             4, Color.BLACK));
                 }
             } else if (button == cmajor) {
-                addMajorScale(currentStartNote == 3 ? 15 : 3, true, noteModel);
+                addAscDescMajorScale(currentStartNote == 3 ? 15 : 3, noteModel);
             } else if (button == gmajor) {
-                addMajorScale(currentStartNote == 10 ? 22 : 10, true, noteModel);
+                addAscDescMajorScale(currentStartNote == 10 ? 22 : 10, noteModel);
             } else if (button == dmajor) {
-                addMajorScale(currentStartNote == 5 ? 17 : 5, true, noteModel);
+                addAscDescMajorScale(currentStartNote == 5 ? 17 : 5, noteModel);
             } else if (button == fmajor) {
-                addMajorScale(currentStartNote == 8 ? 20 : 8, true, noteModel);
+                addAscDescMajorScale(currentStartNote == 8 ? 20 : 8, noteModel);
                 wantsFlat = true;
             } else if (button == bbmajor) {
-                addMajorScale(currentStartNote == 13 ? 25 : 13, true, noteModel);
+                addAscDescMajorScale(currentStartNote == 13 ? 25 : 13, noteModel);
                 wantsFlat = true;
             }
 
@@ -314,6 +314,10 @@ public class PracticeActivity extends Activity {
             model.add(new StaffView.Note(note, 4, Color.BLACK));
         }
         return note;
+    }
+
+    private void addAscDescMajorScale(int startNote, List<StaffView.Note> model) {
+        addMajorScale(addMajorScale(startNote, true, model), false, model);
     }
 
     private static final class HighlightAnnotator

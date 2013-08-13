@@ -170,7 +170,7 @@ class StaffView extends View {
 
         // We want notes not to be spaced too much apart
         int maxNoteDistance = noteRenderer.getWidth() * 3;
-        int minNoteDistance = (int) (noteRenderer.getWidth() * 1.8f);
+        int minNoteDistance = (int) (noteRenderer.getWidth() * 2.0f);
         int notesToDisplay = notesPerStaff;
         // We need to leave some space for accidentals in front of the first
         // note, so it is like displaying notePerStaff + 0.5 notes in a row...
