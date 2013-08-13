@@ -17,6 +17,10 @@ public class PracticeActivity extends Activity {
     private static final int kMajorScaleSequence[] = { 2, 2, 1, 2, 2, 2, 1 };
     private static final int kCentThreshold = 20;
 
+    private static final int futureNoteColor = Color.rgb(200, 200, 200);
+    private static final int successNoteColor = Color.rgb(0, 180, 0);
+    private static final int playNoteColor  = Color.BLACK;
+
     private final ArrayList<StaffView.Note> noteModel;
     private StaffView staff;
     private Button randomTune;
@@ -157,7 +161,7 @@ public class PracticeActivity extends Activity {
         PitchFollowHandler(List<StaffView.Note> model) {
             iterator = model.iterator();
             for (StaffView.Note n : model) {
-                n.color = Color.rgb(200, 200, 200);  // gray out.
+                n.color = futureNoteColor;
             }
             ellipsis = "";
             checkNextNote();
@@ -194,14 +198,14 @@ public class PracticeActivity extends Activity {
         }
 
         private void checkNextNote() {
+            if (currentNote != null)
+                currentNote.color = successNoteColor;
             if (!iterator.hasNext()) {
                 endPractice();
                 return;
             }
-            if (currentNote != null)
-                currentNote.color = Color.GREEN;
             currentNote = iterator.next();
-            currentNote.color = Color.BLACK;
+            currentNote.color = playNoteColor;
             ticksInTune = 0;
             staff.onModelChanged();
         }
