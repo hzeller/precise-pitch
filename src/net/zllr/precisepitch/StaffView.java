@@ -95,6 +95,7 @@ class StaffView extends View {
         backgroundColor.setColor(Color.WHITE);
 
         setNotesPerStaff(4);
+        noteInView = -1;
     }
 
     // Set model. A list of notes to display.
@@ -109,6 +110,13 @@ class StaffView extends View {
     // any element in the model.
     public void onModelChanged() {
         invalidate();
+    }
+
+    public void ensureNoteInView(int n) {
+        if (n != noteInView) {
+            noteInView = n;
+            invalidate();
+        }
     }
 
     // Set number of notes to be displayed along the length of the staff.
@@ -176,15 +184,21 @@ class StaffView extends View {
             notesToDisplay = Math.max(getWidth() / noteDistance, 1);
         }
 
+        int lastNoteInModelToDisplay = notes.size() - 1;
+        if (noteInView >= 0) {
+            // place it in the middle of the view.
+            lastNoteInModelToDisplay = noteInView + (notesToDisplay / 2) - 1;
+        }
+        lastNoteInModelToDisplay = Math.max(notesToDisplay-1, lastNoteInModelToDisplay);
+        lastNoteInModelToDisplay = Math.min(lastNoteInModelToDisplay, notes.size() - 1);
+
         // Rightmost position to display.
         int posX = (noteDistance * Math.min(notesToDisplay, notes.size()) // rightmost note.
                 - (noteDistance / 2)  // center of note is here
                 + (getWidth() - notesToDisplay * noteDistance)/2);  // center globally
 
         // TODO: add animation offset (should be a float-value 0..1).
-        // TODO: scrolling: start from some arbitrary pos.
-        //       right now, we do the most common thing: show the last notes.
-        ListIterator<Note> it = notes.listIterator(notes.size());
+        ListIterator<Note> it = notes.listIterator(lastNoteInModelToDisplay + 1);
         while (it.hasPrevious() && posX > -noteDistance) {
             Note n = it.previous();
             final int centerX = posX;
@@ -335,5 +349,6 @@ class StaffView extends View {
     private int keyDisplay;
     private int notesPerStaff;
     private List<Note> notes;
+    private int noteInView;
 }
 

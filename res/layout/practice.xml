@@ -10,7 +10,7 @@
           class="net.zllr.precisepitch.StaffView" android:id="@+id/practiceStaff"
           android:layout_width="match_parent"/>
 
-    <RelativeLayout android:layout_weight="2"
+    <RelativeLayout android:layout_weight="1"
                   android:layout_height="0px"
                   android:layout_width="match_parent">
         <!-- for first test: have a couple of buttons -->
@@ -99,26 +99,25 @@
                 android:layout_marginTop="10dp"
                 android:textIsSelectable="false"/>
 
-        <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Start"
-                android:id="@+id/practiceStartButton"
-                android:layout_marginTop="10dp"
-                android:layout_below="@+id/practiceInstructions"
-                android:layout_centerHorizontal="true"
-                android:paddingEnd="40dp"
-                android:paddingStart="40dp"
-                android:layout_alignRight="@+id/linearLayout"
-                android:layout_alignLeft="@+id/linearLayout"/>
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:id="@+id/startLayout"
+                      android:layout_below="@+id/practiceInstructions">
+            <Button
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Start"
+                    android:id="@+id/practiceStartButton"
+                    android:paddingEnd="40dp"
+                    android:paddingStart="40dp"/>
 
-        <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Restart"
-                android:id="@+id/practiceRestartButton"
-                android:layout_alignRight="@+id/linearLayout"
-                android:layout_below="@+id/practiceStartButton"/>
-
+            <Button
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Start Over"
+                    android:id="@+id/practiceRestartButton"/>
+        </LinearLayout>
     </RelativeLayout>
 </LinearLayout>

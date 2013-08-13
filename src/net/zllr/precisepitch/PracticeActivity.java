@@ -89,7 +89,7 @@ public class PracticeActivity extends Activity {
             public void onClick(View view) {
                 stopSampling();
                 setActivityState(State.EMPTY_SCALE);
-                setActivityState(State.WAIT_FOR_START);  // We already have
+                setActivityState(State.WAIT_FOR_START);  // We already have notes
             }
         });
         instructions = (TextView) findViewById(R.id.practiceInstructions);
@@ -136,11 +136,12 @@ public class PracticeActivity extends Activity {
                 wantsFlat = true;
             }
 
-        staff.onModelChanged();
+            staff.ensureNoteInView(0);
             staff.setKeyDisplay(wantsFlat ? 0 : 1);
             setActivityState(noteModel.size() > 0
                                      ? State.WAIT_FOR_START
                                      : State.EMPTY_SCALE);
+            staff.onModelChanged();
         }
     }
 
@@ -178,10 +179,11 @@ public class PracticeActivity extends Activity {
         PitchFollowHandler(List<StaffView.Note> model) {
             highlightAnnotator = new HighlightAnnotator(this);
             running = true;
-            iterator = model.iterator();
+            this.model = model;
             for (StaffView.Note n : model) {
                 n.color = futureNoteColor;
             }
+            modelPos = -1;
             checkNextNote();
         }
 
@@ -197,7 +199,7 @@ public class PracticeActivity extends Activity {
             int beforeTicks = ticksInTune;
 
             boolean noteOk = data != null
-                    && (data.note % 12 == currentNote.pitch % 12);
+                    && (data.note % 12 == model.get(modelPos).pitch % 12);
             ledview.setVisibility(noteOk ? View.VISIBLE : View.INVISIBLE);
             if (noteOk) {
                 ledview.setValue(data.cent);
@@ -225,29 +227,34 @@ public class PracticeActivity extends Activity {
         }
 
         private void checkNextNote() {
-            if (currentNote != null) {
+            StaffView.Note currentNote;
+            if (modelPos >= 0) {
+                currentNote = model.get(modelPos);
                 currentNote.color = successNoteColor;
                 currentNote.annotator = null;
             }
-            if (!iterator.hasNext()) {
+
+            ++modelPos;
+            if (modelPos >= model.size()) {
                 running = false;
                 endPractice();
                 staff.onModelChanged();  // post the last change.
                 return;
             }
-            currentNote = iterator.next();
+            currentNote = model.get(modelPos);
             currentNote.color = playNoteColor;
             currentNote.annotator = highlightAnnotator;
             ticksInTune = 0;
+            staff.ensureNoteInView(modelPos);
             staff.onModelChanged();
         }
 
         private final static int kHoldTime = 15;
         private final HighlightAnnotator highlightAnnotator;
-        final Iterator<StaffView.Note> iterator;
-        StaffView.Note currentNote;
-        int ticksInTune;
-        boolean running;
+        private final List<StaffView.Note> model;
+        private int modelPos;
+        private int ticksInTune;
+        private boolean running;
     }
 
     private void setGeneratorButtonsVisibility(int visibility) {
@@ -273,13 +280,13 @@ public class PracticeActivity extends Activity {
                     n.color = Color.BLACK;
                     n.annotator = null;
                 }
+                staff.ensureNoteInView(0);
                 staff.onModelChanged();
                 instructions.setText("Refine or start.");
                 startbutton.setVisibility(View.VISIBLE);
                 setGeneratorButtonsVisibility(View.VISIBLE);
                 break;
             case PRACTICE:
-                instructions.setText("Play notes. Hold when in tune.");
                 startbutton.setVisibility(View.INVISIBLE);
                 restartbutton.setVisibility(View.VISIBLE);
                 ledview.setVisibility(View.VISIBLE);
