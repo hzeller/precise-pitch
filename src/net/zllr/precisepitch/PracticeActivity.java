@@ -176,7 +176,7 @@ public class PracticeActivity extends Activity {
             ledview.setVisibility(data.note == currentNote.pitch
                                           ? View.VISIBLE : View.INVISIBLE);
             ledview.setValue(data.cent);
-            if (data.note == currentNote.pitch
+            if (data.note % 12 == currentNote.pitch % 12
                     && Math.abs(data.cent) < kCentThreshold) {
                 ++ticksInTune;
             } else {
