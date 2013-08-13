@@ -22,13 +22,14 @@ import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.io.Serializable;
 import java.util.*;
 
 class StaffView extends View {
-    public static final class Note {
+    public static final class Note implements Serializable {
         // Optional annotator for users to implement to add arbitrary
         // annotations to the note.
-        public interface Annotator {
+        public interface Annotator extends Serializable {
             void draw(Canvas canvas, RectF staffBoundingBox,
                       RectF noteBoundingBox);
         }
