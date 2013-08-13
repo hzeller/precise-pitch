@@ -324,6 +324,7 @@ public class PracticeActivity extends Activity {
             borderPaint.setColor(Color.BLACK);
             borderPaint.setStrokeWidth(0);
             borderPaint.setStyle(Paint.Style.STROKE);
+            borderPaint.setAntiAlias(true);
             progressPaint = new Paint();
             progressPaint.setColor(Color.GREEN);
             progressProvider = progress;
