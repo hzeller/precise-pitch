@@ -346,8 +346,10 @@ public class PracticeActivity extends Activity {
             float lineWidth = (staffBoundingBox.bottom - staffBoundingBox.top)/4;
             RectF drawBox = new RectF(noteBoundingBox);
             // If note does not go outside staff, make the box a bit larger.
-            drawBox.union(drawBox.left, staffBoundingBox.top - lineWidth);
-            drawBox.union(drawBox.left, staffBoundingBox.bottom + lineWidth);
+            drawBox.union(drawBox.left - 0.2f * lineWidth,
+                          staffBoundingBox.top - lineWidth);
+            drawBox.union(drawBox.right + 0.2f * lineWidth,
+                          staffBoundingBox.bottom + lineWidth);
             float radius = drawBox.width() / 3;
             canvas.drawRoundRect(drawBox, radius, radius, highlightPaint);
             canvas.drawRoundRect(drawBox, radius, radius, borderPaint);
