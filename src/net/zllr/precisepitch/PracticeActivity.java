@@ -181,7 +181,6 @@ public class PracticeActivity extends Activity {
             for (StaffView.Note n : model) {
                 n.color = futureNoteColor;
             }
-            ellipsis = "";
             checkNextNote();
         }
 
@@ -194,29 +193,27 @@ public class PracticeActivity extends Activity {
                     = (MicrophonePitchPoster.PitchData) msg.obj;
             int beforeTicks = ticksInTune;
 
-            ledview.setVisibility(data != null && data.note == currentNote.pitch
-                                          ? View.VISIBLE : View.INVISIBLE);
-            if (data != null) {
+            boolean noteOk = data != null
+                    && (data.note % 12 == currentNote.pitch % 12);
+            ledview.setVisibility(noteOk ? View.VISIBLE : View.INVISIBLE);
+            if (noteOk) {
                 ledview.setValue(data.cent);
             }
-            if (data != null
-                    && data.note % 12 == currentNote.pitch % 12
-                    && Math.abs(data.cent) < kCentThreshold) {
+            if (noteOk && Math.abs(data.cent) < kCentThreshold) {
                 ++ticksInTune;
-            } else {
-                ticksInTune = 0;
+            } else if (data != null) {   // No data is not a penalty.
+                --ticksInTune;
+                if (ticksInTune < 0) ticksInTune = 0;
             }
 
             if (ticksInTune == 0) {
                 instructions.setText("Find the note.");
             }
             else if (ticksInTune > 0 && ticksInTune < kHoldTime) {
-                instructions.setText("Alright, now hold.." +
-                                    String.valueOf(kHoldTime - ticksInTune));
+                instructions.setText("Alright, now hold..");
             }
             else if (ticksInTune >= kHoldTime) {
-                instructions.setText("Yay, continue!" + ellipsis);
-                ellipsis += ".";
+                instructions.setText("Yay, continue!");
                 checkNextNote();
             }
             if (beforeTicks != ticksInTune) {
@@ -246,7 +243,6 @@ public class PracticeActivity extends Activity {
         final Iterator<StaffView.Note> iterator;
         StaffView.Note currentNote;
         int ticksInTune;
-        String ellipsis;
     }
 
     private void setGeneratorButtonsVisibility(int visibility) {
