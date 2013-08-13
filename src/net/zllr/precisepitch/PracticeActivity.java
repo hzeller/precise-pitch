@@ -1,7 +1,10 @@
 package net.zllr.precisepitch;
 
 import android.app.Activity;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -96,7 +99,15 @@ public class PracticeActivity extends Activity {
         setActivityState(State.EMPTY_SCALE);
     }
 
-    // Kinda hardcoded now :)
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (pitchPoster != null) {
+            setActivityState(State.FINISHED);
+        }
+    }
+
+        // Kinda hardcoded now :)
     private final class NoteGenerationListener implements View.OnClickListener {
         public void onClick(View button) {
             boolean wantsFlat = false;
@@ -157,8 +168,15 @@ public class PracticeActivity extends Activity {
         }
     }
 
-    private class PitchFollowHandler extends Handler {
+    // Some abstraction of progress.
+    private interface ProgressProvider {
+        int getMaxProgress();
+        int getCurrentProgress();
+    }
+
+    private class PitchFollowHandler extends Handler implements ProgressProvider {
         PitchFollowHandler(List<StaffView.Note> model) {
+            highlightAnnotator = new HighlightAnnotator(this);
             iterator = model.iterator();
             for (StaffView.Note n : model) {
                 n.color = futureNoteColor;
@@ -167,16 +185,22 @@ public class PracticeActivity extends Activity {
             checkNextNote();
         }
 
+        // --- interface ProgressProvider
+        public int getMaxProgress() { return kHoldTime; }
+        public int getCurrentProgress() { return ticksInTune; }
+
         public void handleMessage(Message msg) {
             final MicrophonePitchPoster.PitchData data
                     = (MicrophonePitchPoster.PitchData) msg.obj;
-            if (data == null)
-                return;
+            int beforeTicks = ticksInTune;
 
-            ledview.setVisibility(data.note == currentNote.pitch
+            ledview.setVisibility(data != null && data.note == currentNote.pitch
                                           ? View.VISIBLE : View.INVISIBLE);
-            ledview.setValue(data.cent);
-            if (data.note % 12 == currentNote.pitch % 12
+            if (data != null) {
+                ledview.setValue(data.cent);
+            }
+            if (data != null
+                    && data.note % 12 == currentNote.pitch % 12
                     && Math.abs(data.cent) < kCentThreshold) {
                 ++ticksInTune;
             } else {
@@ -195,22 +219,30 @@ public class PracticeActivity extends Activity {
                 ellipsis += ".";
                 checkNextNote();
             }
+            if (beforeTicks != ticksInTune) {
+                staff.onModelChanged();  // force redraw ('clock')
+            }
         }
 
         private void checkNextNote() {
-            if (currentNote != null)
+            if (currentNote != null) {
                 currentNote.color = successNoteColor;
+                currentNote.annotator = null;
+            }
             if (!iterator.hasNext()) {
                 endPractice();
+                staff.onModelChanged();  // post the last change.
                 return;
             }
             currentNote = iterator.next();
             currentNote.color = playNoteColor;
+            currentNote.annotator = highlightAnnotator;
             ticksInTune = 0;
             staff.onModelChanged();
         }
 
         private final static int kHoldTime = 15;
+        private final HighlightAnnotator highlightAnnotator;
         final Iterator<StaffView.Note> iterator;
         StaffView.Note currentNote;
         int ticksInTune;
@@ -238,6 +270,7 @@ public class PracticeActivity extends Activity {
             case WAIT_FOR_START:
                 for (StaffView.Note n : noteModel) {
                     n.color = Color.BLACK;
+                    n.annotator = null;
                 }
                 staff.onModelChanged();
                 instructions.setText("Refine or start.");
@@ -273,5 +306,54 @@ public class PracticeActivity extends Activity {
             model.add(new StaffView.Note(note, 4, Color.BLACK));
         }
         return note;
+    }
+
+    private static final class HighlightAnnotator
+            implements StaffView.Note.Annotator {
+        private final Paint highlightPaint;
+        private final Paint borderPaint;
+        private final Paint progressPaint;
+        private final ProgressProvider progressProvider;
+
+        public HighlightAnnotator(ProgressProvider progress) {
+            highlightPaint = new Paint();
+            highlightPaint.setColor(Color.argb(70, 0xff, 0xff, 0));
+            highlightPaint.setStrokeWidth(0);
+            borderPaint = new Paint();
+            borderPaint.setColor(Color.BLACK);
+            borderPaint.setStrokeWidth(0);
+            borderPaint.setStyle(Paint.Style.STROKE);
+            progressPaint = new Paint();
+            progressPaint.setColor(Color.GREEN);
+            progressProvider = progress;
+        }
+
+        public void draw(Canvas canvas, RectF staffBoundingBox,
+                         RectF noteBoundingBox) {
+            float lineWidth = (staffBoundingBox.bottom - staffBoundingBox.top)/4;
+            RectF drawBox = new RectF(noteBoundingBox);
+            // If note does not go outside staff, make the box a bit larger.
+            drawBox.union(drawBox.left, staffBoundingBox.top - lineWidth);
+            drawBox.union(drawBox.left, staffBoundingBox.bottom + lineWidth);
+            float radius = drawBox.width() / 3;
+            canvas.drawRoundRect(drawBox, radius, radius, highlightPaint);
+            canvas.drawRoundRect(drawBox, radius, radius, borderPaint);
+
+            float centerY;
+            float clearanceBottom = canvas.getHeight() - drawBox.bottom;
+            if (clearanceBottom > drawBox.top) {
+                centerY = drawBox.bottom + clearanceBottom / 2;
+            } else {
+                centerY = drawBox.top / 2;
+            }
+            float timerRadius = lineWidth;
+            float centerX = drawBox.left + (drawBox.right - drawBox.left) / 2;
+            RectF timerBox = new RectF(centerX - timerRadius, centerY - timerRadius,
+                                       centerX + timerRadius, centerY + timerRadius);
+            float clockDegrees = 360.0f * progressProvider.getCurrentProgress()
+                    / progressProvider.getMaxProgress();
+            canvas.drawArc(timerBox, -90, clockDegrees, true, progressPaint);
+            canvas.drawOval(timerBox, borderPaint);
+        }
     }
 }

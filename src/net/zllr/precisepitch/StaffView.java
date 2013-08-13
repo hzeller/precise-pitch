@@ -26,6 +26,13 @@ import java.util.*;
 
 class StaffView extends View {
     public static final class Note {
+        // Optional annotator for users to implement to add arbitrary
+        // annotations to the note.
+        public interface Annotator {
+            void draw(Canvas canvas, RectF staffBoundingBox,
+                      RectF noteBoundingBox);
+        }
+
         // Immutable struct to represent a note to display.
         public Note(int pitch, int duration, int color) {
             this.pitch = pitch;
@@ -41,6 +48,9 @@ class StaffView extends View {
             return on.pitch == pitch && on.duration == pitch && on.color == color;
         }
 
+        // -- avoiding chatty setters and getters here, but should probably be
+        // here for a self-respecting Java program :)
+
         // 0 for low A at 55Hz, 1 for A#.. 36 for A at 440Hz
         public final int pitch;
 
@@ -50,6 +60,10 @@ class StaffView extends View {
         // Color to display. Standard Android color representation.
         // (should have a setter)
         public int color;
+
+        // User provided annotator. If not null, is called when the note is
+        // drawn.
+        public Annotator annotator;
     }
 
     // The note name is essentially encoding the 8 positions on the staff, with an additional
@@ -140,6 +154,8 @@ class StaffView extends View {
             final int posY = originY + i * lineDistance;
             canvas.drawLine(0, posY, canvas.getWidth(), posY, staffPaint);
         }
+        RectF staffBoundingBox = new RectF(0, originY, canvas.getWidth(),
+                                           originY + 4 * lineDistance);
 
         if (notesPerStaff == 0 || notes == null)
             return;
@@ -183,16 +199,19 @@ class StaffView extends View {
             barLength = Math.max(barLength, (notePos - 4) * lineDistance / 2);
             barLength = Math.max(barLength, (4 - notePos) * lineDistance / 2);
             final String noteName = noteNames[keyDisplay][n.pitch % 12];
+            RectF noteBoundingBox = new RectF();
             final float noteOffset
                     = noteRenderer.draw(canvas, centerX, centerY,
                                     noteName, notePos < 4 ? barLength : -barLength,
-                                    n.color);
+                                    n.color, noteBoundingBox);
 
             // The help-lines.
             final Paint helpLinePaint = new Paint(staffPaint);
             helpLinePaint.setColor(n.color);
             final float helpLeft = centerX - 1.8f * noteOffset;
             final float helpRight = centerX + 1.8f * noteOffset;
+            noteBoundingBox.union(helpLeft, centerY);
+            noteBoundingBox.union(helpRight, centerY);
             for (int i = notePos / 2; i < 0; ++i) {  // below lowest line
                 canvas.drawLine(helpLeft, originY + 4 * lineDistance - i * lineDistance,
                                 helpRight, originY + 4 * lineDistance - i * lineDistance,
@@ -202,6 +221,10 @@ class StaffView extends View {
                 canvas.drawLine(helpLeft, originY + 4 * lineDistance - i * lineDistance,
                                 helpRight, originY + 4 * lineDistance - i * lineDistance,
                                 helpLinePaint);
+            }
+
+            if (n.annotator != null) {
+                n.annotator.draw(canvas, staffBoundingBox, noteBoundingBox);
             }
         }
     }
@@ -251,7 +274,7 @@ class StaffView extends View {
         // Returns width of head.
         public float draw(Canvas c, float centerX, float centerY,
                           String noteName, float barLength,
-                          int color) {
+                          int color, RectF boundingBox) {
             final float noteLeft = centerX - noteOffsetX;
             final float noteRight = centerX + noteOffsetX;
 
@@ -261,7 +284,10 @@ class StaffView extends View {
                          centerX - 0.5f * noteBitmap.getWidth(),
                          centerY - 0.5f * noteBitmap.getHeight(),
                          localNotePaint);
-
+            boundingBox.union(new RectF(centerX - 0.5f * noteBitmap.getWidth(),
+                                        centerY - 0.5f * noteBitmap.getHeight(),
+                                        centerX + 0.5f * noteBitmap.getWidth(),
+                                        centerY + 0.5f * noteBitmap.getHeight()));
             if (barLength > 0) {
                 c.drawLine(noteRight, centerY - noteOffsetY,
                            noteRight, centerY - barLength, localNotePaint);
@@ -269,6 +295,8 @@ class StaffView extends View {
                 c.drawLine(noteLeft, centerY + noteOffsetY,
                            noteLeft, centerY - barLength, localNotePaint);
             }
+            boundingBox.union(centerX, centerY - barLength);
+
             if (noteName.length() > 1) {
                 float accidentalOffsetY = 0.0f;
                 String accidental = "";
@@ -286,6 +314,10 @@ class StaffView extends View {
                            centerX - 4.0f * noteOffsetX,
                            centerY + accidentalOffsetY,
                            localNotePaint);
+                boundingBox.union(centerX - 4.0f * noteOffsetX,
+                                  centerY + localNotePaint.getTextSize());
+                boundingBox.union(centerX - 4.0f * noteOffsetX,
+                                  centerY - localNotePaint.getTextSize());
             }
             return noteOffsetX;
         }
