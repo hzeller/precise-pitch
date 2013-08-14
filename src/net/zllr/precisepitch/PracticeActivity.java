@@ -253,9 +253,14 @@ public class PracticeActivity extends Activity {
 
             boolean noteOk = data != null
                     && (data.note % 12 == model.get(modelPos).pitch % 12);
-            ledview.setVisibility(noteOk ? View.VISIBLE : View.INVISIBLE);
             if (noteOk) {
                 ledview.setValue(data.cent);
+            }
+            if (data != null) {
+                if (data.note < model.get(modelPos).pitch)
+                    ledview.setValue(-100);  // too low.
+                if (data.note > model.get(modelPos).pitch)
+                    ledview.setValue(+100);  // too high.
             }
             if (noteOk && Math.abs(data.cent) < kCentThreshold) {
                 ++ticksInTune;

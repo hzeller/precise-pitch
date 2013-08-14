@@ -117,18 +117,31 @@ public class CenterOffsetView extends View {
 
         final int steps = (int) (range / quantization);
         final float radius = Math.min(kHeight/2.0f - 5, kWidth/4.0f / steps - 1);
+        filledRedCirclePaint.setTextSize(3 * radius);
         final float widthSteps = (kWidth/2 - 2 * radius) / steps;
         final int highlightStep = (int) Math.round(value / quantization);
+        final boolean tooLow = value < -range;
+        final boolean tooHigh = value > range;
         for (int i = -steps; i <= steps; ++i) {
-            Paint paint;
-            if (i == 0 && Math.abs(highlightStep) <= 3)
-                paint = filledGreenCirclePaint;   // Show always on zero when highlight is in range.
-            else if (i != 0 && highlightStep == i)
-                paint = filledRedCirclePaint;
-            else
-                paint = emptyCirclePaint;
-            canvas.drawCircle(kWidth/2 + i * widthSteps, kHeight/2,
-                              radius, paint);
+            final float centerX = kWidth/2 + i * widthSteps;
+            if (i == -steps && tooLow) {
+                // Instead of first circle, show out-of-range arrow. Should
+                // paint triangle, but too lazy :)
+                canvas.drawText("◀", centerX - 2 * radius, kHeight/2 + radius,
+                                filledRedCirclePaint);
+            } else if (i == steps && tooHigh) {
+                canvas.drawText("▶", centerX - radius, kHeight/2 + radius,
+                                filledRedCirclePaint);
+            } else {
+                Paint paint;
+                if (i == 0 && Math.abs(highlightStep) <= 3)
+                    paint = filledGreenCirclePaint;   // Show always on zero when highlight is in range.
+                else if (i != 0 && highlightStep == i)
+                    paint = filledRedCirclePaint;
+                else
+                    paint = emptyCirclePaint;
+                canvas.drawCircle(centerX, kHeight/2, radius, paint);
+            }
         }
         if (Math.abs(value) <= range) {
             canvas.drawText(String.format("%+.0fc", value),
