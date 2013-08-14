@@ -26,6 +26,7 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -143,8 +144,12 @@ public class PracticeActivity extends Activity {
     protected void onPause() {
         super.onPause();
         if (game != null) {
-            game.stop();
+            game.stop();  // TODO: store game state.
             setActivityState(State.FINISHED);
+            // Now prepare for a new game, with properly reset notes before
+            // the state is serialized (the Paint in note-annotators doesn't serialize).
+            setActivityState(State.EMPTY_SCALE);
+            setActivityState(State.WAIT_FOR_START);  // We already have notes
         }
     }
 
