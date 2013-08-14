@@ -133,6 +133,7 @@ class StaffView extends View {
             invalidate();
         }
     }
+    public int getKeyDisplay() { return keyDisplay; }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {

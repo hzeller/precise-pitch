@@ -30,6 +30,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +44,17 @@ public class PracticeActivity extends Activity {
     private static final int successNoteColor = Color.rgb(0, 180, 0);
     private static final int playNoteColor  = Color.BLACK;
 
-    private ArrayList<StaffView.Note> noteModel;
+    // All the activity state that we need to keep track of between teardown
+    // restart.
+    private static class ActivityState implements Serializable {
+        public ActivityState() {
+            noteModel = new ArrayList<StaffView.Note>();
+        }
+        final ArrayList<StaffView.Note> noteModel;
+        int keyDisplay = 1;
+    };
+    private ActivityState istate;
+
     private StaffView staff;
     private Button randomTune;
     private Button cmajor;
@@ -110,16 +121,20 @@ public class PracticeActivity extends Activity {
         instructions = (TextView) findViewById(R.id.practiceInstructions);
 
         if (savedInstanceState != null) {
-            noteModel = (ArrayList<StaffView.Note>) savedInstanceState.getSerializable(BUNDLE_KEY_MODEL);
+            istate = (ActivityState) savedInstanceState.getSerializable(BUNDLE_KEY_MODEL);
         }
-        if (noteModel == null) {
-            noteModel = new ArrayList<StaffView.Note>();
+        if (istate == null) {
+            istate = new ActivityState();
         }
-        staff.setNoteModel(noteModel);
-        staff.setKeyDisplay(1);
+        staff.setNoteModel(istate.noteModel);
+
+        // TODO: this being a property of the view, can't this be restored
+        // automatically ?
+        staff.setKeyDisplay(istate.keyDisplay);
+
         staff.ensureNoteInView(0);
         setActivityState(State.EMPTY_SCALE);  // need to walk this state first.
-        if (!noteModel.isEmpty()) {
+        if (!istate.noteModel.isEmpty()) {
             setActivityState(State.WAIT_FOR_START);
         }
     }
@@ -135,7 +150,7 @@ public class PracticeActivity extends Activity {
 
     @Override
     protected void onSaveInstanceState(Bundle saveState) {
-        saveState.putSerializable(BUNDLE_KEY_MODEL, noteModel);
+        saveState.putSerializable(BUNDLE_KEY_MODEL, istate);
     }
 
     // Kinda hardcoded now :)
@@ -143,33 +158,35 @@ public class PracticeActivity extends Activity {
         public void onClick(View button) {
             boolean wantsFlat = false;
             int currentStartNote = 0;
+            List<StaffView.Note> model = istate.noteModel;
             // We use the current start note to help toggle major scales.
-            if (noteModel.size() > 0)
-                currentStartNote = noteModel.get(0).pitch;
-            noteModel.clear();
+            if (model.size() > 0)
+                currentStartNote = model.get(0).pitch;
+            model.clear();
             if (button == randomTune) {
                 for (int i = 0; i < 16; ++i) {
-                    noteModel.add(new StaffView.Note(
+                    model.add(new StaffView.Note(
                             3 + (int) (16 * Math.random()),
                             4, Color.BLACK));
                 }
             } else if (button == cmajor) {
-                addAscDescMajorScale(currentStartNote == 3 ? 15 : 3, noteModel);
+                addAscDescMajorScale(currentStartNote == 3 ? 15 : 3, model);
             } else if (button == gmajor) {
-                addAscDescMajorScale(currentStartNote == 10 ? 22 : 10, noteModel);
+                addAscDescMajorScale(currentStartNote == 10 ? 22 : 10, model);
             } else if (button == dmajor) {
-                addAscDescMajorScale(currentStartNote == 5 ? 17 : 5, noteModel);
+                addAscDescMajorScale(currentStartNote == 5 ? 17 : 5, model);
             } else if (button == fmajor) {
-                addAscDescMajorScale(currentStartNote == 8 ? 20 : 8, noteModel);
+                addAscDescMajorScale(currentStartNote == 8 ? 20 : 8, model);
                 wantsFlat = true;
             } else if (button == bbmajor) {
-                addAscDescMajorScale(currentStartNote == 13 ? 25 : 13, noteModel);
+                addAscDescMajorScale(currentStartNote == 13 ? 25 : 13, model);
                 wantsFlat = true;
             }
 
             staff.ensureNoteInView(0);
             staff.setKeyDisplay(wantsFlat ? 0 : 1);
-            setActivityState(noteModel.size() > 0
+            istate.keyDisplay = staff.getKeyDisplay();
+            setActivityState(model.size() > 0
                                      ? State.WAIT_FOR_START
                                      : State.EMPTY_SCALE);
             staff.onModelChanged();
@@ -177,9 +194,9 @@ public class PracticeActivity extends Activity {
     }
 
     private void doPractice() {
-        if (noteModel.isEmpty()) return;
+        if (istate.noteModel.isEmpty()) return;
         setActivityState(State.PRACTICE);
-        game = new PitchFollowGame(noteModel);
+        game = new PitchFollowGame(istate.noteModel);
     }
 
     // Some abstraction of progress.
@@ -307,7 +324,7 @@ public class PracticeActivity extends Activity {
                 instructions.setText("Choose your chant of doom.");
                 break;
             case WAIT_FOR_START:
-                for (StaffView.Note n : noteModel) {
+                for (StaffView.Note n : istate.noteModel) {
                     n.color = Color.BLACK;
                     n.annotator = null;
                 }
