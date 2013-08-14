@@ -256,7 +256,7 @@ public class PracticeActivity extends Activity {
             if (noteOk) {
                 ledview.setValue(data.cent);
             }
-            if (data != null) {
+            else if (data != null) {
                 if (data.note < model.get(modelPos).pitch)
                     ledview.setValue(-100);  // too low.
                 if (data.note > model.get(modelPos).pitch)
