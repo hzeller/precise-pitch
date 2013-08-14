@@ -102,6 +102,8 @@ public class PracticeActivity extends Activity {
         bbmajor = (Button) findViewById(R.id.newBbMajor);
         bbmajor.setOnClickListener(noteCreator);
         ledview = (CenterOffsetView) findViewById(R.id.practiceLedDisplay);
+        ledview.setQuantization(3);
+        ledview.setRange(Math.min(50, kCentThreshold + 10));
         ledview.setKeepScreenOn(true);
         startbutton = (Button) findViewById(R.id.practiceStartButton);
         startbutton.setOnClickListener(new View.OnClickListener() {
@@ -378,6 +380,7 @@ public class PracticeActivity extends Activity {
         return note;
     }
 
+    // Add a random sequence in a particular Major scale to the model.
     private void addRandomMajorSequence(int baseNote,
                                         List<StaffView.Note> model,
                                         int count) {
@@ -420,7 +423,7 @@ public class PracticeActivity extends Activity {
             borderPaint.setStyle(Paint.Style.STROKE);
             borderPaint.setAntiAlias(true);
             progressPaint = new Paint();
-            progressPaint.setColor(Color.GREEN);
+            progressPaint.setColor(successNoteColor);
             progressProvider = progress;
         }
 

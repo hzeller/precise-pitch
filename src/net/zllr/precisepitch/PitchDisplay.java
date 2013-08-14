@@ -64,8 +64,8 @@ public class PitchDisplay extends Activity {
         noteDisplay.setKeepScreenOn(true);
         noteDisplay.setText("");
         offsetCentView = (CenterOffsetView) findViewById(R.id.centView);
-        offsetCentView.setRange(50);
-        offsetCentView.setQuantization(10);
+        offsetCentView.setRange(30);
+        offsetCentView.setQuantization(3);
 
         int techVisibility = kShowTechInfo ? View.VISIBLE : View.INVISIBLE;
         frequencyDisplay = (TextView) findViewById(R.id.frequencyDisplay);

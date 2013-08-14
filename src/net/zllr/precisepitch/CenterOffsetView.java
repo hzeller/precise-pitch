@@ -40,7 +40,7 @@ public class CenterOffsetView extends View {
     private int alphaChannel = 255;
     private double range = 50;
     private double value;
-    private int quantization = 5;
+    private float quantization = 5;
 
     public CenterOffsetView(Context context) {
         this(context, null);
@@ -64,8 +64,8 @@ public class CenterOffsetView extends View {
         centAnnotationPaint.setTextSize((int)(kHeight * 0.8));
         centAnnotationPaint.setTextAlign(Paint.Align.CENTER);
 
-        setRange(45);
-        setQuantization(10);
+        setRange(25);
+        setQuantization(2.5f);
         setValue(0);
     }
 
@@ -94,8 +94,8 @@ public class CenterOffsetView extends View {
         invalidate();
     }
 
-    // Quantization of the range. Default: 10
-    public void setQuantization(int q) {
+    // Quantization of the range.
+    public void setQuantization(float q) {
         if (q == this.quantization) return;
         if (q < 1) throw new IllegalArgumentException(
                                      "Quantization needs to be >= 1: " + q);
@@ -116,8 +116,8 @@ public class CenterOffsetView extends View {
         centAnnotationPaint.setColor(Color.argb(alphaChannel, 255, 255, 255));
 
         final int steps = (int) (range / quantization);
-        final int radius = kHeight/2 - 5;
-        final int widthSteps = (kWidth/2 - 2 * radius) / steps;
+        final float radius = Math.min(kHeight/2.0f - 5, kWidth/4.0f / steps - 1);
+        final float widthSteps = (kWidth/2 - 2 * radius) / steps;
         final int highlightStep = (int) Math.round(value / quantization);
         for (int i = -steps; i <= steps; ++i) {
             Paint paint;
