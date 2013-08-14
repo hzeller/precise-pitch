@@ -26,9 +26,9 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcelable;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import java.io.Serializable;
@@ -53,11 +53,12 @@ public class PracticeActivity extends Activity {
         }
         final ArrayList<StaffView.Note> noteModel;
         int keyDisplay = 1;
+        boolean checkedRandom;
     };
     private ActivityState istate;
 
     private StaffView staff;
-    private Button randomTune;
+    private CheckBox randomTune;
     private Button cmajor;
     private Button gmajor;
     private Button dmajor;
@@ -89,8 +90,7 @@ public class PracticeActivity extends Activity {
         // and (b) direct editing.
 
         final NoteGenerationListener noteCreator = new NoteGenerationListener();
-        randomTune = (Button) findViewById(R.id.newRandom);
-        randomTune.setOnClickListener(noteCreator);
+        randomTune = (CheckBox) findViewById(R.id.randomSequence);
         cmajor = (Button) findViewById(R.id.newCMajor);
         cmajor.setOnClickListener(noteCreator);
         gmajor = (Button) findViewById(R.id.newGMajor);
@@ -129,10 +129,6 @@ public class PracticeActivity extends Activity {
         }
         staff.setNoteModel(istate.noteModel);
 
-        // TODO: this being a property of the view, can't this be restored
-        // automatically ?
-        staff.setKeyDisplay(istate.keyDisplay);
-
         staff.ensureNoteInView(0);
         setActivityState(State.EMPTY_SCALE);  // need to walk this state first.
         if (!istate.noteModel.isEmpty()) {
@@ -140,9 +136,12 @@ public class PracticeActivity extends Activity {
         }
     }
 
+
     @Override
     protected void onPause() {
         super.onPause();
+        istate.keyDisplay = staff.getKeyDisplay();
+        istate.checkedRandom = randomTune.isChecked();
         if (game != null) {
             game.stop();  // TODO: store game state.
             setActivityState(State.FINISHED);
@@ -154,6 +153,14 @@ public class PracticeActivity extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // Do I really have to remember state for Views ?
+        staff.setKeyDisplay(istate.keyDisplay);
+        randomTune.setChecked(istate.checkedRandom);
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle saveState) {
         saveState.putSerializable(BUNDLE_KEY_MODEL, istate);
     }
@@ -162,32 +169,31 @@ public class PracticeActivity extends Activity {
     private final class NoteGenerationListener implements View.OnClickListener {
         public void onClick(View button) {
             boolean wantsFlat = false;
-            int currentStartNote = 0;
             List<StaffView.Note> model = istate.noteModel;
-            // We use the current start note to help toggle major scales.
-            if (model.size() > 0)
-                currentStartNote = model.get(0).pitch;
+            int startNote = model.size() > 0 ? model.get(0).pitch : 0;
             model.clear();
-            if (button == randomTune) {
-                for (int i = 0; i < 16; ++i) {
-                    model.add(new StaffView.Note(
-                            3 + (int) (16 * Math.random()),
-                            4, Color.BLACK));
-                }
-            } else if (button == cmajor) {
-                addAscDescMajorScale(currentStartNote == 3 ? 15 : 3, model);
+
+            // Use lowest note unless that is already set: then choose one
+            // octave higher. That way, we can 'toggle' between two octaves.
+            if (button == cmajor) {
+                startNote = (startNote == 3) ? 15 : 3;
             } else if (button == gmajor) {
-                addAscDescMajorScale(currentStartNote == 10 ? 22 : 10, model);
+                startNote = (startNote == 10) ? 22 : 10;
             } else if (button == dmajor) {
-                addAscDescMajorScale(currentStartNote == 5 ? 17 : 5, model);
+                startNote = (startNote == 5) ? 17 : 5;
             } else if (button == fmajor) {
-                addAscDescMajorScale(currentStartNote == 8 ? 20 : 8, model);
+                startNote = (startNote == 8) ? 20 : 8;
                 wantsFlat = true;
             } else if (button == bbmajor) {
-                addAscDescMajorScale(currentStartNote == 13 ? 25 : 13, model);
+                startNote = (startNote == 13) ? 25 : 13;
                 wantsFlat = true;
             }
 
+            if (randomTune.isChecked()) {
+                addRandomMajorSequence(startNote, model, 16);
+            } else {
+                addAscDescMajorScale(startNote, model);
+            }
             staff.ensureNoteInView(0);
             staff.setKeyDisplay(wantsFlat ? 0 : 1);
             istate.keyDisplay = staff.getKeyDisplay();
@@ -370,6 +376,27 @@ public class PracticeActivity extends Activity {
             model.add(new StaffView.Note(note, 4, Color.BLACK));
         }
         return note;
+    }
+
+    private void addRandomMajorSequence(int baseNote,
+                                        List<StaffView.Note> model,
+                                        int count) {
+        int seq[] = new int[kMajorScaleSequence.length + 1];
+        seq[0] = baseNote;
+        for (int i = 0; i < kMajorScaleSequence.length; ++i) {
+            seq[i+1] = seq[i] + kMajorScaleSequence[i];
+        }
+        seq[seq.length-1] = baseNote + 12;
+        int previousIndex = -1;
+        int randomIndex;
+        for (int i = 0; i < count; ++i) {
+            do {
+                // Don't do the same note twice in a sequence.
+                randomIndex = (int) Math.round((seq.length-1)* Math.random());
+            } while (randomIndex == previousIndex);
+            previousIndex = randomIndex;
+            model.add(new StaffView.Note(seq[randomIndex], 4, Color.BLACK));
+        }
     }
 
     private void addAscDescMajorScale(int startNote, List<StaffView.Note> model) {
