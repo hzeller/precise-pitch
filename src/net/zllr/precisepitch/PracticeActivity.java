@@ -232,7 +232,7 @@ public class PracticeActivity extends Activity {
             pitchPoster = new MicrophonePitchPoster(60);
             pitchPoster.setHandler(this);
             pitchPoster.start();
-            startPracticeTime = System.currentTimeMillis();
+            startPracticeTime = -1;
         }
 
         // --- interface ProgressProvider
@@ -276,10 +276,17 @@ public class PracticeActivity extends Activity {
             }
 
             if (ticksInTune == 0) {
-                instructions.setText("Find the note.");
+                if (startPracticeTime < 0) {
+                    instructions.setText("Time starts with first note.");
+                } else {
+                    instructions.setText("Find the note and hold.");
+                }
             }
             else if (ticksInTune > 0 && ticksInTune < kHoldTime) {
-                instructions.setText("Alright, now hold..");
+                if (startPracticeTime < 0 && ticksInTune >= kHoldTime/2) {
+                    startPracticeTime = System.currentTimeMillis();
+                    instructions.setText("NOW - time is running.");
+                }
             }
             else if (ticksInTune >= kHoldTime) {
                 checkNextNote();
@@ -320,9 +327,9 @@ public class PracticeActivity extends Activity {
 
         private final static int kHoldTime = 15;
         private final MicrophonePitchPoster pitchPoster;
-        private final long startPracticeTime;
         private final HighlightAnnotator highlightAnnotator;
         private final List<StaffView.Note> model;
+        private long startPracticeTime;
         private int modelPos;
         private int ticksInTune;
         private boolean running;
