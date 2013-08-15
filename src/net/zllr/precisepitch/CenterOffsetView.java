@@ -41,6 +41,7 @@ public class CenterOffsetView extends View {
     private double range = 50;
     private double value;
     private float quantization = 5;
+    private boolean isDataValid;
 
     public CenterOffsetView(Context context) {
         this(context, null);
@@ -67,6 +68,7 @@ public class CenterOffsetView extends View {
         setRange(25);
         setQuantization(2.5f);
         setValue(0);
+        setDataValid(true);
     }
 
     // Old Androids don't have setAlpha(). So do something like that here.
@@ -94,6 +96,13 @@ public class CenterOffsetView extends View {
         invalidate();
     }
 
+    public void setDataValid(boolean b) {
+        if (b != isDataValid) {
+            isDataValid = b;
+            invalidate();
+        }
+    }
+
     // Quantization of the range.
     public void setQuantization(float q) {
         if (q == this.quantization) return;
@@ -117,8 +126,17 @@ public class CenterOffsetView extends View {
 
         final int steps = (int) (range / quantization);
         final float radius = Math.min(kHeight/2.0f - 5, kWidth/4.0f / steps - 1);
-        filledRedCirclePaint.setTextSize(3 * radius);
         final float widthSteps = (kWidth/2 - 2 * radius) / steps;
+        if (!isDataValid) {
+            // Shortcut, just empty circles.
+            for (int i = -steps; i <= steps; ++i) {
+                final float centerX = kWidth/2 + i * widthSteps;
+                canvas.drawCircle(centerX, kHeight/2, radius, emptyCirclePaint);
+            }
+            return;
+        }
+
+        filledRedCirclePaint.setTextSize(3 * radius);
         final int highlightStep = (int) Math.round(value / quantization);
         final boolean tooLow = value < -range;
         final boolean tooHigh = value > range;

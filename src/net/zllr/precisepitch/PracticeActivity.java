@@ -251,22 +251,28 @@ public class PracticeActivity extends Activity {
                     = (MicrophonePitchPoster.PitchData) msg.obj;
             int beforeTicks = ticksInTune;
 
-            boolean noteOk = data != null
-                    && (data.note % 12 == model.get(modelPos).pitch % 12);
-            if (noteOk) {
-                ledview.setValue(data.cent);
-            }
-            else if (data != null) {
-                if (data.note < model.get(modelPos).pitch)
-                    ledview.setValue(-100);  // too low.
-                if (data.note > model.get(modelPos).pitch)
-                    ledview.setValue(+100);  // too high.
-            }
-            if (noteOk && Math.abs(data.cent) < kCentThreshold) {
-                ++ticksInTune;
-            } else if (data != null) {   // No data is not a penalty.
-                --ticksInTune;
+            if (data != null) {
+                int gotNote = data.note % 12;
+                int wantNote = model.get(modelPos).pitch % 12;
+                int noteDiff = ((gotNote - wantNote + 6) % 12) - 6;
+                if (noteDiff == 0) {
+                    ledview.setValue(data.cent);
+                    if (Math.abs(data.cent) < kCentThreshold) {
+                        ++ticksInTune;
+                    } else {
+                        --ticksInTune;  // wrong cent: one penalty
+                    }
+                }
+                else {
+                    // negative or positive: exhaust range, so show arrows.
+                    ticksInTune -= 2;  // different note: two penalty
+                    ledview.setValue(noteDiff * 100);
+                }
                 if (ticksInTune < 0) ticksInTune = 0;
+                ledview.setDataValid(true);
+            }
+            else {
+                ledview.setDataValid(false);
             }
 
             if (ticksInTune == 0) {
@@ -276,7 +282,6 @@ public class PracticeActivity extends Activity {
                 instructions.setText("Alright, now hold..");
             }
             else if (ticksInTune >= kHoldTime) {
-                instructions.setText("Yay, continue!");
                 checkNextNote();
             }
             if (beforeTicks != ticksInTune) {
@@ -356,6 +361,7 @@ public class PracticeActivity extends Activity {
                 startbutton.setVisibility(View.INVISIBLE);
                 restartbutton.setVisibility(View.VISIBLE);
                 ledview.setVisibility(View.VISIBLE);
+                ledview.setDataValid(false);
                 setGeneratorButtonsVisibility(View.INVISIBLE);
                 break;
             case FINISHED:
@@ -366,6 +372,7 @@ public class PracticeActivity extends Activity {
                 startbutton.setVisibility(View.INVISIBLE);
                 restartbutton.setVisibility(View.VISIBLE);
                 ledview.setVisibility(View.INVISIBLE);
+                ledview.setDataValid(false);
                 setGeneratorButtonsVisibility(View.INVISIBLE);
         }
     }
