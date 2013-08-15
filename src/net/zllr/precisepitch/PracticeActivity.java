@@ -102,9 +102,10 @@ public class PracticeActivity extends Activity {
         bbmajor = (Button) findViewById(R.id.newBbMajor);
         bbmajor.setOnClickListener(noteCreator);
         ledview = (CenterOffsetView) findViewById(R.id.practiceLedDisplay);
-        ledview.setQuantization(3);
+        ledview.setQuantization(2.5f);
         ledview.setRange(Math.min(50, kCentThreshold + 10));
         ledview.setKeepScreenOn(true);
+        ledview.setMarkAt(kCentThreshold);
         startbutton = (Button) findViewById(R.id.practiceStartButton);
         startbutton.setOnClickListener(new View.OnClickListener() {
             @Override

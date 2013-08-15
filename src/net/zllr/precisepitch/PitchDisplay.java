@@ -25,7 +25,7 @@ import android.view.View;
 import android.widget.*;
 
 public class PitchDisplay extends Activity {
-    private static final int kCentThreshold = 20;  // TODO: make configurable
+    private static final int kCentThreshold = 15;  // TODO: make configurable
     private static final boolean kShowTechInfo = false;
 
     private TextView frequencyDisplay;
@@ -64,8 +64,9 @@ public class PitchDisplay extends Activity {
         noteDisplay.setKeepScreenOn(true);
         noteDisplay.setText("");
         offsetCentView = (CenterOffsetView) findViewById(R.id.centView);
-        offsetCentView.setRange(30);
-        offsetCentView.setQuantization(3);
+        offsetCentView.setRange(25);
+        offsetCentView.setQuantization(2.5f);
+        offsetCentView.setMarkAt(kCentThreshold);
 
         int techVisibility = kShowTechInfo ? View.VISIBLE : View.INVISIBLE;
         frequencyDisplay = (TextView) findViewById(R.id.frequencyDisplay);

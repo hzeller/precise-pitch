@@ -36,12 +36,14 @@ public class CenterOffsetView extends View {
     private final Paint filledRedCirclePaint;
     private final Paint filledGreenCirclePaint;
     private final Paint centAnnotationPaint;
+    private final Paint markPaint;
 
     private int alphaChannel = 255;
     private double range = 50;
     private double value;
     private float quantization = 5;
     private boolean isDataValid;
+    private float markAt;
 
     public CenterOffsetView(Context context) {
         this(context, null);
@@ -64,8 +66,12 @@ public class CenterOffsetView extends View {
         centAnnotationPaint.setColor(Color.rgb(255, 255, 255));
         centAnnotationPaint.setTextSize((int)(kHeight * 0.8));
         centAnnotationPaint.setTextAlign(Paint.Align.CENTER);
+        markPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        markPaint.setColor(Color.rgb(200, 0, 0));
+        markPaint.setStrokeWidth(5);
 
         setRange(25);
+        setMarkAt(20);
         setQuantization(2.5f);
         setValue(0);
         setDataValid(true);
@@ -112,6 +118,12 @@ public class CenterOffsetView extends View {
         invalidate();
     }
 
+    public void setMarkAt(float m) {
+        if (markAt != m) {
+            markAt = m;
+            invalidate();
+        }
+    }
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         setMeasuredDimension(kWidth, 2 * kHeight);  // we show text below.
@@ -123,10 +135,21 @@ public class CenterOffsetView extends View {
         filledGreenCirclePaint.setColor(Color.argb(alphaChannel, 40, 255, 40));
         emptyCirclePaint.setColor(Color.argb(alphaChannel, 63, 63, 63));
         centAnnotationPaint.setColor(Color.argb(alphaChannel, 255, 255, 255));
+        markPaint.setColor(Color.argb(alphaChannel, 200, 0, 0));
 
         final int steps = (int) (range / quantization);
         final float radius = Math.min(kHeight/2.0f - 5, kWidth/4.0f / steps - 1);
         final float widthSteps = (kWidth/2 - 2 * radius) / steps;
+        final float textY = kHeight + kHeight/2 + 2;
+        if (markAt < range) {
+            markPaint.setStrokeWidth(radius / 2);
+            float fraction = (float) (steps * widthSteps * markAt/range);
+            canvas.drawLine(kWidth/2 + fraction, kHeight/2 + radius,
+                            kWidth/2 + fraction, kHeight, markPaint);
+            canvas.drawLine(kWidth/2 - fraction, kHeight/2 + radius,
+                            kWidth/2 - fraction, kHeight, markPaint);
+        }
+
         if (!isDataValid) {
             // Shortcut, just empty circles.
             for (int i = -steps; i <= steps; ++i) {
@@ -163,8 +186,7 @@ public class CenterOffsetView extends View {
         }
         if (Math.abs(value) <= range) {
             canvas.drawText(String.format("%+.0fc", value),
-                            kWidth/2, kHeight + kHeight/2 + 2,
-                            centAnnotationPaint);
+                            kWidth/2, textY, centAnnotationPaint);
         }
     }
 }
