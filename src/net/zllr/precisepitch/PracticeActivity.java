@@ -252,9 +252,9 @@ public class PracticeActivity extends Activity {
             int beforeTicks = ticksInTune;
 
             if (data != null) {
-                int gotNote = data.note % 12;
-                int wantNote = model.get(modelPos).pitch % 12;
-                int noteDiff = ((gotNote - wantNote + 6) % 12) - 6;
+                int gotNote = data.note;
+                int wantNote = model.get(modelPos).pitch;
+                int noteDiff = (gotNote + 12 - wantNote + 6) % 12 - 6;
                 if (noteDiff == 0) {
                     ledview.setValue(data.cent);
                     if (Math.abs(data.cent) < kCentThreshold) {
