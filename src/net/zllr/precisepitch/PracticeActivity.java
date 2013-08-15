@@ -258,6 +258,10 @@ public class PracticeActivity extends Activity {
                 if (noteDiff == 0) {
                     ledview.setValue(data.cent);
                     if (Math.abs(data.cent) < kCentThreshold) {
+                        // for things that _are_ in tune, we record the offset
+                        sumAbsoluteOffset += Math.abs(data.cent);
+                        absoluteOffsetCount++;
+
                         ++ticksInTune;
                     } else {
                         --ticksInTune;  // wrong cent: one penalty
@@ -321,7 +325,9 @@ public class PracticeActivity extends Activity {
 
         private void showPracticeResults() {
             final long duration = System.currentTimeMillis() - startPracticeTime;
-            instructions.setText(String.format("%3.1f seconds!", duration / 1000.0));
+            instructions.setText(String.format("%3.1f seconds; When in range, average %.1f cent off.",
+                                               duration / 1000.0,
+                                               sumAbsoluteOffset / absoluteOffsetCount));
             setActivityState(State.FINISHED);
         }
 
@@ -330,6 +336,8 @@ public class PracticeActivity extends Activity {
         private final HighlightAnnotator highlightAnnotator;
         private final List<StaffView.Note> model;
         private long startPracticeTime;
+        private float sumAbsoluteOffset;
+        private long absoluteOffsetCount;
         private int modelPos;
         private int ticksInTune;
         private boolean running;
