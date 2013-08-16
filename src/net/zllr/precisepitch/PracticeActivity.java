@@ -459,7 +459,8 @@ public class PracticeActivity extends Activity {
             progressProvider = progress;
         }
 
-        public void draw(Canvas canvas, RectF staffBoundingBox,
+        public void draw(DisplayNote note,
+                         Canvas canvas, RectF staffBoundingBox,
                          RectF noteBoundingBox) {
             float lineWidth = (staffBoundingBox.bottom - staffBoundingBox.top)/4;
             RectF drawBox = new RectF(noteBoundingBox);

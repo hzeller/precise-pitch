@@ -24,8 +24,8 @@ public final class DisplayNote implements Serializable {
     // Optional annotator for users to implement to add arbitrary
     // annotations to the note.
     public interface Annotator extends Serializable {
-        void draw(Canvas canvas, RectF staffBoundingBox,
-                  RectF noteBoundingBox);
+        void draw(DisplayNote note, Canvas canvas,
+                  RectF staffBoundingBox, RectF noteBoundingBox);
     }
 
     // Immutable struct to represent a note to display.

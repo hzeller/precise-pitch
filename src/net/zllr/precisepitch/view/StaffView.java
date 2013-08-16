@@ -202,7 +202,7 @@ public class StaffView extends View {
             }
 
             if (n.annotator != null) {
-                n.annotator.draw(canvas, staffBoundingBox, noteBoundingBox);
+                n.annotator.draw(n, canvas, staffBoundingBox, noteBoundingBox);
             }
         }
     }
