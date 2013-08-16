@@ -21,51 +21,11 @@ import android.content.Context;
 import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.View;
+import net.zllr.precisepitch.model.DisplayNote;
 
-import java.io.Serializable;
 import java.util.*;
 
 public class StaffView extends View {
-    public static final class Note implements Serializable {
-        // Optional annotator for users to implement to add arbitrary
-        // annotations to the note.
-        public interface Annotator extends Serializable {
-            void draw(Canvas canvas, RectF staffBoundingBox,
-                      RectF noteBoundingBox);
-        }
-
-        // Immutable struct to represent a note to display.
-        public Note(int pitch, int duration, int color) {
-            this.pitch = pitch;
-            this.duration = duration;
-            this.color = color;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (other == null || !(other instanceof Note))
-                return false;
-            Note on = (Note) other;
-            return on.pitch == pitch && on.duration == duration && on.color == color;
-        }
-
-        // -- avoiding chatty setters and getters here, but should probably be
-        // here for a self-respecting Java program :)
-
-        // 0 for low A at 55Hz, 1 for A#.. 36 for A at 440Hz
-        public final int pitch;
-
-        // 1=full note 4=1/4 note ... Ignored for now, only 1/4 work.
-        public final int duration;
-
-        // Color to display. Standard Android color representation.
-        // (should have a setter)
-        public int color;
-
-        // User provided annotator. If not null, is called when the note is
-        // drawn.
-        public Annotator annotator;
-    }
 
     // The note name is essentially encoding the 8 positions on the staff, with an additional
     // character describing if this is sharp or flat. For the 'flat' version, we encode
@@ -100,7 +60,7 @@ public class StaffView extends View {
     }
 
     // Set model. A list of notes to display.
-    public void setNoteModel(List<Note> model) {
+    public void setNoteModel(List<DisplayNote> model) {
         if (model != notes) {
             notes = model;
             onModelChanged();
@@ -145,7 +105,7 @@ public class StaffView extends View {
         staffPaint.setStrokeWidth(lineDistance / 10);  // 10% between lines
     }
 
-    private int getNotePosition(Note n) {
+    private int getNotePosition(DisplayNote n) {
         final int octave = n.pitch / 12;
         final String noteName = noteNames[keyDisplay][n.pitch % 12];
         final int position = (noteName.charAt(0) - 'A') + 7 * octave;
@@ -202,9 +162,9 @@ public class StaffView extends View {
                 + (getWidth() - notesToDisplay * noteDistance)/2);  // center globally
 
         // TODO: add animation offset (should be a float-value 0..1).
-        ListIterator<Note> it = notes.listIterator(lastNoteInModelToDisplay + 1);
+        ListIterator<DisplayNote> it = notes.listIterator(lastNoteInModelToDisplay + 1);
         while (it.hasPrevious() && posX > -noteDistance) {
-            Note n = it.previous();
+            DisplayNote n = it.previous();
             final int centerX = posX;
             posX -= noteDistance;
             if (n == null)
@@ -352,7 +312,7 @@ public class StaffView extends View {
     private NoteRenderer noteRenderer;   // changes when size changes.
     private int keyDisplay;
     private int notesPerStaff;
-    private List<Note> notes;
+    private List<DisplayNote> notes;
     private int noteInView;
 }
 

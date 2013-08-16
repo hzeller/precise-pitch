@@ -30,6 +30,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import net.zllr.precisepitch.model.DisplayNote;
 import net.zllr.precisepitch.view.CenterOffsetView;
 import net.zllr.precisepitch.view.StaffView;
 
@@ -51,9 +52,9 @@ public class PracticeActivity extends Activity {
     // restart.
     private static class ActivityState implements Serializable {
         public ActivityState() {
-            noteModel = new ArrayList<StaffView.Note>();
+            noteModel = new ArrayList<DisplayNote>();
         }
-        final ArrayList<StaffView.Note> noteModel;
+        final ArrayList<DisplayNote> noteModel;
         int keyDisplay = 1;
         boolean checkedRandom;
     };
@@ -174,7 +175,7 @@ public class PracticeActivity extends Activity {
     private final class NoteGenerationListener implements View.OnClickListener {
         public void onClick(View button) {
             boolean wantsFlat = false;
-            List<StaffView.Note> model = istate.noteModel;
+            List<DisplayNote> model = istate.noteModel;
             int startNote = model.size() > 0 ? model.get(0).pitch : 0;
             model.clear();
 
@@ -222,11 +223,11 @@ public class PracticeActivity extends Activity {
     }
 
     private class PitchFollowGame extends Handler implements ProgressProvider {
-        PitchFollowGame(List<StaffView.Note> model) {
+        PitchFollowGame(List<DisplayNote> model) {
             highlightAnnotator = new HighlightAnnotator(this);
             running = true;
             this.model = model;
-            for (StaffView.Note n : model) {
+            for (DisplayNote n : model) {
                 n.color = futureNoteColor;
             }
             modelPos = -1;
@@ -304,7 +305,7 @@ public class PracticeActivity extends Activity {
         }
 
         private void checkNextNote() {
-            StaffView.Note currentNote;
+            DisplayNote currentNote;
             if (modelPos >= 0) {
                 currentNote = model.get(modelPos);
                 currentNote.color = successNoteColor;
@@ -337,7 +338,7 @@ public class PracticeActivity extends Activity {
         private final static int kHoldTime = 15;
         private final MicrophonePitchPoster pitchPoster;
         private final HighlightAnnotator highlightAnnotator;
-        private final List<StaffView.Note> model;
+        private final List<DisplayNote> model;
         private long startPracticeTime;
         private float sumAbsoluteOffset;
         private long absoluteOffsetCount;
@@ -365,7 +366,7 @@ public class PracticeActivity extends Activity {
                 instructions.setText("Choose your chant of doom.");
                 break;
             case WAIT_FOR_START:
-                for (StaffView.Note n : istate.noteModel) {
+                for (DisplayNote n : istate.noteModel) {
                     n.color = Color.BLACK;
                     n.annotator = null;
                 }
@@ -396,23 +397,23 @@ public class PracticeActivity extends Activity {
     }
     // Add a major scale to the model.
     private int addMajorScale(int startNote, boolean ascending,
-                              List<StaffView.Note> model) {
+                              List<DisplayNote> model) {
         int note = startNote;
-        model.add(new StaffView.Note(note, 4, Color.BLACK));
+        model.add(new DisplayNote(note, 4, Color.BLACK));
         for (int i = 0; i < kMajorScaleSequence.length; ++i) {
             if (ascending) {
                 note += kMajorScaleSequence[i];
             } else {
                 note -= kMajorScaleSequence[kMajorScaleSequence.length - 1 - i ];
             }
-            model.add(new StaffView.Note(note, 4, Color.BLACK));
+            model.add(new DisplayNote(note, 4, Color.BLACK));
         }
         return note;
     }
 
     // Add a random sequence in a particular Major scale to the model.
     private void addRandomMajorSequence(int baseNote,
-                                        List<StaffView.Note> model,
+                                        List<DisplayNote> model,
                                         int count) {
         int seq[] = new int[kMajorScaleSequence.length + 1];
         seq[0] = baseNote;
@@ -428,16 +429,16 @@ public class PracticeActivity extends Activity {
                 randomIndex = (int) Math.round((seq.length-1)* Math.random());
             } while (randomIndex == previousIndex);
             previousIndex = randomIndex;
-            model.add(new StaffView.Note(seq[randomIndex], 4, Color.BLACK));
+            model.add(new DisplayNote(seq[randomIndex], 4, Color.BLACK));
         }
     }
 
-    private void addAscDescMajorScale(int startNote, List<StaffView.Note> model) {
+    private void addAscDescMajorScale(int startNote, List<DisplayNote> model) {
         addMajorScale(addMajorScale(startNote, true, model), false, model);
     }
 
     private static final class HighlightAnnotator
-            implements StaffView.Note.Annotator {
+            implements DisplayNote.Annotator {
         private final Paint highlightPaint;
         private final Paint borderPaint;
         private final Paint progressPaint;
