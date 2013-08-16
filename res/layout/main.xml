@@ -124,7 +124,7 @@
         android:id="@+id/centView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        class="net.zllr.precisepitch.CenterOffsetView"
+        class="net.zllr.precisepitch.view.CenterOffsetView"
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/noteDisplay"/>
     <ImageView

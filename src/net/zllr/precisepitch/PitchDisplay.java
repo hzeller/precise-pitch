@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.*;
+import net.zllr.precisepitch.view.CenterOffsetView;
 
 public class PitchDisplay extends Activity {
     private static final int kCentThreshold = 15;  // TODO: make configurable

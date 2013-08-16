@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.zllr.precisepitch;
+package net.zllr.precisepitch.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -146,8 +146,8 @@ public class CenterOffsetView extends View {
             float fraction = (float) (steps * widthSteps * markAt/range);
             canvas.drawLine(kWidth/2 + fraction, kHeight/2 + radius,
                             kWidth/2 + fraction, kHeight, markPaint);
-            canvas.drawLine(kWidth/2 - fraction, kHeight/2 + radius,
-                            kWidth/2 - fraction, kHeight, markPaint);
+            canvas.drawLine(kWidth / 2 - fraction, kHeight / 2 + radius,
+                            kWidth / 2 - fraction, kHeight, markPaint);
         }
 
         if (!isDataValid) {

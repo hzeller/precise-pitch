@@ -15,7 +15,7 @@
  */
 
 // A view of notes that are displayed as staff.
-package net.zllr.precisepitch;
+package net.zllr.precisepitch.view;
 
 import android.content.Context;
 import android.graphics.*;
@@ -25,7 +25,7 @@ import android.view.View;
 import java.io.Serializable;
 import java.util.*;
 
-class StaffView extends View {
+public class StaffView extends View {
     public static final class Note implements Serializable {
         // Optional annotator for users to implement to add arbitrary
         // annotations to the note.
@@ -46,7 +46,7 @@ class StaffView extends View {
             if (other == null || !(other instanceof Note))
                 return false;
             Note on = (Note) other;
-            return on.pitch == pitch && on.duration == pitch && on.color == color;
+            return on.pitch == pitch && on.duration == duration && on.color == color;
         }
 
         // -- avoiding chatty setters and getters here, but should probably be

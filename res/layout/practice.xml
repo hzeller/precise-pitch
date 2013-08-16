@@ -7,7 +7,7 @@
 
     <view android:layout_weight="1"
           android:layout_height="0px"
-          class="net.zllr.precisepitch.StaffView" android:id="@+id/practiceStaff"
+          class="net.zllr.precisepitch.view.StaffView" android:id="@+id/practiceStaff"
           android:layout_width="match_parent"/>
 
     <RelativeLayout android:layout_weight="1"
@@ -81,7 +81,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="22dp"
                 android:layout_marginTop="10dp"
-                class="net.zllr.precisepitch.CenterOffsetView"
+                class="net.zllr.precisepitch.view.CenterOffsetView"
                 android:id="@+id/practiceLedDisplay"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/practiceStaff"/>

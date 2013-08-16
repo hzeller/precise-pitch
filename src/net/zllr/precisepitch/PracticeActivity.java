@@ -30,6 +30,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import net.zllr.precisepitch.view.CenterOffsetView;
+import net.zllr.precisepitch.view.StaffView;
 
 import java.io.Serializable;
 import java.util.ArrayList;
