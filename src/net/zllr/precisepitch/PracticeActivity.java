@@ -31,6 +31,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import net.zllr.precisepitch.model.DisplayNote;
+import net.zllr.precisepitch.model.MeasuredPitch;
 import net.zllr.precisepitch.view.CenterOffsetView;
 import net.zllr.precisepitch.view.StaffView;
 
@@ -251,8 +252,8 @@ public class PracticeActivity extends Activity {
         public void handleMessage(Message msg) {
             if (!running)
                 return;  // Received a sample, but we're done already.
-            final MicrophonePitchPoster.PitchData data
-                    = (MicrophonePitchPoster.PitchData) msg.obj;
+            final MeasuredPitch data
+                    = (MeasuredPitch) msg.obj;
             int beforeTicks = ticksInTune;
 
             if (data != null) {

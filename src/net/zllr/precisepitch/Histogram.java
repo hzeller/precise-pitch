@@ -1,5 +1,7 @@
 package net.zllr.precisepitch;
 
+import net.zllr.precisepitch.model.MeasuredPitch;
+
 public class Histogram {
     private static final int MAX_NOTE = 56;
     private double histdata[][];
@@ -17,7 +19,7 @@ public class Histogram {
         }
     }
     
-    public void update(MicrophonePitchPoster.PitchData d) {
+    public void update(MeasuredPitch d) {
         if (d.note >= 0 && d.note < MAX_NOTE) {
             int cent = (int)(d.cent + 50.0);
             cent = Math.max(0, Math.min(cent, 99));

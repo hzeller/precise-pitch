@@ -19,8 +19,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Handler;
-
-import java.io.Serializable;
+import net.zllr.precisepitch.model.MeasuredPitch;
 
 // Samples the microphone continuously and provides PitchData updates to the
 // handler.
@@ -28,25 +27,6 @@ class MicrophonePitchPoster extends Thread {
     // If positive, create notes with that time in-between. If negative,
     // do the real pitch detection.
     static final int kDebugMs = -1;
-
-    public static final class PitchData {
-        public PitchData(double f, int n, double c, double d) {
-            frequency = f;
-            note = n;
-            cent = c;
-            decibel = d;
-        }
-
-        // Raw frequency.
-        public final double frequency;
-
-        // (note % 12) returns a range from 0 (A) to 11 (Ab/G#).
-        // The absolute range starts with 0 (low A, 55Hz), 12 = 110Hz ...
-        public final int note;
-
-        public final double cent;     // How far off we are in cent.
-        public final double decibel;  // input level in decibel.
-    }
 
     public MicrophonePitchPoster(int minFrequency) {
         sampleCount = DyWaPitchTrack.suggestedSamplecount(minFrequency);
@@ -109,7 +89,7 @@ class MicrophonePitchPoster extends Thread {
         float pitch = minPitch;
         while (isSamplingRunning()) {
             try { Thread.sleep(waitMs); } catch (InterruptedException e) {}
-            final PitchData nc = createPitchData(pitch, 32766);
+            final MeasuredPitch nc = createPitchData(pitch, 32766);
             if (handler != null) {
                 handler.sendMessage(handler.obtainMessage(0, nc));
             }
@@ -133,7 +113,7 @@ class MicrophonePitchPoster extends Thread {
                 maxValue = maxValue < localMax ? localMax : maxValue;
             }
             final double pitch = pitchTracker.computePitch(samples);
-            final PitchData nc = createPitchData(pitch, maxValue);
+            final MeasuredPitch nc = createPitchData(pitch, maxValue);
             if (handler != null) {
                 handler.sendMessage(handler.obtainMessage(0, nc));
             }
@@ -147,7 +127,7 @@ class MicrophonePitchPoster extends Thread {
         }
     }
 
-    private PitchData createPitchData(double frequency, int maxValue) {
+    private MeasuredPitch createPitchData(double frequency, int maxValue) {
         final double base = kPitchA / 8; // The A just below our C string (55Hz)
         final double d = Math.exp(Math.log(2) / 1200);
         final double cent_above_base = Math.log(frequency / base) / Math.log(d);
@@ -161,7 +141,7 @@ class MicrophonePitchPoster extends Thread {
         final int rounded = (int) Math.round(scale);
         final double cent = 100 * (scale - rounded);
         final double vu_db = 20 * (Math.log(maxValue / 32768.0) / Math.log(10));
-        return new PitchData(frequency, rounded, cent, vu_db);
+        return new MeasuredPitch(frequency, rounded, cent, vu_db);
     }
 
     private static final double kPitchA = 440.0; // Hz.

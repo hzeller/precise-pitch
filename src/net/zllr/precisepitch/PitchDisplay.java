@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.*;
+import net.zllr.precisepitch.model.MeasuredPitch;
 import net.zllr.precisepitch.view.CenterOffsetView;
 
 public class PitchDisplay extends Activity {
@@ -135,8 +136,8 @@ public class PitchDisplay extends Activity {
         }
 
         public void handleMessage(Message msg) {
-            final MicrophonePitchPoster.PitchData data
-                = (MicrophonePitchPoster.PitchData) msg.obj;
+            final MeasuredPitch data
+                = (MeasuredPitch) msg.obj;
 
             if (data != null && data.decibel > -30) {
                 frequencyDisplay.setText(String.format(data.frequency < 200 ? "%.1fHz" : "%.0fHz",
@@ -171,7 +172,7 @@ public class PitchDisplay extends Activity {
             lastPitch = data;
         }
 
-        private MicrophonePitchPoster.PitchData lastPitch;
+        private MeasuredPitch lastPitch;
         private int fadeCountdown;
     }
 }
