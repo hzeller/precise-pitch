@@ -106,8 +106,8 @@ public class StaffView extends View {
     }
 
     private int getNotePosition(DisplayNote n) {
-        final int octave = n.pitch / 12;
-        final String noteName = noteNames[keyDisplay][n.pitch % 12];
+        final int octave = n.note / 12;
+        final String noteName = noteNames[keyDisplay][n.note % 12];
         final int position = (noteName.charAt(0) - 'A') + 7 * octave;
         return position - 6;  // relative to lowest line.
     }
@@ -176,7 +176,7 @@ public class StaffView extends View {
             float barLength = 3.2f * lineDistance;
             barLength = Math.max(barLength, (notePos - 4) * lineDistance / 2);
             barLength = Math.max(barLength, (4 - notePos) * lineDistance / 2);
-            final String noteName = noteNames[keyDisplay][n.pitch % 12];
+            final String noteName = noteNames[keyDisplay][n.note % 12];
             RectF noteBoundingBox = new RectF();
             final float noteOffset
                     = noteRenderer.draw(canvas, centerX, centerY,

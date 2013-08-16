@@ -177,7 +177,7 @@ public class PracticeActivity extends Activity {
         public void onClick(View button) {
             boolean wantsFlat = false;
             List<DisplayNote> model = istate.noteModel;
-            int startNote = model.size() > 0 ? model.get(0).pitch : 0;
+            int startNote = model.size() > 0 ? model.get(0).note : 0;
             model.clear();
 
             // Use lowest note unless that is already set: then choose one
@@ -258,7 +258,7 @@ public class PracticeActivity extends Activity {
 
             if (data != null) {
                 int gotNote = data.note;
-                int wantNote = model.get(modelPos).pitch;
+                int wantNote = model.get(modelPos).note;
                 int noteDiff = (gotNote + 12 - wantNote + 6) % 12 - 6;
                 if (noteDiff == 0) {
                     ledview.setValue(data.cent);

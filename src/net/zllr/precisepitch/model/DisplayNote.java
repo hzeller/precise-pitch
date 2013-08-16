@@ -17,7 +17,6 @@ package net.zllr.precisepitch.model;
 
 import android.graphics.Canvas;
 import android.graphics.RectF;
-import net.zllr.precisepitch.view.StaffView;
 
 import java.io.Serializable;
 
@@ -30,8 +29,8 @@ public final class DisplayNote implements Serializable {
     }
 
     // Immutable struct to represent a note to display.
-    public DisplayNote(int pitch, int duration, int color) {
-        this.pitch = pitch;
+    public DisplayNote(int note, int duration, int color) {
+        this.note = note;
         this.duration = duration;
         this.color = color;
     }
@@ -41,14 +40,14 @@ public final class DisplayNote implements Serializable {
         if (other == null || !(other instanceof DisplayNote))
             return false;
         DisplayNote on = (DisplayNote) other;
-        return on.pitch == pitch && on.duration == duration && on.color == color;
+        return on.note == note && on.duration == duration && on.color == color;
     }
 
     // -- avoiding chatty setters and getters here, but should probably be
     // here for a self-respecting Java program :)
 
     // 0 for low A at 55Hz, 1 for A#.. 36 for A at 440Hz
-    public final int pitch;
+    public final int note;
 
     // 1=full note 4=1/4 note ... Ignored for now, only 1/4 work.
     public final int duration;
