@@ -26,7 +26,7 @@ import android.widget.*;
 import net.zllr.precisepitch.model.MeasuredPitch;
 import net.zllr.precisepitch.view.CenterOffsetView;
 
-public class PitchDisplay extends Activity {
+public class TunerActivity extends Activity {
     private static final int kCentThreshold = 15;  // TODO: make configurable
     private static final boolean kShowTechInfo = false;
 

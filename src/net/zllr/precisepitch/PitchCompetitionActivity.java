@@ -31,5 +31,6 @@ package net.zllr.precisepitch;
 
 import android.app.Activity;
 
+//
 public class PitchCompetitionActivity extends Activity {
 }

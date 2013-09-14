@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 public class PrecisePitchHome extends Activity implements OnItemClickListener {
     private static final String entries[][] = {
-        {"Pitch Display", "Live tuner view", "net.zllr.precisepitch.PitchDisplay"},
+        {"Tuner", "Live pitch view", "net.zllr.precisepitch.TunerActivity"},
         {"Practice", "Play a sequence of notes", "net.zllr.precisepitch.PracticeActivity"},
         {"Study", "See histograms and heat maps", "net.zllr.precisepitch.FingerboardHeatMap"},
         {"Car Race", "Two player game", "net.zllr.precisepitch.PitchCompetitionActivity"},
