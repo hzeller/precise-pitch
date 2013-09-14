@@ -6,12 +6,14 @@
               android:layout_height="match_parent">
 
     <view android:layout_weight="1"
+          android:layout_width="match_parent"
           android:layout_height="0px"
-          class="net.zllr.precisepitch.view.StaffView" android:id="@+id/practiceStaff"
-          android:layout_width="match_parent"/>
+          class="net.zllr.precisepitch.view.StaffView"
+          android:id="@+id/practiceStaff"/>
+
 
     <RelativeLayout android:layout_weight="1"
-                  android:layout_height="0px"
+                  android:layout_height="60px"
                   android:layout_width="match_parent">
         <!-- for first test: have a couple of buttons -->
         <LinearLayout android:layout_width="match_parent"

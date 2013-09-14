@@ -225,7 +225,7 @@ public class PracticeActivity extends Activity {
 
     private class PitchFollowGame extends Handler implements ProgressProvider {
         PitchFollowGame(List<DisplayNote> model) {
-            //highlightAnnotator = new HighlightAnnotator(this);
+            //highlightAnnotator = new HighlightAndClockAnnotator(this);
             highlightAnnotator = new HistogramAnnotator(new Histogram());
             running = true;
             this.model = model;
@@ -339,7 +339,7 @@ public class PracticeActivity extends Activity {
 
         private final static int kHoldTime = 15;
         private final MicrophonePitchPoster pitchPoster;
-        //private final HighlightAnnotator highlightAnnotator;
+        //private final HighlightAndClockAnnotator highlightAnnotator;
         private final HistogramAnnotator highlightAnnotator;
         private final List<DisplayNote> model;
         private long startPracticeTime;
@@ -440,6 +440,7 @@ public class PracticeActivity extends Activity {
         addMajorScale(addMajorScale(startNote, true, model), false, model);
     }
 
+
     private static final class HistogramAnnotator
             implements DisplayNote.Annotator {
         
@@ -536,14 +537,14 @@ public class PracticeActivity extends Activity {
         }
     }
     
-    private static final class HighlightAnnotator
+    private static final class HighlightAndClockAnnotator
             implements DisplayNote.Annotator {
         private final Paint highlightPaint;
         private final Paint borderPaint;
         private final Paint progressPaint;
         private final ProgressProvider progressProvider;
 
-        public HighlightAnnotator(ProgressProvider progress) {
+        public HighlightAndClockAnnotator(ProgressProvider progress) {
             highlightPaint = new Paint();
             highlightPaint.setColor(Color.argb(70, 0xff, 0xff, 0));
             highlightPaint.setStrokeWidth(0);

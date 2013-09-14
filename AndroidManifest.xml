@@ -26,16 +26,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="net.zllr.precisepitch.PitchDisplay"
+            android:name=".TunerActivity"
             android:label="@string/title_activity_precise_pitch_home" >
         </activity>
         <activity
-            android:name="net.zllr.precisepitch.FingerboardHeatMap"
+            android:name=".FingerboardHeatMap"
             android:label="@string/title_activity_fingerboard_heat_map" >
         </activity>
         <activity
-            android:name="net.zllr.precisepitch.PracticeActivity"
+            android:name=".PracticeActivity"
             android:label="@string/practice_note_sequences" >
+        </activity>
+        <activity
+             android:name=".GameSetupActivity"
+             android:label="@string/pitch_competition" >
         </activity>
     </application>
 
