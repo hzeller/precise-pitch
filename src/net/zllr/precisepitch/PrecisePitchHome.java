@@ -19,24 +19,24 @@ public class PrecisePitchHome extends Activity implements OnItemClickListener {
         {"Pitch Display", "Live tuner view", "net.zllr.precisepitch.PitchDisplay"},
         {"Practice", "Play a sequence of notes", "net.zllr.precisepitch.PracticeActivity"},
         {"Study", "See histograms and heat maps", "net.zllr.precisepitch.FingerboardHeatMap"},
-        {"Play", "Two player game", "GameActivity"},
+        {"Car Race", "Two player game", "net.zllr.precisepitch.PitchCompetitionActivity"},
     };
-    
+
     private ListView homeList;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_precise_pitch_home);
-        
+
         homeList = (ListView) findViewById(R.id.homeList);
         homeList.setOnItemClickListener(this);
-        
+
         HomeListAdapter adapter = new HomeListAdapter(this, R.layout.home_list_entry, entries);
-        
+
         homeList.setAdapter(adapter);
     }
-    
+
     @Override
     public void onItemClick(AdapterView<?> adapter, View view, int position, long id) {
         Class<?> c = null;
@@ -57,48 +57,47 @@ public class PrecisePitchHome extends Activity implements OnItemClickListener {
         getMenuInflater().inflate(R.menu.precise_pitch_home, menu);
         return true;
     }
-    
-}
 
-class HomeListAdapter extends ArrayAdapter<String[]> {
-    Context context;
-    int layoutResourceId;
-    
-    String data[][] = null;
-    
-    public HomeListAdapter(Context context, int layoutResourceId, String[][] data) {
-        super(context, layoutResourceId, data);
-        this.layoutResourceId = layoutResourceId;
-        this.context = context;
-        this.data = data;
-    }
-    
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View row = convertView;
-        HomeEntryHolder holder = null;
-        
-        if (row == null) {
-            LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-            row = inflater.inflate(layoutResourceId, parent, false);
-            
-            holder = new HomeEntryHolder();
-            holder.homeListEntryText1 = (TextView)row.findViewById(R.id.homeListEntryText1);
-            holder.homeListEntryText2 = (TextView)row.findViewById(R.id.homeListEntryText2);
-            
-            row.setTag(holder);
-        } else {
-            holder = (HomeEntryHolder)row.getTag();
+    private static class HomeListAdapter extends ArrayAdapter<String[]> {
+        Context context;
+        int layoutResourceId;
+
+        String data[][] = null;
+
+        public HomeListAdapter(Context context, int layoutResourceId, String[][] data) {
+            super(context, layoutResourceId, data);
+            this.layoutResourceId = layoutResourceId;
+            this.context = context;
+            this.data = data;
         }
-        
-        holder.homeListEntryText1.setText(data[position][0]);
-        holder.homeListEntryText2.setText(data[position][1]);
-        
-        return row;
-    }
-    
-    static class HomeEntryHolder {
-        TextView homeListEntryText1;
-        TextView homeListEntryText2;
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View row = convertView;
+            HomeEntryHolder holder = null;
+
+            if (row == null) {
+                LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+                row = inflater.inflate(layoutResourceId, parent, false);
+
+                holder = new HomeEntryHolder();
+                holder.homeListEntryText1 = (TextView)row.findViewById(R.id.homeListEntryText1);
+                holder.homeListEntryText2 = (TextView)row.findViewById(R.id.homeListEntryText2);
+
+                row.setTag(holder);
+            } else {
+                holder = (HomeEntryHolder)row.getTag();
+            }
+
+            holder.homeListEntryText1.setText(data[position][0]);
+            holder.homeListEntryText2.setText(data[position][1]);
+
+            return row;
+        }
+
+        static class HomeEntryHolder {
+            TextView homeListEntryText1;
+            TextView homeListEntryText2;
+        }
     }
 }
