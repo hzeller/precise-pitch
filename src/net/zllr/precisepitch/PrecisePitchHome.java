@@ -19,7 +19,7 @@ public class PrecisePitchHome extends Activity implements OnItemClickListener {
         {"Tuner", "Live pitch view", "net.zllr.precisepitch.TunerActivity"},
         {"Practice", "Play a sequence of notes", "net.zllr.precisepitch.PracticeActivity"},
         {"Study", "See histograms and heat maps", "net.zllr.precisepitch.FingerboardHeatMap"},
-        {"Car Race", "Two player game", "net.zllr.precisepitch.PitchCompetitionActivity"},
+        {"Car Race", "Two player game", "net.zllr.precisepitch.GameSetupActivity"},
     };
 
     private ListView homeList;

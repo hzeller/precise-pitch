@@ -5,9 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GameState implements Serializable {
-    public GameState(int numPlayers) {
+    public GameState() {
         notesToPlay = new ArrayList<DisplayNote>();
-        playerResult = new ArrayList<PlayerResult>(numPlayers);
     }
 
     public static final class PlayerResult implements Serializable {
@@ -22,14 +21,22 @@ public class GameState implements Serializable {
     // display situations.
     List<DisplayNote> getMutableNoteModel() { return notesToPlay; }
 
-    int getNumPlayers() { return playerResult.size(); }
+    void setNumPlayers(int players) {
+        if (playerResults != null)
+            throw new IllegalStateException("Setting players after game started.");
+        numPlayers = players;
+    }
+    int getNumPlayers() { return numPlayers; }
 
     // Set the collected result for a particular player.
     void setPlayerResult(int player, PlayerResult result) {
-        playerResult.set(player, result);
+        if (playerResults == null)
+            playerResults = new ArrayList<PlayerResult>(numPlayers);
+        playerResults.set(player, result);
     }
-    PlayerResult getPlayerResult(int player) { return playerResult.get(player); }
+    PlayerResult getPlayerResult(int player) { return playerResults.get(player); }
 
     private final List<DisplayNote> notesToPlay;
-    private final List<PlayerResult> playerResult;
+    private int numPlayers;
+    private List<PlayerResult> playerResults;
 }

@@ -30,7 +30,13 @@
 package net.zllr.precisepitch;
 
 import android.app.Activity;
+import android.os.Bundle;
 
-//
-public class PitchCompetitionActivity extends Activity {
+// Set up the game: choose notes to play and number of players.
+// (right now, a lot of stuff is copied from PracticeActivity; consolidate)
+public class GameSetupActivity extends Activity {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.game_setup);
+    }
 }

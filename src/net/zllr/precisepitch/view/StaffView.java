@@ -100,6 +100,7 @@ public class StaffView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        if (h <= 0) return;
         int lineDistance = h / kTotalDisplayRange;
         noteRenderer = new NoteRenderer(lineDistance);
         staffPaint.setStrokeWidth(lineDistance / 10);  // 10% between lines

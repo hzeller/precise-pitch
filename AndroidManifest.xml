@@ -38,7 +38,7 @@
             android:label="@string/practice_note_sequences" >
         </activity>
         <activity
-             android:name=".PitchCompetitionActivity"
+             android:name=".GameSetupActivity"
              android:label="@string/pitch_competition" >
         </activity>
     </application>
