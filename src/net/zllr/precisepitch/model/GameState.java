@@ -19,22 +19,24 @@ public class GameState implements Serializable {
     // notes and is to be played by each player.
     // The DisplayNotes contain annotators, that might be replaced for different
     // display situations.
-    List<DisplayNote> getMutableNoteModel() { return notesToPlay; }
+    public List<DisplayNote> getMutableNoteModel() { return notesToPlay; }
 
-    void setNumPlayers(int players) {
+    public void setNumPlayers(int players) {
         if (playerResults != null)
             throw new IllegalStateException("Setting players after game started.");
         numPlayers = players;
     }
-    int getNumPlayers() { return numPlayers; }
+    public int getNumPlayers() { return numPlayers; }
 
     // Set the collected result for a particular player.
-    void setPlayerResult(int player, PlayerResult result) {
+    public void setPlayerResult(int player, PlayerResult result) {
         if (playerResults == null)
             playerResults = new ArrayList<PlayerResult>(numPlayers);
         playerResults.set(player, result);
     }
-    PlayerResult getPlayerResult(int player) { return playerResults.get(player); }
+    public PlayerResult getPlayerResult(int player) {
+        return playerResults.get(player);
+    }
 
     private final List<DisplayNote> notesToPlay;
     private int numPlayers;
