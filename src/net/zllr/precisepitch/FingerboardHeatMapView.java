@@ -2,6 +2,7 @@ package net.zllr.precisepitch;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Canvas.VertexMode;
 import android.graphics.Color;
@@ -17,6 +18,8 @@ import android.view.View;
 public class FingerboardHeatMapView extends View {
     
     private Paint p;
+    
+    private Bitmap fullmap;
     
     private static final float STRING_LENGTH = 4.69f;
     
@@ -82,9 +85,9 @@ public class FingerboardHeatMapView extends View {
     
     
     // Scale factor (1.0 = normal)
-    private double scale;
+    //private double scale;
     // Vertical position (0 = top)
-    private int pos;
+    //private int pos;
     
     public FingerboardHeatMapView(Context context) {
         super(context);
@@ -102,6 +105,19 @@ public class FingerboardHeatMapView extends View {
         init();
     }
     
+    @Override
+    protected void onMeasure (int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        //int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        //int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        //int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        
+        System.out.println("FingerboardHeatMapView onMeasure widthSize: " + widthSize);
+        setMeasuredDimension(widthSize, (int)(4.2 * widthSize));
+    }
+    
+    
     @SuppressLint({ "NewApi", "InlinedApi" })
     void init() {
         // Need to disable hardware acceleration so that call
@@ -110,25 +126,47 @@ public class FingerboardHeatMapView extends View {
             setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         }
         
+        //scale = 1.0;
+        //pos = 0;
+        fullmap = null;
         
-        scale = 1.0;
-        pos = 0;
+        System.out.println("FingerboardHeatMapView init + getWidth(): " + getWidth() + " getHeight(): " + getHeight());
+        
         
         p = new Paint();
         p.setFlags(Paint.ANTI_ALIAS_FLAG);
         p.setStyle(Style.FILL_AND_STROKE);
         p.setColor(Color.WHITE);
+        invalidate();
     }
     
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        System.out.println("FingerboardHeatMapView onDraw");
+
+        if (fullmap == null) {
+            createHeatMap();
+        }
         
-        canvas.scale((float)canvas.getWidth(), (float)canvas.getWidth());
-        canvas.drawColor(Color.WHITE);
+        canvas.drawBitmap(fullmap, 0, 0, null);
+    }
+    
+    private void createHeatMap() {
+        System.out.println("getWidth(): " + getWidth() + " getHeight(): " + getHeight());
+        fullmap = Bitmap.createBitmap(getWidth(), (int)(4.2 * (float)getWidth()), Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(fullmap);
         
-        drawCello(canvas);
-        drawFrets(canvas);
+        c.scale((float)c.getWidth(), (float)c.getWidth());
+        c.drawColor(Color.WHITE);
+        
+        drawCello(c);
+        drawFrets(c);
+        drawHistogram(c);
+    }
+    
+    private void drawHistogram(Canvas c) {
+        // need to acquire the Histogram object somehow...
     }
     
     private void drawFrets(Canvas c) {

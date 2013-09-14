@@ -1,0 +1,9 @@
+<!-- example of setting parent activity (for correct back button behavior) -->
+<activity
+            android:name="net.zllr.precisepitch.TwoPlayerSelect"
+            android:label="@string/title_activity_two_player_select"
+            android:parentActivityName="net.zllr.precisepitch.PrecisePitchHome" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="net.zllr.precisepitch.PrecisePitchHome" />
+        </activity>
