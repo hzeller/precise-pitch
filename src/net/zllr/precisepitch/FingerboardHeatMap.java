@@ -3,6 +3,9 @@ package net.zllr.precisepitch;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.LinearLayout;
 
 public class FingerboardHeatMap extends Activity {
 
