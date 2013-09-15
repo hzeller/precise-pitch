@@ -93,10 +93,9 @@
         <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Start Player Red"
+                android:text="Start Player 1"
                 android:id="@+id/startPlayer1"
                 android:layout_gravity="center_horizontal|top"
-                android:background="#ff5555"
                 android:padding="30dp"
                 android:layout_marginRight="10dp"
                 android:textSize="@dimen/large_button_text"
@@ -105,10 +104,9 @@
         <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Start Player Blue"
+                android:text="Start Player 2"
                 android:id="@+id/startPlayer2"
                 android:padding="30dp"
-                android:background="#5555ff"
                 android:layout_gravity="center_horizontal|top"
                 android:textSize="@dimen/large_button_text"
                 android:textStyle="bold"/>

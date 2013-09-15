@@ -30,6 +30,7 @@
 package net.zllr.precisepitch;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -66,8 +67,6 @@ public class GameSetupActivity extends Activity {
         bbmajor.setOnClickListener(noteCreator);
 
         instructions = (TextView) findViewById(R.id.gameSetupInstructions);
-        player1 = (Button) findViewById(R.id.startPlayer1);
-        player2 = (Button) findViewById(R.id.startPlayer2);
 
         staff = (StaffView) findViewById(R.id.gameSetupStaff);
         staff.setNotesPerStaff(16);
@@ -78,7 +77,25 @@ public class GameSetupActivity extends Activity {
         if (gameState == null) {
             gameState = new GameState();
         }
+
+        // Right now, we have two fixed players with default names :)
         gameState.setNumPlayers(2);
+        gameState.setPlayer(0, new GameState.Player(Color.parseColor("#5555FF"), "Blue"));
+        gameState.setPlayer(1, new GameState.Player(Color.parseColor("#FF9955"), "Orange"));
+
+        // TODO: fill the linear layout from the player array with the right
+        // number of buttons (right now, we're kinda fixed to two).
+        final View.OnClickListener gameStarter = new SwitchToGameListener();
+        player1 = (Button) findViewById(R.id.startPlayer1);
+        player1.setBackgroundColor(gameState.getPlayer(0).getColor());
+        player1.setText("Start " + gameState.getPlayer(0).getName());
+        player1.setOnClickListener(gameStarter);
+
+        player2 = (Button) findViewById(R.id.startPlayer2);
+        player2.setBackgroundColor(gameState.getPlayer(1).getColor());
+        player2.setText("Start " + gameState.getPlayer(1).getName());
+        player2.setOnClickListener(gameStarter);
+
         staff.setNoteModel(gameState.getMutableNoteModel());
         staff.ensureNoteInView(0);
         setEnableGameButtons(gameState.getMutableNoteModel().size() > 0);
@@ -89,6 +106,18 @@ public class GameSetupActivity extends Activity {
         saveState.putSerializable(BUNDLE_GAME_STATE, gameState);
     }
 
+    private final class SwitchToGameListener implements View.OnClickListener {
+        public void onClick(View button) {
+            Intent toGame = new Intent(getBaseContext(), GamePlayActivity.class);
+            int playerIndex = 0;
+            if (button == player1) playerIndex = 0;
+            if (button == player2) playerIndex = 1;
+            toGame.putExtra("player", gameState.getPlayer(playerIndex));
+            toGame.putExtra("state", gameState);
+            startActivity(toGame);
+        }
+
+    }
     // Kinda hardcoded now :)
     private final class NoteGenerationListener implements View.OnClickListener {
         public void onClick(View button) {
