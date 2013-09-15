@@ -67,6 +67,12 @@ public class StaffView extends View {
         }
     }
 
+    // Returns the model used. If you ever modify it or the contents, you need
+    // to call onModelChanted()
+    public List<DisplayNote> getNoteModel() {
+        return notes;
+    }
+
     // Call this method whenever the model changed (number of notes or
     // any element in the model.
     public void onModelChanged() {
