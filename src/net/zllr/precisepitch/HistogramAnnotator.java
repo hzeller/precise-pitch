@@ -7,16 +7,17 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 
 public class HistogramAnnotator implements DisplayNote.Annotator {
-    private final boolean twoPlayer;
-    private final Histogram hist1;
-    private final Histogram hist2;
+    private boolean twoPlayer;
+    public Histogram hist1;
+    public Histogram hist2;
     private final Paint borderPaint;
     private final Paint histPaint;
     
-    public HistogramAnnotator(Histogram player1, Histogram player2) {
-        twoPlayer = (player2 != null);
-        hist1 = player1;
-        hist2 = player2;
+    
+    public HistogramAnnotator() {
+        twoPlayer = false;
+        hist1 = new Histogram(100);
+        hist2 = null;
         
         borderPaint = new Paint();
         borderPaint.setColor(Color.BLACK);
@@ -28,21 +29,15 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
         histPaint.setAntiAlias(true);
     }
     
-    public HistogramAnnotator(Histogram player1) {
-        this(player1, null);
-    }
-    
-    private static int getJetColor(double value) {
-        //value from 0.0 to 1.0
-        int fourValue = (int)(4.0 * 256.0 * value);
-        int red   = Math.min(fourValue - 384, -fourValue + 1152);
-        int green = Math.min(fourValue - 128, -fourValue + 896);
-        int blue  = Math.min(fourValue + 128, -fourValue + 640);
-        red   = Math.min(255, Math.max(0, red));
-        green = Math.min(255, Math.max(0, green));
-        blue  = Math.min(255, Math.max(0, blue));
-        
-        return Color.rgb(red, green, blue);
+    public void setTwoPlayer(boolean isTwoPlayer) {
+        if (isTwoPlayer) {
+            if (hist2 == null) {
+                hist2 = new Histogram(100);
+            }
+        } else {
+            hist2 = null;
+        }
+        twoPlayer = isTwoPlayer;
     }
     
     public void draw(DisplayNote note, Canvas canvas,
@@ -82,10 +77,10 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
                 histSlice2.bottom = histSlice1.bottom;
                 histSlice2.top = histSlice1.top;
                 
-                histPaint.setColor(getJetColor(hist1.normalized(note.note, i - 50)));
+                histPaint.setColor(Histogram.getBlackBlueColor(hist1.filtered(i)));
                 canvas.drawRect(histSlice1, histPaint);
                 
-                histPaint.setColor(getJetColor(hist2.normalized(note.note, i - 50)));
+                histPaint.setColor(Histogram.getBlackRedColor(hist2.filtered(i)));
                 canvas.drawRect(histSlice2, histPaint);
             }
             canvas.drawRect(histBox1, borderPaint);
@@ -99,7 +94,7 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
                 histSlice.bottom = histBox.bottom - (i*histBox.height()/100.0f);
                 histSlice.top = histBox.bottom - ((i+1)*histBox.height()/100.0f);
                 
-                histPaint.setColor(getJetColor(hist1.normalized(note.note, i - 50)));
+                histPaint.setColor(Histogram.getBlackBlueColor(hist1.filtered(i)));
                 canvas.drawRect(histSlice, histPaint);
             }
             System.out.println("hist draw: (note: " + note.note + ")");

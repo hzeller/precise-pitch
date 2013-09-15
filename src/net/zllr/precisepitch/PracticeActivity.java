@@ -239,8 +239,11 @@ public class PracticeActivity extends Activity {
             pitchPoster.start();
             startPracticeTime = -1;
             
-            hist = new Histogram();
-            histogramAnnotator = new HistogramAnnotator(hist);
+            //histogramAnnotator = new HistogramAnnotator();
+            histogramAnnotators = new HistogramAnnotator[model.size()];
+            for (int i = 0; i < histogramAnnotators.length; i++) {
+                histogramAnnotators[i] = new HistogramAnnotator();
+            }
         }
 
         // --- interface ProgressProvider
@@ -265,12 +268,11 @@ public class PracticeActivity extends Activity {
                 if (noteDiff == 0) {
                     ledview.setValue(data.cent);
                     //ignore harmonics for now
-                    MeasuredPitch octaveData = new MeasuredPitch(
-                            data.frequency, wantNote, data.cent, data.decibel);
-                    hist.update(octaveData);
-                    System.out.println("hist data: (n: " + octaveData.note
-                                       + ", c: " + octaveData.cent
-                                       + ") wantNote: " + wantNote);
+                    //MeasuredPitch octaveData = new MeasuredPitch(
+                    //        data.frequency, wantNote, data.cent, data.decibel);
+                    //hist.update(octaveData);
+                    histogramAnnotators[modelPos].hist1.increment((int)(data.cent + 50.0));
+                    
                     if (Math.abs(data.cent) < kCentThreshold) {
                         // for things that _are_ in tune, we record the offset
                         sumAbsoluteOffset += Math.abs(data.cent);
@@ -319,7 +321,8 @@ public class PracticeActivity extends Activity {
             if (modelPos >= 0) {
                 currentNote = model.get(modelPos);
                 currentNote.color = successNoteColor;
-                currentNote.annotator = histogramAnnotator;
+                histogramAnnotators[modelPos].hist1.filter(20);
+                currentNote.annotator = histogramAnnotators[modelPos];
             }
 
             ++modelPos;
@@ -348,8 +351,9 @@ public class PracticeActivity extends Activity {
         private final static int kHoldTime = 15;
         private final MicrophonePitchPoster pitchPoster;
         private final HighlightAndClockAnnotator highlightAnnotator;
-        private final HistogramAnnotator histogramAnnotator;
+        //private final HistogramAnnotator histogramAnnotator;
         private final List<DisplayNote> model;
+        private final HistogramAnnotator histogramAnnotators[];
         private long startPracticeTime;
         private float sumAbsoluteOffset;
         private long absoluteOffsetCount;
