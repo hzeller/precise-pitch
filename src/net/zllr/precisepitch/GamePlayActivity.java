@@ -27,7 +27,6 @@ import net.zllr.precisepitch.model.NoteDocument;
 import net.zllr.precisepitch.view.StaffView;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class GamePlayActivity extends Activity {
     private static final String BUNDLE_ACTIVITY_STATE = "GamePlayActivity.state";
@@ -35,7 +34,7 @@ public class GamePlayActivity extends Activity {
     private StaffView staff;
     private GameState.Player player;
     private GameState gameState;
-    private Button nextPlayer;
+    private Button nextInGame;
     private NoteFollowRecorder follower;
     private TextView instructions;
 
@@ -72,17 +71,30 @@ public class GamePlayActivity extends Activity {
             istate = new ActivityState();
         }
 
-        nextPlayer = (Button) findViewById(R.id.nextPlayer);
+        nextInGame = (Button) findViewById(R.id.nextInGame);
         // Right now, we only have two players, so this is simple:
         int otherPlayerIndex = player.getIndex() == 0 ? 1 : 0;
 
         // TODO: when we are done with all players, then there is no next player
         // but we move on to the game result activity (race/histogram - view).
-        GameState.Player otherPlayer = gameState.getPlayer(otherPlayerIndex);
-        nextPlayer.setBackgroundColor(otherPlayer.getColor());
-        nextPlayer.setText("Next: " + otherPlayer.getName());
-        nextPlayer.setVisibility(View.INVISIBLE);
-        // TODO: register listener that starts GamePlayActivity with 'otherPlayer'.
+        final GameState.Player otherPlayer = gameState.getPlayer(otherPlayerIndex);
+        if (gameState.getPlayerResult(otherPlayer) == null) {
+            nextInGame.setBackgroundColor(otherPlayer.getColor());
+            nextInGame.setText("Next: " + otherPlayer.getName());
+            nextInGame.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View button) {
+                    Intent toGame = new Intent(getBaseContext(), GamePlayActivity.class);
+                    toGame.putExtra("player", otherPlayer);
+                    toGame.putExtra("state", gameState);
+                    startActivity(toGame);
+                }
+            });
+        } else {
+            nextInGame.setText("To Results");
+            // Listener for results.
+        }
+        nextInGame.setVisibility(View.INVISIBLE);
+
         follower = new NoteFollowRecorder(staff, new FollowEventListener());
     }
 
@@ -92,10 +104,11 @@ public class GamePlayActivity extends Activity {
             startPracticeTime = -1;
             instructions.setText("Time starts with first note.");
         }
+
         public void onFinishedModel() {
             playerResult.setPlayMillis(System.currentTimeMillis() - startPracticeTime);
             gameState.setPlayerResult(player, playerResult);
-            nextPlayer.setVisibility(View.VISIBLE);
+            nextInGame.setVisibility(View.VISIBLE);
         }
 
         public void onStartNote(int modelPos, DisplayNote note) {

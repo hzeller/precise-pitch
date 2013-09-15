@@ -98,7 +98,6 @@ public class GameSetupActivity extends Activity {
             toGame.putExtra("state", gameState);
             startActivity(toGame);
         }
-
     }
 
     private void setEnableGameButtons(boolean on) {

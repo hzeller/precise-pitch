@@ -87,6 +87,7 @@ public class GameState implements Serializable {
         playerResults[player.index] = result;
     }
     public PlayerResult getPlayerResult(Player player) {
+        if (playerResults == null) return null;
         return playerResults[player.index];
     }
 

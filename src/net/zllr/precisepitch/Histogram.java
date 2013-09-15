@@ -2,7 +2,9 @@ package net.zllr.precisepitch;
 
 import android.graphics.Color;
 
-public class Histogram {
+import java.io.Serializable;
+
+public class Histogram implements Serializable {
     private int histData[];
     private int maxCount;
     
