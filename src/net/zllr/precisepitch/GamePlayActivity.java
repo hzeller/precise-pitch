@@ -32,13 +32,13 @@ public class GamePlayActivity extends Activity {
 
         staff = (StaffView) findViewById(R.id.gameStaff);
         staff.setNotesPerStaff(16);
+        staff.setKeepScreenOn(true);
 
         Intent intent = getIntent();
         if (intent != null) {
             player = (GameState.Player) intent.getSerializableExtra("player");
             gameState = (GameState) intent.getSerializableExtra("state");
             staff.setNoteModel(gameState.getMutableNoteModel());
-            staff.ensureNoteInView(0);
         }
 
         TextView playerText = (TextView) findViewById(R.id.playerHeadline);
@@ -55,19 +55,29 @@ public class GamePlayActivity extends Activity {
         nextPlayer = (Button) findViewById(R.id.nextPlayer);
         // Right now, we only have two players, so this is simple:
         int otherPlayerIndex = player.getIndex() == 0 ? 1 : 0;
+
+        // TODO: when we are done with all players, then there is no next player
+        // but we go to the result.
         GameState.Player otherPlayer = gameState.getPlayer(otherPlayerIndex);
         nextPlayer.setBackgroundColor(otherPlayer.getColor());
         nextPlayer.setText("Next: " + otherPlayer.getName());
         nextPlayer.setVisibility(View.INVISIBLE);
+        // TODO: register listener that starts GamePlayActivity with 'otherPlayer'.
         follower = new NoteFollowRecorder(staff, new FollowListener());
     }
 
     private class FollowListener implements NoteFollowRecorder.Listener {
         public void onNoteMiss() { }
+        public void onStartNote(DisplayNote note) {
+            // TODO: create new histogram.
+        }
         public boolean isInTune(DisplayNote note, double cent) {
+            // TODO: update histogram.
             return true;
         }
-        public void onFinishedNote(DisplayNote note) { }
+        public void onFinishedNote(DisplayNote note) {
+            // TODO: store histogram for this note in PlayerResult
+        }
         public void onFinishedModel() {
             nextPlayer.setVisibility(View.VISIBLE);
         }

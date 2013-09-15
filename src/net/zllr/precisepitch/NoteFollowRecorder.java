@@ -36,6 +36,7 @@ public class NoteFollowRecorder {
 
     // A listener for events happening while following notes.
     public interface Listener {
+        void onStartNote(DisplayNote note);
         // Received note is not the one expected in the model.
         void onNoteMiss();
         // Return if the given cent are accepted to be in-tune.
@@ -74,13 +75,14 @@ public class NoteFollowRecorder {
                 n.color = kFinishedNoteColor;
             }
             else if (i == modelPos) {
-                n.color = kFinishedNoteColor;
+                n.color = kCurrentNoteColor;
                 n.annotator = highlightAnnotator;
             }
             else {
                 n.color = kFutureNoteColor;
             }
         }
+        staff.ensureNoteInView(modelPos);
         if (running && pitchPoster == null) {
             pitchPoster = new MicrophonePitchPoster(60 /*Hz*/);
             pitchPoster.setHandler(handler);
@@ -107,6 +109,7 @@ public class NoteFollowRecorder {
         currentNote = model.get(modelPos);
         currentNote.color = kCurrentNoteColor;
         currentNote.annotator = highlightAnnotator;
+        listener.onStartNote(currentNote);
         ticksInTune = 0;
         staff.ensureNoteInView(modelPos);
         staff.onModelChanged();
