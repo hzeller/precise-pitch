@@ -13,19 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Rough sequence:
- *   - choose 1 or 2 players
- *   - display practice activity
- *         o choose chant of doom. Right now: pre-select
- *           Game data: Staff model with DisplayNotes, #players game result data.
- *         o have two colored buttons. Let first player choose.
- *         o Game goes on with practice activity, accepting +/- 45 cent, displays
- *           time. Records results for player #1
- *         o When done, the other button shows up. Pressing that goes to the
- *           practice activity, records results for player #2
- *         o When all results are collected, gets to the result display page
- *             - display raw scores at first.
- *             - next: toggle between car-race and histogram annotated notes.
  */
 package net.zllr.precisepitch;
 
@@ -35,9 +22,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.TextView;
-import net.zllr.precisepitch.model.DisplayNote;
 import net.zllr.precisepitch.model.GameState;
 import net.zllr.precisepitch.view.StaffView;
 

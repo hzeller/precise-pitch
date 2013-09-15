@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-// Beware, this is a bit hacky right now
-
 package net.zllr.precisepitch;
 
 import android.app.Activity;
