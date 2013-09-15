@@ -8,6 +8,7 @@ import android.graphics.RectF;
 
 public class HistogramAnnotator implements DisplayNote.Annotator {
     private static final Paint borderPaint;
+    private static final Paint referenceLine;
     private static final Paint histPaint;
     static {
         // These are always the same and cannot be serialized. Make them static.
@@ -15,6 +16,10 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
         borderPaint.setColor(Color.BLACK);
         borderPaint.setStrokeWidth(0);
         borderPaint.setStyle(Paint.Style.STROKE);
+
+        referenceLine = new Paint();
+        referenceLine.setColor(Color.BLACK);
+        referenceLine.setStrokeWidth(2);
 
         histPaint = new Paint();
         histPaint.setStrokeWidth(0);
@@ -58,6 +63,19 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
         return Color.rgb(red, greenblue, greenblue);
     }
 
+    private static int getJetColor(double value) {
+        //value from 0.0 to 1.0
+        int fourValue = (int)(4.0 * 256.0 * value);
+        int red   = Math.min(fourValue - 384, -fourValue + 1152);
+        int green = Math.min(fourValue - 128, -fourValue + 896);
+        int blue  = Math.min(fourValue + 128, -fourValue + 640);
+        red   = Math.min(255, Math.max(0, red));
+        green = Math.min(255, Math.max(0, green));
+        blue  = Math.min(255, Math.max(0, blue));
+
+        return Color.rgb(red, green, blue);
+    }
+
     public void draw(DisplayNote note, Canvas canvas,
                      RectF staffBoundingBox, RectF noteBoundingBox) {
         
@@ -80,7 +98,10 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
                 histBottom = bottomBoxBottom;
             }
         }
-        
+
+        canvas.drawLine(centerX - halfWidth - 20, histTop + (histBottom - histTop) / 2,
+                        centerX + halfWidth + 20, histTop + (histBottom - histTop) / 2,
+                        referenceLine);
         if (twoPlayer) {
             RectF histBox1 = new RectF(centerX - halfWidth, histTop,
                                  centerX, histBottom);

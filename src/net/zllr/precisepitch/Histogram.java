@@ -1,7 +1,5 @@
 package net.zllr.precisepitch;
 
-import android.graphics.Color;
-
 import java.io.Serializable;
 
 public class Histogram implements Serializable {
@@ -89,18 +87,5 @@ public class Histogram implements Serializable {
         }
         maxCount = 0;
         filtered = false;
-    }
-    
-    public static int getJetColor(double value) {
-        //value from 0.0 to 1.0
-        int fourValue = (int)(4.0 * 256.0 * value);
-        int red   = Math.min(fourValue - 384, -fourValue + 1152);
-        int green = Math.min(fourValue - 128, -fourValue + 896);
-        int blue  = Math.min(fourValue + 128, -fourValue + 640);
-        red   = Math.min(255, Math.max(0, red));
-        green = Math.min(255, Math.max(0, green));
-        blue  = Math.min(255, Math.max(0, blue));
-        
-        return Color.rgb(red, green, blue);
     }
 }
