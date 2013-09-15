@@ -15,6 +15,8 @@
  */
 package net.zllr.precisepitch.model;
 
+import net.zllr.precisepitch.Histogram;
+
 import java.io.Serializable;
 
 public class GameState implements Serializable {
@@ -44,9 +46,19 @@ public class GameState implements Serializable {
     }
 
     public static final class PlayerResult implements Serializable {
-        public int playTimeMilliseconds;
-        // other states, such as Histograms of notes. Could just be an array
-        // of the same size as notesToPlay.
+        public PlayerResult(int noteCount) {
+            pitchHistogram = new Histogram[noteCount];
+        }
+        public void setPitchHistogram(int pos, Histogram h) {
+            pitchHistogram[pos] = h;
+        }
+        public Histogram getPitchHistogram(int p) { return pitchHistogram[p];}
+
+        public void setPlayMillis(long m) { playTimeMilliseconds = m; }
+        public long getPlayMillis() { return playTimeMilliseconds; }
+
+        private long playTimeMilliseconds;
+        private final Histogram pitchHistogram[];
     }
 
     // The model of notes to be played. This is initialized once with the

@@ -130,6 +130,7 @@ public class PracticeActivity extends Activity {
                 histogramAnnotators[i] = new HistogramAnnotator();
             }
             startPracticeTime = -1;
+            instructions.setText("Time starts with first note.");
         }
         public void onFinishedModel() {
             final long duration = System.currentTimeMillis() - startPracticeTime;
@@ -162,9 +163,7 @@ public class PracticeActivity extends Activity {
 
             // Give some instructions depending on ticks in tune.
             if (ticksInTuneSoFar == 0) {
-                if (startPracticeTime < 0) {
-                    instructions.setText("Time starts with first note.");
-                } else {
+                if (startPracticeTime > 0) {
                     instructions.setText("Find the note and hold.");
                 }
             } else if (startPracticeTime < 0 && ticksInTuneSoFar > 5) {

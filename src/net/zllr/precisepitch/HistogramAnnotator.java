@@ -12,34 +12,26 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
     public Histogram hist2;
     private final Paint borderPaint;
     private final Paint histPaint;
-    
-    
-    public HistogramAnnotator() {
-        twoPlayer = false;
-        hist1 = new Histogram(100);
-        hist2 = null;
-        
+
+    public HistogramAnnotator(Histogram a, Histogram b) {
+        hist1 = a;
+        hist2 = b;
+        twoPlayer = (a != null) && (b != null);
+
         borderPaint = new Paint();
         borderPaint.setColor(Color.BLACK);
         borderPaint.setStrokeWidth(0);
         borderPaint.setStyle(Paint.Style.STROKE);
-        
+
         histPaint = new Paint();
         histPaint.setStrokeWidth(0);
         histPaint.setAntiAlias(true);
     }
-    
-    public void setTwoPlayer(boolean isTwoPlayer) {
-        if (isTwoPlayer) {
-            if (hist2 == null) {
-                hist2 = new Histogram(100);
-            }
-        } else {
-            hist2 = null;
-        }
-        twoPlayer = isTwoPlayer;
+
+    public HistogramAnnotator() {
+        this(new Histogram(100), null);
     }
-    
+
     public void draw(DisplayNote note, Canvas canvas,
                      RectF staffBoundingBox, RectF noteBoundingBox) {
         

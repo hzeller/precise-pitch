@@ -37,6 +37,7 @@ public class GamePlayActivity extends Activity {
     private GameState gameState;
     private Button nextPlayer;
     private NoteFollowRecorder follower;
+    private TextView instructions;
 
     private static class ActivityState implements Serializable {
         int modelPosition;
@@ -62,6 +63,8 @@ public class GamePlayActivity extends Activity {
         playerText.setText("Player " + player.getName());
         playerText.setBackgroundColor(player.getColor());
 
+        instructions = (TextView) findViewById(R.id.gameInstructions);
+
         if (savedInstanceState != null) {
             istate = (ActivityState) savedInstanceState.getSerializable(BUNDLE_ACTIVITY_STATE);
         }
@@ -84,23 +87,45 @@ public class GamePlayActivity extends Activity {
     }
 
     private class FollowEventListener implements NoteFollowRecorder.EventListener {
-        public void onStartModel(NoteDocument model) { }
+        public void onStartModel(NoteDocument model) {
+            playerResult = new GameState.PlayerResult(model.size());
+            startPracticeTime = -1;
+            instructions.setText("Time starts with first note.");
+        }
         public void onFinishedModel() {
+            playerResult.setPlayMillis(System.currentTimeMillis() - startPracticeTime);
+            gameState.setPlayerResult(player, playerResult);
             nextPlayer.setVisibility(View.VISIBLE);
         }
 
         public void onStartNote(int modelPos, DisplayNote note) {
-            // TODO: create new histogram.
+            currentModelPos = modelPos;
+            currentHistogram = new Histogram(100);
         }
         public void onSilence() {}
         public void onNoteMiss(int diff) { }
         public boolean isInTune(double cent, int ticksInTuneSoFar) {
-            // TODO: update histogram.
-            return true;
+            if (ticksInTuneSoFar == 0) {
+                if (startPracticeTime > 0) {
+                    instructions.setText("Find the note and hold.");
+                }
+            } else if (startPracticeTime < 0 && ticksInTuneSoFar > 5) {
+                startPracticeTime = System.currentTimeMillis();
+                instructions.setText("Time starts now.");
+            }
+
+            return true;  // accepting everything. Histogram counts.
         }
+
         public void onFinishedNote() {
-            // TODO: store histogram for this note in PlayerResult
+            playerResult.setPitchHistogram(currentModelPos, currentHistogram);
+            currentHistogram = null;
         }
+
+        int currentModelPos;
+        Histogram currentHistogram;
+        long startPracticeTime;
+        GameState.PlayerResult playerResult;
     };
 
     @Override
