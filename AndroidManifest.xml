@@ -26,24 +26,28 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".TunerActivity"
+            android:name="net.zllr.precisepitch.TunerActivity"
             android:label="@string/title_activity_precise_pitch_home" >
         </activity>
         <activity
-            android:name=".FingerboardHeatMap"
+            android:name="net.zllr.precisepitch.FingerboardHeatMap"
             android:label="@string/title_activity_fingerboard_heat_map" >
         </activity>
         <activity
-            android:name=".PracticeActivity"
+            android:name="net.zllr.precisepitch.PracticeActivity"
             android:label="@string/practice_note_sequences" >
         </activity>
         <activity
-                android:name=".GameSetupActivity"
-                android:label="@string/pitch_competition" >
+            android:name="net.zllr.precisepitch.GameSetupActivity"
+            android:label="@string/pitch_competition" >
         </activity>
         <activity
-                android:name=".GamePlayActivity"
-                android:label="@string/pitch_competition" >
+            android:name="net.zllr.precisepitch.GamePlayActivity"
+            android:label="@string/pitch_competition" >
+        </activity>
+        <activity
+            android:name="net.zllr.precisepitch.CarRaceAnimation"
+            android:label="@string/title_activity_car_race_animation" >
         </activity>
     </application>
 
