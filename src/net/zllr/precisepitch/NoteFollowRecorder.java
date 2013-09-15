@@ -18,15 +18,18 @@ import java.util.List;
 //  - displays a 'clock' as long as note is in-tune
 //  - moves on until it reaches the end.
 public class NoteFollowRecorder {
+    // Color of notes we already have finished (green).
     private static final int kFinishedNoteColor = Color.rgb(0, 180, 0);
+    // Color of the current note to be played.
     private static final int kCurrentNoteColor = Color.BLACK;
+    // Color of notes to play later (grayed out).
     private static final int kFutureNoteColor = Color.rgb(200, 200, 200);
 
     private final static int kHoldTime = 15;
 
     private final StaffView staff;
     private final List<DisplayNote> model;
-    private final Listener listener;
+    private final EventListener eventListener;
     private final HighlightAndClockAnnotator highlightAnnotator;
     private final HandlerImplementation handler;
     private MicrophonePitchPoster pitchPoster;
@@ -34,20 +37,38 @@ public class NoteFollowRecorder {
     private int ticksInTune;
     private boolean running;
 
-    // A listener for events happening while following notes.
-    public interface Listener {
-        void onStartNote(DisplayNote note);
-        // Received note is not the one expected in the model.
-        void onNoteMiss();
-        // Return if the given cent are accepted to be in-tune.
-        boolean isInTune(DisplayNote note, double cent);
-        void onFinishedNote(DisplayNote note);
+    // A eventListener for events happening while following notes.
+    public interface EventListener {
+        // Start following the given model.
+        void onStartModel(List<DisplayNote> model);
+
+        // We're done following. Users might consider changing the colors of
+        // the notes back.
         void onFinishedModel();
+
+        // Start a new note. The following calls until onFinishNote() will
+        // be in this context.
+        void onStartNote(int modelPos, DisplayNote note);
+
+        // Received note is not the one currently expected in the model.
+        // This is the number of half-notes it is off from what we expect.
+        // Since we fold all octaves, this can be in the range ofr +/- 6
+        void onNoteMiss(int diff);
+
+        // Didn't receive pitch data.
+        void onSilence();
+
+        // The note was found, this callback needs to decide if the given range
+        // of cents is acceptable (-50..+50)
+        boolean isInTune(double cent, int ticksInTuneSoFar);
+
+        // Done with the current note started in onStartNote()
+        void onFinishedNote();
     }
 
-    public NoteFollowRecorder(StaffView staff, Listener listener) {
+    public NoteFollowRecorder(StaffView staff, EventListener eventListener) {
         this.staff = staff;
-        this.listener = listener;
+        this.eventListener = eventListener;
         this.model = staff.getNoteModel();
         running = true;
         modelPos = -1;
@@ -55,6 +76,7 @@ public class NoteFollowRecorder {
 
         handler = new HandlerImplementation();
         highlightAnnotator = new HighlightAndClockAnnotator(handler);
+        eventListener.onStartModel(model);
         resume(0);
     }
 
@@ -96,20 +118,21 @@ public class NoteFollowRecorder {
             currentNote = model.get(modelPos);
             currentNote.color = kFinishedNoteColor;
             currentNote.annotator = null;
+            eventListener.onFinishedNote();
         }
 
         ++modelPos;
         if (modelPos >= model.size()) {
             pause();
             running = false;
-            listener.onFinishedModel();
+            eventListener.onFinishedModel();
             staff.onModelChanged();  // post the last change.
             return;
         }
         currentNote = model.get(modelPos);
         currentNote.color = kCurrentNoteColor;
         currentNote.annotator = highlightAnnotator;
-        listener.onStartNote(currentNote);
+        eventListener.onStartNote(modelPos, currentNote);
         ticksInTune = 0;
         staff.ensureNoteInView(modelPos);
         staff.onModelChanged();
@@ -130,8 +153,12 @@ public class NoteFollowRecorder {
         public int getCurrentProgress() { return ticksInTune; }
 
         public void handleMessage(Message msg) {
-            if (!running || msg.obj == null)
+            if (!running)
                 return;  // Received a sample, but we're done already.
+            if (msg.obj == null) {
+                eventListener.onSilence();
+                return;
+            }
             final MeasuredPitch data = (MeasuredPitch) msg.obj;
             final int beforeTicks = ticksInTune;
 
@@ -142,22 +169,19 @@ public class NoteFollowRecorder {
             // matter the octave: good.
             int noteDiff = (gotNote + 12 - wantNote + 6) % 12 - 6;
             if (noteDiff == 0) {
-                if (listener.isInTune(expectedNote, data.cent)) {
+                if (eventListener.isInTune(data.cent, ticksInTune)) {
                     ++ticksInTune;
                 } else {
                     --ticksInTune;  // wrong cent: one penalty
                 }
-            }
-            else {
-                // Negative or positive: exhaust range, so show arrows.
+            } else {
                 ticksInTune -= 2;  // different note: two penalty
-                listener.onNoteMiss();
+                eventListener.onNoteMiss(noteDiff);
             }
-            if (ticksInTune < 0)
+            if (ticksInTune < 0)   // too much penalty accrued :)
                 ticksInTune = 0;
 
             if (ticksInTune >= kHoldTime) {
-                listener.onFinishedNote(expectedNote);
                 advanceNote();
             }
             if (beforeTicks != ticksInTune) {

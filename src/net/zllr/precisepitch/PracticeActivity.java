@@ -19,19 +19,13 @@
 package net.zllr.precisepitch;
 
 import android.app.Activity;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.RectF;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import net.zllr.precisepitch.model.DisplayNote;
-import net.zllr.precisepitch.model.MeasuredPitch;
 import net.zllr.precisepitch.view.CenterOffsetView;
 import net.zllr.precisepitch.view.StaffView;
 
@@ -45,10 +39,6 @@ public class PracticeActivity extends Activity {
     private static final int kMajorScaleSequence[] = { 2, 2, 1, 2, 2, 2, 1 };
     private static final int kCentThreshold = 20;
 
-    private static final int futureNoteColor = Color.rgb(200, 200, 200);
-    private static final int successNoteColor = Color.rgb(0, 180, 0);
-    private static final int playNoteColor  = Color.BLACK;
-
     // All the activity state that we need to keep track of between teardown
     // restart.
     private static class ActivityState implements Serializable {
@@ -58,6 +48,7 @@ public class PracticeActivity extends Activity {
         final ArrayList<DisplayNote> noteModel;
         int keyDisplay = 1;
         boolean checkedRandom;
+        int followPos = -1;
     };
     private ActivityState istate;
 
@@ -72,7 +63,7 @@ public class PracticeActivity extends Activity {
     private Button startbutton;
     private TextView instructions;
     private Button restartbutton;
-    private PitchFollowGame game;
+    private NoteFollowRecorder noteFollower;
 
     private enum State {
         EMPTY_SCALE,     // initial state or after 'clear'
@@ -143,14 +134,82 @@ public class PracticeActivity extends Activity {
         }
     }
 
+    // Callbacks from the NoteFollowRecorder. We use this to record statistics.
+    private class FollowEventListener implements NoteFollowRecorder.EventListener {
+        public void onStartModel(List<DisplayNote> model) {
+            histogramAnnotators = new HistogramAnnotator[model.size()];
+            for (int i = 0; i < histogramAnnotators.length; i++) {
+                histogramAnnotators[i] = new HistogramAnnotator();
+            }
+            startPracticeTime = -1;
+        }
+        public void onFinishedModel() {
+            final long duration = System.currentTimeMillis() - startPracticeTime;
+            instructions.setText(String.format("%3.1f seconds; When in range, average %.1f cent off.",
+                                               duration / 1000.0,
+                                               sumAbsoluteOffset / absoluteOffsetCount));
+            setActivityState(State.FINISHED);
+        }
+
+        public void onStartNote(int modelPos, DisplayNote note) {
+            currentModelPos = modelPos;
+            currentNote = note;
+        }
+        public void onSilence() {
+            ledview.setDataValid(false);
+        }
+        public void onNoteMiss(int diff) {
+            ledview.setDataValid(true);
+            ledview.setValue(diff * 100);  // displays too low/high arrows
+        }
+        public boolean isInTune(double cent, int ticksInTuneSoFar) {
+            ledview.setDataValid(true);
+            ledview.setValue(cent);
+            // The following stat can probably go as we can determine a better
+            // score out of the histogram data.
+            sumAbsoluteOffset += Math.abs(cent);
+            absoluteOffsetCount++;
+
+            histogramAnnotators[currentModelPos].hist1.increment((int)(cent + 50.0));
+
+            // Give some instructions depending on ticks in tune.
+            if (ticksInTuneSoFar == 0) {
+                if (startPracticeTime < 0) {
+                    instructions.setText("Time starts with first note.");
+                } else {
+                    instructions.setText("Find the note and hold.");
+                }
+            } else if (startPracticeTime < 0 && ticksInTuneSoFar > 5) {
+                startPracticeTime = System.currentTimeMillis();
+                instructions.setText("Time starts now.");
+            }
+
+            return true; // accept everything. Accuracy recorded in histogram.
+        }
+        public void onFinishedNote() {
+            histogramAnnotators[currentModelPos].hist1.filter(20);
+            currentNote.annotator = histogramAnnotators[currentModelPos];
+        }
+
+        private long startPracticeTime;
+        private float sumAbsoluteOffset;
+        private long absoluteOffsetCount;
+        private int currentModelPos;
+        private DisplayNote currentNote;
+        private HistogramAnnotator histogramAnnotators[];
+    }
 
     @Override
     protected void onPause() {
         super.onPause();
         istate.keyDisplay = staff.getKeyDisplay();
         istate.checkedRandom = randomTune.isChecked();
-        if (game != null) {
-            game.stop();  // TODO: store game state.
+        if (noteFollower != null)
+            istate.followPos = noteFollower.getPosition();
+        if (noteFollower != null) {
+            // TODO: NoteFollower actually can handle being paused/resumed
+            // now. Take this into account.
+            noteFollower.pause();
             setActivityState(State.FINISHED);
             // Now prepare for a new game, with properly reset notes before
             // the state is serialized (the Paint in note-annotators doesn't serialize).
@@ -165,6 +224,8 @@ public class PracticeActivity extends Activity {
         // Do I really have to remember state for Views ?
         staff.setKeyDisplay(istate.keyDisplay);
         randomTune.setChecked(istate.checkedRandom);
+        if (noteFollower != null)
+            noteFollower.resume(istate.followPos);
     }
 
     @Override
@@ -214,153 +275,8 @@ public class PracticeActivity extends Activity {
     private void doPractice() {
         if (istate.noteModel.isEmpty()) return;
         setActivityState(State.PRACTICE);
-        game = new PitchFollowGame(istate.noteModel);
-    }
-
-    // Some abstraction of progress.
-    private interface ProgressProvider {
-        int getMaxProgress();
-        int getCurrentProgress();
-    }
-
-    private class PitchFollowGame extends Handler implements ProgressProvider {
-        PitchFollowGame(List<DisplayNote> model) {
-            highlightAnnotator = new HighlightAndClockAnnotator(this);
-            running = true;
-            this.model = model;
-            for (DisplayNote n : model) {
-                n.color = futureNoteColor;
-            }
-            modelPos = -1;
-            checkNextNote();
-
-            pitchPoster = new MicrophonePitchPoster(60);
-            pitchPoster.setHandler(this);
-            pitchPoster.start();
-            startPracticeTime = -1;
-            
-            //histogramAnnotator = new HistogramAnnotator();
-            histogramAnnotators = new HistogramAnnotator[model.size()];
-            for (int i = 0; i < histogramAnnotators.length; i++) {
-                histogramAnnotators[i] = new HistogramAnnotator();
-            }
-        }
-
-        // --- interface ProgressProvider
-        public int getMaxProgress() { return kHoldTime; }
-        public int getCurrentProgress() { return ticksInTune; }
-        public void stop() {
-            if (!running) return;
-            running = false;
-            pitchPoster.stopSampling();
-        }
-
-        public void handleMessage(Message msg) {
-            if (!running)
-                return;  // Received a sample, but we're done already.
-            final MeasuredPitch data = (MeasuredPitch) msg.obj;
-            int beforeTicks = ticksInTune;
-
-            if (data != null) {
-                int gotNote = data.note;
-                int wantNote = model.get(modelPos).note;
-                int noteDiff = (gotNote + 12 - wantNote + 6) % 12 - 6;
-                if (noteDiff == 0) {
-                    ledview.setValue(data.cent);
-                    //ignore harmonics for now
-                    //MeasuredPitch octaveData = new MeasuredPitch(
-                    //        data.frequency, wantNote, data.cent, data.decibel);
-                    //hist.update(octaveData);
-                    histogramAnnotators[modelPos].hist1.increment((int)(data.cent + 50.0));
-                    
-                    if (Math.abs(data.cent) < kCentThreshold) {
-                        // for things that _are_ in tune, we record the offset
-                        sumAbsoluteOffset += Math.abs(data.cent);
-                        absoluteOffsetCount++;
-
-                        ++ticksInTune;
-                    } else {
-                        --ticksInTune;  // wrong cent: one penalty
-                    }
-                }
-                else {
-                    // negative or positive: exhaust range, so show arrows.
-                    ticksInTune -= 2;  // different note: two penalty
-                    ledview.setValue(noteDiff * 100);
-                }
-                if (ticksInTune < 0) ticksInTune = 0;
-                ledview.setDataValid(true);
-            }
-            else {
-                ledview.setDataValid(false);
-            }
-
-            if (ticksInTune == 0) {
-                if (startPracticeTime < 0) {
-                    instructions.setText("Time starts with first note.");
-                } else {
-                    instructions.setText("Find the note and hold.");
-                }
-            }
-            else if (ticksInTune > 0 && ticksInTune < kHoldTime) {
-                if (startPracticeTime < 0 && ticksInTune >= kHoldTime/2) {
-                    startPracticeTime = System.currentTimeMillis();
-                    instructions.setText("NOW - time is running.");
-                }
-            }
-            else if (ticksInTune >= kHoldTime) {
-                checkNextNote();
-            }
-            if (beforeTicks != ticksInTune) {
-                staff.onModelChanged();  // force redraw ('clock')
-            }
-        }
-
-        private void checkNextNote() {
-            DisplayNote currentNote;
-            if (modelPos >= 0) {
-                currentNote = model.get(modelPos);
-                currentNote.color = successNoteColor;
-                histogramAnnotators[modelPos].hist1.filter(20);
-                currentNote.annotator = histogramAnnotators[modelPos];
-            }
-
-            ++modelPos;
-            if (modelPos >= model.size()) {
-                stop();
-                showPracticeResults();
-                staff.onModelChanged();  // post the last change.
-                return;
-            }
-            currentNote = model.get(modelPos);
-            currentNote.color = playNoteColor;
-            currentNote.annotator = highlightAnnotator;
-            ticksInTune = 0;
-            staff.ensureNoteInView(modelPos);
-            staff.onModelChanged();
-        }
-
-        private void showPracticeResults() {
-            final long duration = System.currentTimeMillis() - startPracticeTime;
-            instructions.setText(String.format("%3.1f seconds; When in range, average %.1f cent off.",
-                                               duration / 1000.0,
-                                               sumAbsoluteOffset / absoluteOffsetCount));
-            setActivityState(State.FINISHED);
-        }
-
-        private final static int kHoldTime = 15;
-        private final MicrophonePitchPoster pitchPoster;
-        private final HighlightAndClockAnnotator highlightAnnotator;
-        //private final HistogramAnnotator histogramAnnotator;
-        private final List<DisplayNote> model;
-        private final HistogramAnnotator histogramAnnotators[];
-        private long startPracticeTime;
-        private float sumAbsoluteOffset;
-        private long absoluteOffsetCount;
-        private int modelPos;
-        private int ticksInTune;
-        private boolean running;
-        private Histogram hist;
+        //game = new PitchFollowGame(istate.noteModel);
+        noteFollower = new NoteFollowRecorder(staff, new FollowEventListener());
     }
 
     private void setGeneratorButtonsVisibility(int visibility) {
@@ -400,9 +316,9 @@ public class PracticeActivity extends Activity {
                 setGeneratorButtonsVisibility(View.INVISIBLE);
                 break;
             case FINISHED:
-                if (game != null) {
-                    game.stop();
-                    game = null;
+                if (noteFollower != null) {
+                    noteFollower.pause();
+                    noteFollower = null;
                 }
                 startbutton.setVisibility(View.INVISIBLE);
                 restartbutton.setVisibility(View.VISIBLE);
@@ -451,58 +367,5 @@ public class PracticeActivity extends Activity {
 
     private void addAscDescMajorScale(int startNote, List<DisplayNote> model) {
         addMajorScale(addMajorScale(startNote, true, model), false, model);
-    }
-    
-    private static final class HighlightAndClockAnnotator
-            implements DisplayNote.Annotator {
-        private final Paint highlightPaint;
-        private final Paint borderPaint;
-        private final Paint progressPaint;
-        private final ProgressProvider progressProvider;
-
-        public HighlightAndClockAnnotator(ProgressProvider progress) {
-            highlightPaint = new Paint();
-            highlightPaint.setColor(Color.argb(70, 0xff, 0xff, 0));
-            highlightPaint.setStrokeWidth(0);
-            borderPaint = new Paint();
-            borderPaint.setColor(Color.BLACK);
-            borderPaint.setStrokeWidth(0);
-            borderPaint.setStyle(Paint.Style.STROKE);
-            borderPaint.setAntiAlias(true);
-            progressPaint = new Paint();
-            progressPaint.setColor(successNoteColor);
-            progressProvider = progress;
-        }
-
-        public void draw(DisplayNote note,
-                         Canvas canvas, RectF staffBoundingBox,
-                         RectF noteBoundingBox) {
-            float lineWidth = (staffBoundingBox.bottom - staffBoundingBox.top)/4;
-            RectF drawBox = new RectF(noteBoundingBox);
-            // If note does not go outside staff, make the box a bit larger.
-            drawBox.union(drawBox.left - 0.2f * lineWidth,
-                          staffBoundingBox.top - lineWidth);
-            drawBox.union(drawBox.right + 0.2f * lineWidth,
-                          staffBoundingBox.bottom + lineWidth);
-            float radius = drawBox.width() / 3;
-            canvas.drawRoundRect(drawBox, radius, radius, highlightPaint);
-            canvas.drawRoundRect(drawBox, radius, radius, borderPaint);
-
-            float centerY;
-            float clearanceBottom = canvas.getHeight() - drawBox.bottom;
-            if (clearanceBottom > drawBox.top) {
-                centerY = drawBox.bottom + clearanceBottom / 2;
-            } else {
-                centerY = drawBox.top / 2;
-            }
-            float timerRadius = lineWidth;
-            float centerX = drawBox.left + (drawBox.right - drawBox.left) / 2;
-            RectF timerBox = new RectF(centerX - timerRadius, centerY - timerRadius,
-                                       centerX + timerRadius, centerY + timerRadius);
-            float clockDegrees = 360.0f * progressProvider.getCurrentProgress()
-                    / progressProvider.getMaxProgress();
-            canvas.drawArc(timerBox, -90, clockDegrees, true, progressPaint);
-            canvas.drawOval(timerBox, borderPaint);
-        }
     }
 }

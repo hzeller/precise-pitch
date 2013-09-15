@@ -11,6 +11,7 @@ import net.zllr.precisepitch.model.GameState;
 import net.zllr.precisepitch.view.StaffView;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class GamePlayActivity extends Activity {
     private static final String BUNDLE_ACTIVITY_STATE = "GamePlayActivity.state";
@@ -57,29 +58,32 @@ public class GamePlayActivity extends Activity {
         int otherPlayerIndex = player.getIndex() == 0 ? 1 : 0;
 
         // TODO: when we are done with all players, then there is no next player
-        // but we go to the result.
+        // but we move on to the game result activity (race/histogram - view).
         GameState.Player otherPlayer = gameState.getPlayer(otherPlayerIndex);
         nextPlayer.setBackgroundColor(otherPlayer.getColor());
         nextPlayer.setText("Next: " + otherPlayer.getName());
         nextPlayer.setVisibility(View.INVISIBLE);
         // TODO: register listener that starts GamePlayActivity with 'otherPlayer'.
-        follower = new NoteFollowRecorder(staff, new FollowListener());
+        follower = new NoteFollowRecorder(staff, new FollowEventListener());
     }
 
-    private class FollowListener implements NoteFollowRecorder.Listener {
-        public void onNoteMiss() { }
-        public void onStartNote(DisplayNote note) {
+    private class FollowEventListener implements NoteFollowRecorder.EventListener {
+        public void onStartModel(List<DisplayNote> model) { }
+        public void onFinishedModel() {
+            nextPlayer.setVisibility(View.VISIBLE);
+        }
+
+        public void onStartNote(int modelPos, DisplayNote note) {
             // TODO: create new histogram.
         }
-        public boolean isInTune(DisplayNote note, double cent) {
+        public void onSilence() {}
+        public void onNoteMiss(int diff) { }
+        public boolean isInTune(double cent, int ticksInTuneSoFar) {
             // TODO: update histogram.
             return true;
         }
-        public void onFinishedNote(DisplayNote note) {
+        public void onFinishedNote() {
             // TODO: store histogram for this note in PlayerResult
-        }
-        public void onFinishedModel() {
-            nextPlayer.setVisibility(View.VISIBLE);
         }
     };
 
