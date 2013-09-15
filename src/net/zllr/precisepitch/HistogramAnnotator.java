@@ -73,7 +73,7 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
                                  centerX, histBottom);
             RectF histBox2 = new RectF(centerX, histTop,
                                  centerX + halfWidth, histBottom);
-            //fill in histogram
+            //fill in histograms
             RectF histSlice1 = new RectF(histBox1);
             RectF histSlice2 = new RectF(histBox2);
             for (int i = 0; i < 100; i++) {
@@ -102,6 +102,7 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
                 histPaint.setColor(getJetColor(hist1.normalized(note.note, i - 50)));
                 canvas.drawRect(histSlice, histPaint);
             }
+            System.out.println("hist draw: (note: " + note.note + ")");
             canvas.drawRect(histBox, borderPaint);
         }
     }
