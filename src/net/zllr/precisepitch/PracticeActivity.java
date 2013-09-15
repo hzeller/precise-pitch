@@ -238,6 +238,9 @@ public class PracticeActivity extends Activity {
             pitchPoster.setHandler(this);
             pitchPoster.start();
             startPracticeTime = -1;
+            
+            hist = new Histogram();
+            histogramAnnotator = new HistogramAnnotator(hist);
         }
 
         // --- interface ProgressProvider
@@ -252,8 +255,7 @@ public class PracticeActivity extends Activity {
         public void handleMessage(Message msg) {
             if (!running)
                 return;  // Received a sample, but we're done already.
-            final MeasuredPitch data
-                    = (MeasuredPitch) msg.obj;
+            final MeasuredPitch data = (MeasuredPitch) msg.obj;
             int beforeTicks = ticksInTune;
 
             if (data != null) {
@@ -262,6 +264,13 @@ public class PracticeActivity extends Activity {
                 int noteDiff = (gotNote + 12 - wantNote + 6) % 12 - 6;
                 if (noteDiff == 0) {
                     ledview.setValue(data.cent);
+                    //ignore harmonics for now
+                    MeasuredPitch octaveData = new MeasuredPitch(
+                            data.frequency, wantNote, data.cent, data.decibel);
+                    hist.update(octaveData);
+                    System.out.println("hist data: (n: " + octaveData.note
+                                       + ", c: " + octaveData.cent
+                                       + ") wantNote: " + wantNote);
                     if (Math.abs(data.cent) < kCentThreshold) {
                         // for things that _are_ in tune, we record the offset
                         sumAbsoluteOffset += Math.abs(data.cent);
@@ -310,7 +319,7 @@ public class PracticeActivity extends Activity {
             if (modelPos >= 0) {
                 currentNote = model.get(modelPos);
                 currentNote.color = successNoteColor;
-                currentNote.annotator = null;
+                currentNote.annotator = histogramAnnotator;
             }
 
             ++modelPos;
@@ -339,6 +348,7 @@ public class PracticeActivity extends Activity {
         private final static int kHoldTime = 15;
         private final MicrophonePitchPoster pitchPoster;
         private final HighlightAndClockAnnotator highlightAnnotator;
+        private final HistogramAnnotator histogramAnnotator;
         private final List<DisplayNote> model;
         private long startPracticeTime;
         private float sumAbsoluteOffset;
@@ -346,6 +356,7 @@ public class PracticeActivity extends Activity {
         private int modelPos;
         private int ticksInTune;
         private boolean running;
+        private Histogram hist;
     }
 
     private void setGeneratorButtonsVisibility(int visibility) {
@@ -437,7 +448,7 @@ public class PracticeActivity extends Activity {
     private void addAscDescMajorScale(int startNote, List<DisplayNote> model) {
         addMajorScale(addMajorScale(startNote, true, model), false, model);
     }
-
+    
     private static final class HighlightAndClockAnnotator
             implements DisplayNote.Annotator {
         private final Paint highlightPaint;
