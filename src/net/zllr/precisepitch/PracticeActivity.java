@@ -125,10 +125,6 @@ public class PracticeActivity extends Activity {
     // Callbacks from the NoteFollowRecorder. We use this to record statistics.
     private class FollowEventListener implements NoteFollowRecorder.EventListener {
         public void onStartModel(NoteDocument model) {
-            histogramAnnotators = new HistogramAnnotator[model.size()];
-            for (int i = 0; i < histogramAnnotators.length; i++) {
-                histogramAnnotators[i] = new HistogramAnnotator();
-            }
             startPracticeTime = -1;
             instructions.setText("Time starts with first note.");
         }
@@ -141,6 +137,7 @@ public class PracticeActivity extends Activity {
         }
 
         public void onStartNote(int modelPos, DisplayNote note) {
+            currentHistogram = new Histogram(100);
             currentModelPos = modelPos;
             currentNote = note;
         }
@@ -159,7 +156,7 @@ public class PracticeActivity extends Activity {
             sumAbsoluteOffset += Math.abs(cent);
             absoluteOffsetCount++;
 
-            histogramAnnotators[currentModelPos].hist1.increment((int)(cent + 50.0));
+            currentHistogram.increment((int)(cent + 50.0));
 
             // Give some instructions depending on ticks in tune.
             if (ticksInTuneSoFar == 0) {
@@ -174,8 +171,8 @@ public class PracticeActivity extends Activity {
             return true; // accept everything. Accuracy recorded in histogram.
         }
         public void onFinishedNote() {
-            histogramAnnotators[currentModelPos].hist1.filter(20);
-            currentNote.annotator = histogramAnnotators[currentModelPos];
+            currentHistogram.filter(20);
+            currentNote.annotator = new HistogramAnnotator(currentHistogram, null);
         }
 
         private long startPracticeTime;
@@ -183,7 +180,7 @@ public class PracticeActivity extends Activity {
         private long absoluteOffsetCount;
         private int currentModelPos;
         private DisplayNote currentNote;
-        private HistogramAnnotator histogramAnnotators[];
+        private Histogram currentHistogram;
     }
 
     @Override

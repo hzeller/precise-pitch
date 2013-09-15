@@ -103,16 +103,4 @@ public class Histogram implements Serializable {
         
         return Color.rgb(red, green, blue);
     }
-    
-    public static int getBlackBlueColor(double value) {
-        int blue = (int)(value * 255.0);
-        int redgreen = (int)(value * 0xBB);
-        return Color.rgb(redgreen, redgreen, blue);
-    }
-    
-    public static int getBlackRedColor(double value) {
-        int red = (int)(value * 255.0);
-        int greenblue = (int)(value * 0xBB);
-        return Color.rgb(red, greenblue, greenblue);
-    }
 }
