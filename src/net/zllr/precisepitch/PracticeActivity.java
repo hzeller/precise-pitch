@@ -172,7 +172,7 @@ public class PracticeActivity extends Activity {
         }
         public void onFinishedNote() {
             currentHistogram.filter(20);
-            currentNote.annotator = new HistogramAnnotator(currentHistogram, null);
+            currentNote.annotator = new HistogramAnnotator(currentHistogram);
         }
 
         private long startPracticeTime;
