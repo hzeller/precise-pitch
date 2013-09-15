@@ -15,69 +15,12 @@
     <RelativeLayout android:layout_weight="1"
                   android:layout_height="60px"
                   android:layout_width="match_parent">
-        <!-- for first test: have a couple of buttons -->
-        <LinearLayout android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:id="@+id/linearLayout">
 
-            <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Random"
-                    android:id="@+id/randomSequence"
-                    android:layout_gravity="center_horizontal|bottom"
-                    android:paddingEnd="10dp"/>
-
-            <Button
-                android:layout_width="0px"
-                android:layout_weight="1"
+        <view
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="C"
-                android:id="@+id/newCMajor"
-                android:layout_marginTop="10dp"
-                android:layout_below="@+id/practiceStaff"
-                android:layout_toRightOf="@+id/newRandom"/>
-
-            <Button
-                    android:layout_width="0px"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="G"
-                    android:id="@+id/newGMajor"
-                    android:layout_marginTop="10dp"
-                    android:layout_below="@+id/practiceStaff"
-                    android:layout_toRightOf="@+id/newCMajor"/>
-
-            <Button
-                    android:layout_width="0px"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="D"
-                    android:id="@+id/newDMajor"
-                    android:layout_marginTop="10dp"
-                    android:layout_below="@+id/practiceStaff"
-                    android:layout_toRightOf="@+id/newGMajor"/>
-
-            <Button
-                    android:layout_width="0px"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="F"
-                    android:id="@+id/newFMajor"
-                    android:layout_marginTop="10dp"
-                    android:layout_below="@+id/practiceStaff"
-                    android:layout_toRightOf="@+id/newDMajor"/>
-
-            <Button
-                    android:layout_width="0px"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Bb"
-                    android:id="@+id/newBbMajor"
-                    android:layout_marginTop="10dp"
-                    android:layout_below="@+id/practiceStaff"
-                    android:layout_toRightOf="@+id/newFMajor"/>
-        </LinearLayout>
+                class="net.zllr.precisepitch.TuneChoiceControl"
+                android:id="@+id/tuneChoice"/>
 
         <view
                 android:layout_width="wrap_content"

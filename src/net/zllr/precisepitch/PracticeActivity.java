@@ -35,8 +35,6 @@ import java.util.List;
 
 public class PracticeActivity extends Activity {
     private static final String BUNDLE_KEY_MODEL = "PracticeActivity.model";
-
-    private static final int kMajorScaleSequence[] = { 2, 2, 1, 2, 2, 2, 1 };
     private static final int kCentThreshold = 20;
 
     // All the activity state that we need to keep track of between teardown
@@ -47,18 +45,12 @@ public class PracticeActivity extends Activity {
         }
         final ArrayList<DisplayNote> noteModel;
         int keyDisplay = 1;
-        boolean checkedRandom;
         int followPos = -1;
     };
-    private ActivityState istate;
 
+    private ActivityState istate;
+    private TuneChoiceControl tuneChoice;
     private StaffView staff;
-    private CheckBox randomTune;
-    private Button cmajor;
-    private Button gmajor;
-    private Button dmajor;
-    private Button fmajor;
-    private Button bbmajor;
     private CenterOffsetView ledview;
     private Button startbutton;
     private TextView instructions;
@@ -84,18 +76,6 @@ public class PracticeActivity extends Activity {
         // these should be replaced by: (a) Spinner (for choosing scales and randomTune)
         // and (b) direct editing.
 
-        final NoteGenerationListener noteCreator = new NoteGenerationListener();
-        randomTune = (CheckBox) findViewById(R.id.randomSequence);
-        cmajor = (Button) findViewById(R.id.newCMajor);
-        cmajor.setOnClickListener(noteCreator);
-        gmajor = (Button) findViewById(R.id.newGMajor);
-        gmajor.setOnClickListener(noteCreator);
-        dmajor = (Button) findViewById(R.id.newDMajor);
-        dmajor.setOnClickListener(noteCreator);
-        fmajor = (Button) findViewById(R.id.newFMajor);
-        fmajor.setOnClickListener(noteCreator);
-        bbmajor = (Button) findViewById(R.id.newBbMajor);
-        bbmajor.setOnClickListener(noteCreator);
         ledview = (CenterOffsetView) findViewById(R.id.practiceLedDisplay);
         ledview.setQuantization(2.5f);
         ledview.setRange(Math.min(50, kCentThreshold + 10));
@@ -128,6 +108,22 @@ public class PracticeActivity extends Activity {
         staff.setNoteModel(istate.noteModel);
 
         staff.ensureNoteInView(0);
+
+        tuneChoice = (TuneChoiceControl) findViewById(R.id.tuneChoice);
+        tuneChoice.setNoteModel(staff.getNoteModel());
+        tuneChoice.setOnChangeListener(new TuneChoiceControl.OnChangeListener() {
+            @Override
+            public void onChange(boolean wantsFlat) {
+                staff.ensureNoteInView(0);
+                staff.setKeyDisplay(wantsFlat ? 0 : 1);
+                istate.keyDisplay = staff.getKeyDisplay();
+                setActivityState(staff.getNoteModel().size() > 0
+                                         ? State.WAIT_FOR_START
+                                         : State.EMPTY_SCALE);
+                staff.onModelChanged();
+            }
+        });
+
         setActivityState(State.EMPTY_SCALE);  // need to walk this state first.
         if (!istate.noteModel.isEmpty()) {
             setActivityState(State.WAIT_FOR_START);
@@ -203,7 +199,6 @@ public class PracticeActivity extends Activity {
     protected void onPause() {
         super.onPause();
         istate.keyDisplay = staff.getKeyDisplay();
-        istate.checkedRandom = randomTune.isChecked();
         if (noteFollower != null)
             istate.followPos = noteFollower.getPosition();
         if (noteFollower != null) {
@@ -223,7 +218,6 @@ public class PracticeActivity extends Activity {
         super.onResume();
         // Do I really have to remember state for Views ?
         staff.setKeyDisplay(istate.keyDisplay);
-        randomTune.setChecked(istate.checkedRandom);
         if (noteFollower != null)
             noteFollower.resume(istate.followPos);
     }
@@ -233,59 +227,10 @@ public class PracticeActivity extends Activity {
         saveState.putSerializable(BUNDLE_KEY_MODEL, istate);
     }
 
-    // Kinda hardcoded now :)
-    private final class NoteGenerationListener implements View.OnClickListener {
-        public void onClick(View button) {
-            boolean wantsFlat = false;
-            List<DisplayNote> model = istate.noteModel;
-            int startNote = model.size() > 0 ? model.get(0).note : 0;
-            model.clear();
-
-            // Use lowest note unless that is already set: then choose one
-            // octave higher. That way, we can 'toggle' between two octaves.
-            if (button == cmajor) {
-                startNote = (startNote == 3) ? 15 : 3;
-            } else if (button == gmajor) {
-                startNote = (startNote == 10) ? 22 : 10;
-            } else if (button == dmajor) {
-                startNote = (startNote == 5) ? 17 : 5;
-            } else if (button == fmajor) {
-                startNote = (startNote == 8) ? 20 : 8;
-                wantsFlat = true;
-            } else if (button == bbmajor) {
-                startNote = (startNote == 13) ? 25 : 13;
-                wantsFlat = true;
-            }
-
-            if (randomTune.isChecked()) {
-                addRandomMajorSequence(startNote, model, 16);
-            } else {
-                addAscDescMajorScale(startNote, model);
-            }
-            staff.ensureNoteInView(0);
-            staff.setKeyDisplay(wantsFlat ? 0 : 1);
-            istate.keyDisplay = staff.getKeyDisplay();
-            setActivityState(model.size() > 0
-                                     ? State.WAIT_FOR_START
-                                     : State.EMPTY_SCALE);
-            staff.onModelChanged();
-        }
-    }
-
     private void doPractice() {
         if (istate.noteModel.isEmpty()) return;
         setActivityState(State.PRACTICE);
-        //game = new PitchFollowGame(istate.noteModel);
         noteFollower = new NoteFollowRecorder(staff, new FollowEventListener());
-    }
-
-    private void setGeneratorButtonsVisibility(int visibility) {
-        randomTune.setVisibility(visibility);
-        gmajor.setVisibility(visibility);
-        cmajor.setVisibility(visibility);
-        dmajor.setVisibility(visibility);
-        fmajor.setVisibility(visibility);
-        bbmajor.setVisibility(visibility);
     }
 
     private void setActivityState(State state) {
@@ -294,7 +239,7 @@ public class PracticeActivity extends Activity {
                 startbutton.setVisibility(View.INVISIBLE);
                 restartbutton.setVisibility(View.INVISIBLE);
                 ledview.setVisibility(View.INVISIBLE);
-                setGeneratorButtonsVisibility(View.VISIBLE);
+                tuneChoice.setVisibility(View.VISIBLE);
                 instructions.setText("Choose your chant of doom.");
                 break;
             case WAIT_FOR_START:
@@ -306,14 +251,14 @@ public class PracticeActivity extends Activity {
                 staff.onModelChanged();
                 instructions.setText("Refine or start.");
                 startbutton.setVisibility(View.VISIBLE);
-                setGeneratorButtonsVisibility(View.VISIBLE);
+                tuneChoice.setVisibility(View.VISIBLE);
                 break;
             case PRACTICE:
                 startbutton.setVisibility(View.INVISIBLE);
                 restartbutton.setVisibility(View.VISIBLE);
                 ledview.setVisibility(View.VISIBLE);
                 ledview.setDataValid(false);
-                setGeneratorButtonsVisibility(View.INVISIBLE);
+                tuneChoice.setVisibility(View.INVISIBLE);
                 break;
             case FINISHED:
                 if (noteFollower != null) {
@@ -324,48 +269,7 @@ public class PracticeActivity extends Activity {
                 restartbutton.setVisibility(View.VISIBLE);
                 ledview.setVisibility(View.INVISIBLE);
                 ledview.setDataValid(false);
-                setGeneratorButtonsVisibility(View.INVISIBLE);
+                tuneChoice.setVisibility(View.INVISIBLE);
         }
-    }
-    // Add a major scale to the model.
-    private int addMajorScale(int startNote, boolean ascending,
-                              List<DisplayNote> model) {
-        int note = startNote;
-        model.add(new DisplayNote(note, 4, Color.BLACK));
-        for (int i = 0; i < kMajorScaleSequence.length; ++i) {
-            if (ascending) {
-                note += kMajorScaleSequence[i];
-            } else {
-                note -= kMajorScaleSequence[kMajorScaleSequence.length - 1 - i ];
-            }
-            model.add(new DisplayNote(note, 4, Color.BLACK));
-        }
-        return note;
-    }
-
-    // Add a random sequence in a particular Major scale to the model.
-    private void addRandomMajorSequence(int baseNote,
-                                        List<DisplayNote> model,
-                                        int count) {
-        int seq[] = new int[kMajorScaleSequence.length + 1];
-        seq[0] = baseNote;
-        for (int i = 0; i < kMajorScaleSequence.length; ++i) {
-            seq[i+1] = seq[i] + kMajorScaleSequence[i];
-        }
-        seq[seq.length-1] = baseNote + 12;
-        int previousIndex = -1;
-        int randomIndex;
-        for (int i = 0; i < count; ++i) {
-            do {
-                // Don't do the same note twice in a sequence.
-                randomIndex = (int) Math.round((seq.length-1)* Math.random());
-            } while (randomIndex == previousIndex);
-            previousIndex = randomIndex;
-            model.add(new DisplayNote(seq[randomIndex], 4, Color.BLACK));
-        }
-    }
-
-    private void addAscDescMajorScale(int startNote, List<DisplayNote> model) {
-        addMajorScale(addMajorScale(startNote, true, model), false, model);
     }
 }
