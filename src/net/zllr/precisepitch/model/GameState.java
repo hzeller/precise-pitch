@@ -19,6 +19,7 @@ import net.zllr.precisepitch.Histogram;
 
 import java.io.Serializable;
 
+// NoteDocument for game, the available players and their results.
 public class GameState implements Serializable {
     public GameState() {
         notesToPlay = new NoteDocument();
