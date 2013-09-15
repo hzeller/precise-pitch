@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import net.zllr.precisepitch.model.DisplayNote;
 import net.zllr.precisepitch.model.GameState;
+import net.zllr.precisepitch.model.NoteDocument;
 import net.zllr.precisepitch.view.StaffView;
 
 import java.io.Serializable;
@@ -68,7 +69,7 @@ public class GamePlayActivity extends Activity {
     }
 
     private class FollowEventListener implements NoteFollowRecorder.EventListener {
-        public void onStartModel(List<DisplayNote> model) { }
+        public void onStartModel(NoteDocument model) { }
         public void onFinishedModel() {
             nextPlayer.setVisibility(View.VISIBLE);
         }

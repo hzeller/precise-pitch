@@ -9,13 +9,14 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import net.zllr.precisepitch.model.DisplayNote;
+import net.zllr.precisepitch.model.NoteDocument;
 
 import java.util.List;
 
 public class TuneChoiceControl extends LinearLayout {
     private static final int kMajorScaleSequence[] = { 2, 2, 1, 2, 2, 2, 1 };
 
-    private List<DisplayNote> model;
+    private NoteDocument model;
     private OnChangeListener changeListener;
     private CheckBox randomTune;
     private Button cmajor;
@@ -25,7 +26,7 @@ public class TuneChoiceControl extends LinearLayout {
     private Button bbmajor;
 
     public interface OnChangeListener {
-        void onChange(boolean wantsFlat);
+        void onChange();
     }
 
     public TuneChoiceControl(Context context) {
@@ -41,7 +42,7 @@ public class TuneChoiceControl extends LinearLayout {
     public void setOnChangeListener(OnChangeListener listener) {
         changeListener = listener;
     }
-    public void setNoteModel(List<DisplayNote> newModel) {
+    public void setNoteModel(NoteDocument newModel) {
         if (this.model == null)
             InitializeListeners();
         this.model = newModel;
@@ -92,15 +93,16 @@ public class TuneChoiceControl extends LinearLayout {
             } else {
                 addAscDescMajorScale(startNote, model);
             }
+            model.setFlat(wantsFlat);
             if (changeListener != null) {
-                changeListener.onChange(wantsFlat);
+                changeListener.onChange();
             }
         }
     }
 
     // Add a major scale to the model. Returns last note.
     private int addMajorScale(int startNote, boolean ascending,
-                              List<DisplayNote> model) {
+                              NoteDocument model) {
         int note = startNote;
         model.add(new DisplayNote(note, 4, Color.BLACK));
         for (int i = 0; i < kMajorScaleSequence.length; ++i) {
@@ -116,7 +118,7 @@ public class TuneChoiceControl extends LinearLayout {
 
     // Add a random sequence in a particular Major scale to the model.
     private void addRandomMajorSequence(int baseNote,
-                                        List<DisplayNote> model,
+                                        NoteDocument model,
                                         int count) {
         int seq[] = new int[kMajorScaleSequence.length + 1];
         seq[0] = baseNote;
@@ -136,7 +138,7 @@ public class TuneChoiceControl extends LinearLayout {
         }
     }
 
-    private void addAscDescMajorScale(int startNote, List<DisplayNote> model) {
+    private void addAscDescMajorScale(int startNote, NoteDocument model) {
         addMajorScale(addMajorScale(startNote, true, model), false, model);
     }
 }

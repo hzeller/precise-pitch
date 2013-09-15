@@ -83,7 +83,7 @@ public class GameSetupActivity extends Activity {
 
         staff.setNoteModel(gameState.getMutableNoteModel());
         staff.ensureNoteInView(0);
-        setEnableGameButtons(gameState.getMutableNoteModel().size() > 0);
+        setEnableGameButtons(!gameState.getMutableNoteModel().isEmpty());
 
         TuneChoiceControl tuneChoice = (TuneChoiceControl) findViewById(R.id.tuneChoice);
         tuneChoice.setOnChangeListener(new NoteModelChangeListener());
@@ -91,10 +91,9 @@ public class GameSetupActivity extends Activity {
     }
 
     private class NoteModelChangeListener implements TuneChoiceControl.OnChangeListener {
-        public void onChange(boolean wantsFlat) {
+        public void onChange() {
             staff.ensureNoteInView(0);
-            staff.setKeyDisplay(wantsFlat ? 0 : 1);
-            setEnableGameButtons(staff.getNoteModel().size() > 0);
+            setEnableGameButtons(!staff.getNoteModel().isEmpty());
             staff.onModelChanged();
         }
     }

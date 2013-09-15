@@ -23,15 +23,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.TextView;
 import net.zllr.precisepitch.model.DisplayNote;
+import net.zllr.precisepitch.model.NoteDocument;
 import net.zllr.precisepitch.view.CenterOffsetView;
 import net.zllr.precisepitch.view.StaffView;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PracticeActivity extends Activity {
     private static final String BUNDLE_KEY_MODEL = "PracticeActivity.model";
@@ -41,10 +39,9 @@ public class PracticeActivity extends Activity {
     // restart.
     private static class ActivityState implements Serializable {
         public ActivityState() {
-            noteModel = new ArrayList<DisplayNote>();
+            noteModel = new NoteDocument();
         }
-        final ArrayList<DisplayNote> noteModel;
-        int keyDisplay = 1;
+        final NoteDocument noteModel;
         int followPos = -1;
     };
 
@@ -113,13 +110,11 @@ public class PracticeActivity extends Activity {
         tuneChoice.setNoteModel(staff.getNoteModel());
         tuneChoice.setOnChangeListener(new TuneChoiceControl.OnChangeListener() {
             @Override
-            public void onChange(boolean wantsFlat) {
+            public void onChange() {
                 staff.ensureNoteInView(0);
-                staff.setKeyDisplay(wantsFlat ? 0 : 1);
-                istate.keyDisplay = staff.getKeyDisplay();
-                setActivityState(staff.getNoteModel().size() > 0
-                                         ? State.WAIT_FOR_START
-                                         : State.EMPTY_SCALE);
+                setActivityState(staff.getNoteModel().isEmpty()
+                                         ? State.EMPTY_SCALE
+                                         : State.WAIT_FOR_START);
                 staff.onModelChanged();
             }
         });
@@ -132,7 +127,7 @@ public class PracticeActivity extends Activity {
 
     // Callbacks from the NoteFollowRecorder. We use this to record statistics.
     private class FollowEventListener implements NoteFollowRecorder.EventListener {
-        public void onStartModel(List<DisplayNote> model) {
+        public void onStartModel(NoteDocument model) {
             histogramAnnotators = new HistogramAnnotator[model.size()];
             for (int i = 0; i < histogramAnnotators.length; i++) {
                 histogramAnnotators[i] = new HistogramAnnotator();
@@ -198,7 +193,6 @@ public class PracticeActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        istate.keyDisplay = staff.getKeyDisplay();
         if (noteFollower != null)
             istate.followPos = noteFollower.getPosition();
         if (noteFollower != null) {
@@ -216,8 +210,6 @@ public class PracticeActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Do I really have to remember state for Views ?
-        staff.setKeyDisplay(istate.keyDisplay);
         if (noteFollower != null)
             noteFollower.resume(istate.followPos);
     }
@@ -243,7 +235,7 @@ public class PracticeActivity extends Activity {
                 instructions.setText("Choose your chant of doom.");
                 break;
             case WAIT_FOR_START:
-                for (DisplayNote n : istate.noteModel) {
+                for (DisplayNote n : istate.noteModel.getNotes()) {
                     n.color = Color.BLACK;
                     n.annotator = null;
                 }

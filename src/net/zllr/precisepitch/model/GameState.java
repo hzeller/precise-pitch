@@ -7,7 +7,7 @@ import java.util.List;
 
 public class GameState implements Serializable {
     public GameState() {
-        notesToPlay = new ArrayList<DisplayNote>();
+        notesToPlay = new NoteDocument();
     }
 
     public static final class Player implements Serializable {
@@ -41,7 +41,7 @@ public class GameState implements Serializable {
     // notes and is to be played by each player.
     // The DisplayNotes contain annotators, that might be replaced for different
     // display situations.
-    public List<DisplayNote> getMutableNoteModel() { return notesToPlay; }
+    public NoteDocument getMutableNoteModel() { return notesToPlay; }
 
     public void setNumPlayers(int numPlayers) {
         if (playerResults != null)
@@ -66,7 +66,7 @@ public class GameState implements Serializable {
         return playerResults[player.index];
     }
 
-    private final List<DisplayNote> notesToPlay;
+    private final NoteDocument notesToPlay;
     private PlayerResult playerResults[];
     private Player players[];
 }

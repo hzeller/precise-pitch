@@ -22,6 +22,7 @@ import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.View;
 import net.zllr.precisepitch.model.DisplayNote;
+import net.zllr.precisepitch.model.NoteDocument;
 
 import java.util.*;
 
@@ -60,17 +61,17 @@ public class StaffView extends View {
     }
 
     // Set model. A list of notes to display.
-    public void setNoteModel(List<DisplayNote> model) {
-        if (model != notes) {
-            notes = model;
+    public void setNoteModel(NoteDocument model) {
+        if (model != this.model) {
+            this.model = model;
             onModelChanged();
         }
     }
 
     // Returns the model used. If you ever modify it or the contents, you need
     // to call onModelChanted()
-    public List<DisplayNote> getNoteModel() {
-        return notes;
+    public NoteDocument getNoteModel() {
+        return model;
     }
 
     // Call this method whenever the model changed (number of notes or
@@ -92,17 +93,6 @@ public class StaffView extends View {
         invalidate();
     }
 
-    // Set how the key is displayed. 0=flat, 1=sharp.
-    public void setKeyDisplay(int k) {
-        if (k != keyDisplay) {
-            keyDisplay = k;
-            invalidate();
-        }
-    }
-    public int getKeyDisplay() {
-        return keyDisplay;
-    }
-
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -114,7 +104,7 @@ public class StaffView extends View {
 
     private int getNotePosition(DisplayNote n) {
         final int octave = n.note / 12;
-        final String noteName = noteNames[keyDisplay][n.note % 12];
+        final String noteName = noteNames[model.isFlat() ? 0 : 1][n.note % 12];
         final int position = (noteName.charAt(0) - 'A') + 7 * octave;
         return position - 6;  // relative to lowest line.
     }
@@ -136,7 +126,7 @@ public class StaffView extends View {
         RectF staffBoundingBox = new RectF(0, originY, canvas.getWidth(),
                                            originY + 4 * lineDistance);
 
-        if (notesPerStaff == 0 || notes == null)
+        if (notesPerStaff == 0 || model == null)
             return;
 
         // We want notes not to be spaced too much apart
@@ -155,21 +145,21 @@ public class StaffView extends View {
             notesToDisplay = Math.max(getWidth() / noteDistance, 1);
         }
 
-        int lastNoteInModelToDisplay = notes.size() - 1;
+        int lastNoteInModelToDisplay = model.size() - 1;
         if (noteInView >= 0) {
             // place it in the middle of the view.
             lastNoteInModelToDisplay = noteInView + (notesToDisplay / 2) - 1;
         }
         lastNoteInModelToDisplay = Math.max(notesToDisplay-1, lastNoteInModelToDisplay);
-        lastNoteInModelToDisplay = Math.min(lastNoteInModelToDisplay, notes.size() - 1);
+        lastNoteInModelToDisplay = Math.min(lastNoteInModelToDisplay, model.size() - 1);
 
         // Rightmost position to display.
-        int posX = (noteDistance * Math.min(notesToDisplay, notes.size()) // rightmost note.
+        int posX = (noteDistance * Math.min(notesToDisplay, model.size()) // rightmost note.
                 - (noteDistance / 2)  // center of note is here
                 + (getWidth() - notesToDisplay * noteDistance)/2);  // center globally
 
         // TODO: add animation offset (should be a float-value 0..1).
-        ListIterator<DisplayNote> it = notes.listIterator(lastNoteInModelToDisplay + 1);
+        ListIterator<DisplayNote> it = model.getNotes().listIterator(lastNoteInModelToDisplay + 1);
         while (it.hasPrevious() && posX > -noteDistance) {
             DisplayNote n = it.previous();
             final int centerX = posX;
@@ -183,7 +173,7 @@ public class StaffView extends View {
             float barLength = 3.2f * lineDistance;
             barLength = Math.max(barLength, (notePos - 4) * lineDistance / 2);
             barLength = Math.max(barLength, (4 - notePos) * lineDistance / 2);
-            final String noteName = noteNames[keyDisplay][n.note % 12];
+            final String noteName = noteNames[model.isFlat() ? 0 : 1][n.note % 12];
             RectF noteBoundingBox = new RectF();
             final float noteOffset
                     = noteRenderer.draw(canvas, centerX, centerY,
@@ -317,9 +307,8 @@ public class StaffView extends View {
     private final Paint backgroundColor;
 
     private NoteRenderer noteRenderer;   // changes when size changes.
-    private int keyDisplay;
     private int notesPerStaff;
-    private List<DisplayNote> notes;
+    private NoteDocument model;
     private int noteInView;
 }
 

@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import net.zllr.precisepitch.model.DisplayNote;
 import net.zllr.precisepitch.model.MeasuredPitch;
+import net.zllr.precisepitch.model.NoteDocument;
 import net.zllr.precisepitch.view.StaffView;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class NoteFollowRecorder {
     private final static int kHoldTime = 15;
 
     private final StaffView staff;
-    private final List<DisplayNote> model;
+    private final NoteDocument model;
     private final EventListener eventListener;
     private final HighlightAndClockAnnotator highlightAnnotator;
     private final HandlerImplementation handler;
@@ -40,7 +41,7 @@ public class NoteFollowRecorder {
     // A eventListener for events happening while following notes.
     public interface EventListener {
         // Start following the given model.
-        void onStartModel(List<DisplayNote> model);
+        void onStartModel(NoteDocument model);
 
         // We're done following. Users might consider changing the colors of
         // the notes back.
