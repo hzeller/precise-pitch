@@ -22,7 +22,8 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
         referenceLine.setStrokeWidth(2);
 
         histPaint = new Paint();
-        histPaint.setStrokeWidth(0);
+        histPaint.setStrokeWidth(1);
+        histPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         histPaint.setAntiAlias(true);
     }
 
