@@ -33,7 +33,7 @@ import net.zllr.precisepitch.view.StaffView;
 //  - moves on until it reaches the end.
 public class NoteFollowRecorder {
     // For debugging: less whisteling needed :)
-    private static boolean isAutoFollow = true;
+    private static boolean isAutoFollow = false;
 
     // Color of notes we already have finished (green).
     private static final int kFinishedNoteColor = Color.rgb(0, 180, 0);
