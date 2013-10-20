@@ -25,6 +25,7 @@ public class GameState implements Serializable {
         notesToPlay = new NoteDocument();
     }
 
+    // Generic information about each player.
     public static final class Player implements Serializable {
         public Player(int color, String name) {
             this.color = color;
@@ -46,6 +47,7 @@ public class GameState implements Serializable {
         // more things: icon ?
     }
 
+    // The game result gathered for each player; histograms and time.
     public static final class PlayerResult implements Serializable {
         public PlayerResult(int noteCount) {
             pitchHistogram = new Histogram[noteCount];
@@ -66,7 +68,7 @@ public class GameState implements Serializable {
     // notes and is to be played by each player.
     // The DisplayNotes contain annotators, that might be replaced for different
     // display situations.
-    public NoteDocument getMutableNoteModel() { return notesToPlay; }
+    public NoteDocument getMutableNoteDocument() { return notesToPlay; }
 
     public void setNumPlayers(int numPlayers) {
         if (playerResults != null)

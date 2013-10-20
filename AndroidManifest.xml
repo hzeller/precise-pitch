@@ -49,6 +49,7 @@
             android:name="net.zllr.precisepitch.CarRaceAnimation"
             android:label="@string/title_activity_car_race_animation" >
         </activity>
+        <activity android:name=".GameResultActivity"/>
     </application>
 
 </manifest>

@@ -26,8 +26,6 @@ import android.widget.TextView;
 import net.zllr.precisepitch.model.GameState;
 import net.zllr.precisepitch.view.StaffView;
 
-import java.util.List;
-
 // Set up the game: choose notes to play and number of players.
 // (right now, a lot of stuff is copied from PracticeActivity; consolidate)
 public class GameSetupActivity extends Activity {
@@ -66,9 +64,9 @@ public class GameSetupActivity extends Activity {
         player2.setText("Start " + gameState.getPlayer(1).getName());
         player2.setOnClickListener(gameStarter);
 
-        staff.setNoteModel(gameState.getMutableNoteModel());
+        staff.setNoteModel(gameState.getMutableNoteDocument());
         staff.ensureNoteInView(0);
-        setEnableGameButtons(!gameState.getMutableNoteModel().isEmpty());
+        setEnableGameButtons(!gameState.getMutableNoteDocument().isEmpty());
 
         TuneChoiceControl tuneChoice = (TuneChoiceControl) findViewById(R.id.tuneChoice);
         tuneChoice.setOnChangeListener(new NoteModelChangeListener());

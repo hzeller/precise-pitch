@@ -17,13 +17,12 @@
 package net.zllr.precisepitch;
 
 import android.os.Handler;
-import android.widget.Toast;
 import net.zllr.precisepitch.model.MeasuredPitch;
 
 // A Debug pitch source is a source of frequencies for debugging purposes.
 public class DebugPitchSource implements PitchSource {
     public DebugPitchSource() {
-        expectedPitch = 440.0;
+        expectedPitch = 220.0;  // some sensible default.
     }
 
     // Set the frequency this source should generate from now on until

@@ -55,7 +55,7 @@ public class GamePlayActivity extends Activity {
         if (intent != null) {
             player = (GameState.Player) intent.getSerializableExtra("player");
             gameState = (GameState) intent.getSerializableExtra("state");
-            staff.setNoteModel(gameState.getMutableNoteModel());
+            staff.setNoteModel(gameState.getMutableNoteDocument());
         }
 
         TextView playerText = (TextView) findViewById(R.id.playerHeadline);
@@ -91,13 +91,21 @@ public class GamePlayActivity extends Activity {
             });
         } else {
             nextInGame.setText("To Results");
-            // Listener for results.
+            nextInGame.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View button) {
+                    Intent toGame = new Intent(getBaseContext(), GameResultActivity.class);
+                    toGame.putExtra("state", gameState);
+                    startActivity(toGame);
+                }
+            });
         }
         nextInGame.setVisibility(View.INVISIBLE);
 
         follower = new NoteFollowRecorder(staff, new FollowEventListener());
     }
 
+    // The NoteFollowRecorder returns key events while following the given
+    // staff. We use that to fill in the game state for our user.
     private class FollowEventListener implements NoteFollowRecorder.EventListener {
         public void onStartModel(NoteDocument model) {
             playerResult = new GameState.PlayerResult(model.size());
@@ -126,7 +134,7 @@ public class GamePlayActivity extends Activity {
                 startPracticeTime = System.currentTimeMillis();
                 instructions.setText("Time starts now.");
             }
-
+            currentHistogram.increment((int) (cent + 50));
             return true;  // accepting everything. Histogram counts.
         }
 
