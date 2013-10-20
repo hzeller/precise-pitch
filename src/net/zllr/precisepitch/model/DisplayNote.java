@@ -43,6 +43,11 @@ public final class DisplayNote implements Serializable {
         return on.note == note && on.duration == duration && on.color == color;
     }
 
+    // Get the frequency equivalent of this note.
+    public double getFrequency() {
+        return 55.0 * Math.exp(note * Math.log(2) / 12);
+    }
+
     // -- avoiding chatty setters and getters here, but should probably be
     // here for a self-respecting Java program :)
 

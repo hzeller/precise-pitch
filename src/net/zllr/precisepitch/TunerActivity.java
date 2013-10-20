@@ -39,7 +39,7 @@ public class TunerActivity extends Activity {
     private TextView nextNote;
     private CenterOffsetView offsetCentView;
 
-    private MicrophonePitchPoster pitchPoster;
+    private PitchSource pitchPoster;
     private ImageView earIcon;
 
     private enum KeyDisplay {
@@ -109,12 +109,12 @@ public class TunerActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        pitchPoster = new MicrophonePitchPoster(60);
+        pitchPoster = new MicrophonePitchSource();
         pitchPoster.setHandler(new UIUpdateHandler());
-        pitchPoster.start();
+        pitchPoster.startSampling();
     }
 
-    // Whenever MicrophonePitchPoster has a new note value available, it will
+    // Whenever MicrophonePitchSource has a new note value available, it will
     // post it to the message queue, received here.
     private final class UIUpdateHandler extends Handler {
         private final static int kMaxWait = 32;

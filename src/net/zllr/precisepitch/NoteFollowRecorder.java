@@ -26,14 +26,15 @@ import net.zllr.precisepitch.model.MeasuredPitch;
 import net.zllr.precisepitch.model.NoteDocument;
 import net.zllr.precisepitch.view.StaffView;
 
-import java.util.List;
-
 // Given a note model and a staff view, listen to the player and make them
 // follow the notes.
 //  - Highlights the current note to be played.
 //  - displays a 'clock' as long as note is in-tune
 //  - moves on until it reaches the end.
 public class NoteFollowRecorder {
+    // For debugging: less whisteling needed :)
+    private static boolean isAutoFollow = false;
+
     // Color of notes we already have finished (green).
     private static final int kFinishedNoteColor = Color.rgb(0, 180, 0);
     // Color of the current note to be played.
@@ -47,8 +48,8 @@ public class NoteFollowRecorder {
     private final NoteDocument model;
     private final EventListener eventListener;
     private final HighlightAndClockAnnotator highlightAnnotator;
-    private final HandlerImplementation handler;
-    private MicrophonePitchPoster pitchPoster;
+    private final PitchReceiver handler;
+    private PitchSource pitchPoster;
     private int modelPos;
     private int ticksInTune;
     private boolean running;
@@ -68,7 +69,7 @@ public class NoteFollowRecorder {
 
         // Received note is not the one currently expected in the model.
         // This is the number of half-notes it is off from what we expect.
-        // Since we fold all octaves, this can be in the range ofr +/- 6
+        // Since we fold all octaves, this can be in the range of +/- 6
         void onNoteMiss(int diff);
 
         // Didn't receive pitch data.
@@ -90,7 +91,7 @@ public class NoteFollowRecorder {
         modelPos = -1;
         advanceNote();
 
-        handler = new HandlerImplementation();
+        handler = new PitchReceiver();
         highlightAnnotator = new HighlightAndClockAnnotator(handler);
         eventListener.onStartModel(model);
         resume(0);
@@ -122,9 +123,14 @@ public class NoteFollowRecorder {
         }
         staff.ensureNoteInView(modelPos);
         if (running && pitchPoster == null) {
-            pitchPoster = new MicrophonePitchPoster(60 /*Hz*/);
+            if (isAutoFollow) {
+                pitchPoster = new DebugPitchSource();
+                ((DebugPitchSource)pitchPoster).setExpectedPitch(model.get(modelPos).getFrequency());
+            } else {
+                pitchPoster = new MicrophonePitchSource();
+            }
             pitchPoster.setHandler(handler);
-            pitchPoster.start();
+            pitchPoster.startSampling();
         }
     }
 
@@ -149,6 +155,9 @@ public class NoteFollowRecorder {
         currentNote.color = kCurrentNoteColor;
         currentNote.annotator = highlightAnnotator;
         eventListener.onStartNote(modelPos, currentNote);
+        if (isAutoFollow && pitchPoster instanceof DebugPitchSource) {
+            ((DebugPitchSource) pitchPoster).setExpectedPitch(currentNote.getFrequency());
+        }
         ticksInTune = 0;
         staff.ensureNoteInView(modelPos);
         staff.onModelChanged();
@@ -163,7 +172,9 @@ public class NoteFollowRecorder {
     // Most of our implementation is in this inner class, extending and
     // implementing other interfaces that we don't want to leak into the public
     // interface.
-    private class HandlerImplementation extends Handler implements ProgressProvider {
+
+    // The PitchReceiver receives the messages from the MicrophonePitchSource.
+    private class PitchReceiver extends Handler implements ProgressProvider {
         // --- interface ProgressProvider
         public int getMaxProgress() { return kHoldTime; }
         public int getCurrentProgress() { return ticksInTune; }
@@ -206,6 +217,7 @@ public class NoteFollowRecorder {
         }
     }
 
+    // We provide our own annotator to display the timing information.
     private static final class HighlightAndClockAnnotator implements DisplayNote.Annotator {
         private final Paint highlightPaint;
         private final Paint borderPaint;

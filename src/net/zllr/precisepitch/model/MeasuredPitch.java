@@ -23,6 +23,26 @@ public final class MeasuredPitch {
         decibel = d;
     }
 
+    // Convenience factory to create pitch data. linearVolume range is 0..1
+    public static MeasuredPitch createPitchData(double frequency,
+                                                double linearVolume) {
+        final double kPitchA = 440.0; // Hz.
+        final double base = kPitchA / 8; // The A just below our C string (55Hz)
+        final double d = Math.exp(Math.log(2) / 1200);
+        final double cent_above_base = Math.log(frequency / base) / Math.log(d);
+        final int scale_above_C = (int)Math.round(cent_above_base / 100.0) - 3;
+        if (scale_above_C < 0) {
+            return null;
+        }
+
+        // Press into regular scale
+        double scale = cent_above_base / 100.0;
+        final int rounded = (int) Math.round(scale);
+        final double cent = 100 * (scale - rounded);
+        final double vu_db = 20 * (Math.log(linearVolume) / Math.log(10));
+        return new MeasuredPitch(frequency, rounded, cent, vu_db);
+    }
+
     // Raw frequency.
     public final double frequency;
 

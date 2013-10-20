@@ -1,0 +1,70 @@
+package net.zllr.precisepitch;
+
+import android.os.Handler;
+import android.widget.Toast;
+import net.zllr.precisepitch.model.MeasuredPitch;
+
+// A Debug pitch source is a source of frequencies for debugging purposes.
+public class DebugPitchSource implements PitchSource {
+    public DebugPitchSource() {
+        expectedPitch = 440.0;
+    }
+
+    // Set the frequency this source should generate from now on until
+    // changed.
+    // This could do some jitter up and down to simulate non-precise pitches,
+    public synchronized void setExpectedPitch(double frequency) {
+        expectedPitch = frequency;
+    }
+    private synchronized double getExpectedPitch() { return expectedPitch; }
+
+    @Override
+    public void setHandler(Handler handler) {
+        this.handler = handler;
+    }
+
+    @Override
+    public void startSampling() {
+        if (runner != null) return; // already running.
+        runner = new PitchGenerator();
+        runner.start();
+    }
+
+    @Override
+    public void stopSampling() {
+        if (runner != null) {
+            runner.windDown();
+            runner = null;
+        }
+    }
+
+    private class PitchGenerator extends Thread {
+        public PitchGenerator() { running = true; }
+        public void run() {
+            while (isRunning()) {
+                try {
+                    Thread.sleep(25);  // a bit faster than usual.
+                }
+                catch (InterruptedException e) {
+                    continue;
+                }
+                final MeasuredPitch nc = MeasuredPitch.createPitchData(getExpectedPitch(), 1);
+                if (handler != null) {
+                    handler.sendMessage(handler.obtainMessage(0, nc));
+                }
+            }
+        }
+
+        private synchronized boolean isRunning() { return running; }
+        public synchronized void windDown() {
+            running = false;
+            interrupt();
+        }
+
+        private boolean running;
+    }
+
+    private double expectedPitch;
+    private Handler handler;
+    private PitchGenerator runner;
+}
