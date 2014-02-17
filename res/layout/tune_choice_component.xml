@@ -17,6 +17,14 @@
                 android:layout_width="0px"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:text="Seq"
+                android:id="@+id/tcNewSeq"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:text="C"
                 android:id="@+id/tcNewCMajor"
                 android:layout_marginTop="10dp"/>

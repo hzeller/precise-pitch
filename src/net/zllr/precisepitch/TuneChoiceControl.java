@@ -39,6 +39,8 @@ public class TuneChoiceControl extends LinearLayout {
     private Button dmajor;
     private Button fmajor;
     private Button bbmajor;
+    
+    private Button seq;
 
     public interface OnChangeListener {
         void onChange();
@@ -65,6 +67,7 @@ public class TuneChoiceControl extends LinearLayout {
 
     private void InitializeListeners() {
         final NoteGenerationListener noteCreator = new NoteGenerationListener();
+        final FixedNoteSequenceListener seqCreator = new FixedNoteSequenceListener();
         randomTune = (CheckBox) findViewById(R.id.tcRandomSequence);
         cmajor = (Button) findViewById(R.id.tcNewCMajor);
         cmajor.setOnClickListener(noteCreator);
@@ -76,8 +79,93 @@ public class TuneChoiceControl extends LinearLayout {
         fmajor.setOnClickListener(noteCreator);
         bbmajor = (Button) findViewById(R.id.tcNewBbMajor);
         bbmajor.setOnClickListener(noteCreator);
+        
+        seq = (Button) findViewById(R.id.tcNewSeq);
+        seq.setOnClickListener(seqCreator);
     }
 
+    private final class FixedNoteSequenceListener implements View.OnClickListener {
+        public void onClick(View button) {
+            if (model == null) {
+                return;
+            }
+            
+            int fifthNote = model.size() >= 5 ? model.get(4).note : 0;
+            model.clear();
+            
+            if (button == seq) {
+            
+                if (fifthNote == 0 || fifthNote == 7) {
+                    model.add(new DisplayNote(19, 4, Color.BLACK));
+                    model.add(new DisplayNote(23, 4, Color.BLACK));
+                    model.add(new DisplayNote(20, 4, Color.BLACK));
+                    model.add(new DisplayNote(23, 4, Color.BLACK));
+                    
+                    model.add(new DisplayNote(17, 4, Color.BLACK));
+                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    model.add(new DisplayNote(14, 4, Color.BLACK));
+                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    
+                    model.add(new DisplayNote(19, 4, Color.BLACK));
+                    model.add(new DisplayNote(23, 4, Color.BLACK));
+                    model.add(new DisplayNote(20, 4, Color.BLACK));
+                    model.add(new DisplayNote(19, 4, Color.BLACK));
+                    
+                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    model.add(new DisplayNote(12, 4, Color.BLACK));
+                    model.add(new DisplayNote(14, 4, Color.BLACK));
+                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                } else if (fifthNote == 17) {
+                    model.add(new DisplayNote(19, 4, Color.BLACK));
+                    model.add(new DisplayNote(23, 4, Color.BLACK));
+                    model.add(new DisplayNote(20, 4, Color.BLACK));
+                    model.add(new DisplayNote(23, 4, Color.BLACK));
+                    
+                    model.add(new DisplayNote(19, 4, Color.BLACK));
+                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    model.add(new DisplayNote(19, 4, Color.BLACK));
+                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    
+                    model.add(new DisplayNote(14, 4, Color.BLACK));
+                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    model.add(new DisplayNote(12, 4, Color.BLACK));
+                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    
+                    model.add(new DisplayNote(10, 4, Color.BLACK));
+                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    model.add(new DisplayNote(14, 4, Color.BLACK));
+                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                } else if (fifthNote == 19) {
+                    model.add(new DisplayNote(5, 4, Color.BLACK));
+                    model.add(new DisplayNote(9, 4, Color.BLACK));
+                    model.add(new DisplayNote(12, 4, Color.BLACK));
+                    model.add(new DisplayNote(9, 4, Color.BLACK));
+                    
+                    model.add(new DisplayNote(7, 4, Color.BLACK));
+                    model.add(new DisplayNote(9, 4, Color.BLACK));
+                    model.add(new DisplayNote(5, 4, Color.BLACK));
+                    model.add(new DisplayNote(9, 4, Color.BLACK));
+                    
+                    model.add(new DisplayNote(7, 4, Color.BLACK));
+                    model.add(new DisplayNote(10, 4, Color.BLACK));
+                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    model.add(new DisplayNote(12, 4, Color.BLACK));
+                    
+                    model.add(new DisplayNote(9, 4, Color.BLACK));
+                    model.add(new DisplayNote(5, 4, Color.BLACK));
+                    model.add(new DisplayNote(9, 4, Color.BLACK));
+                    model.add(new DisplayNote(5, 4, Color.BLACK));
+                }
+            }
+            
+            model.setFlat(false);
+            if (changeListener != null) {
+                changeListener.onChange();
+            }
+        }
+    }
+    
+    
     // Kinda hardcoded now :)
     private final class NoteGenerationListener implements View.OnClickListener {
         public void onClick(View button) {
@@ -85,28 +173,73 @@ public class TuneChoiceControl extends LinearLayout {
                 return;
             boolean wantsFlat = false;
             int startNote = model.size() > 0 ? model.get(0).note : 0;
+            int eighthNote = model.size() >= 8 ? model.get(7).note : -1;
+            int ninthNote = model.size() >= 9 ? model.get(8).note : -2;
             model.clear();
 
             // Use lowest note unless that is already set: then choose one
             // octave higher. That way, we can 'toggle' between two octaves.
             if (button == cmajor) {
-                startNote = (startNote == 3) ? 15 : 3;
+                //startNote = (startNote == 3) ? 15 : 3;
+                if (startNote == 3) {
+                    startNote = (ninthNote == eighthNote) ? 3 : 15;
+                } else if (startNote == 15) {
+                    startNote = 15 + 12;
+                } else {
+                    startNote = 3;
+                }
             } else if (button == gmajor) {
-                startNote = (startNote == 10) ? 22 : 10;
+                //startNote = (startNote == 10) ? 22 : 10;
+                if (startNote == 10) {
+                    startNote = (ninthNote == eighthNote) ? 10 : 22;
+                } else if (startNote == 22) {
+                    startNote = 22 + 12;
+                } else {
+                    startNote = 10;
+                }
             } else if (button == dmajor) {
-                startNote = (startNote == 5) ? 17 : 5;
+                //startNote = (startNote == 5) ? 17 : 5;
+                if (startNote == 5) {
+                    startNote = (ninthNote == eighthNote) ? 5 : 17;
+                } else if (startNote == 17) {
+                    startNote = 17 + 12;
+                } else {
+                    startNote = 5;
+                }
             } else if (button == fmajor) {
-                startNote = (startNote == 8) ? 20 : 8;
+                //startNote = (startNote == 8) ? 20 : 8;
+                if (startNote == 8) {
+                    startNote = (ninthNote == eighthNote) ? 8 : 20;
+                } else if (startNote == 20) {
+                    startNote = 20 + 12;
+                } else {
+                    startNote = 8;
+                }
                 wantsFlat = true;
             } else if (button == bbmajor) {
-                startNote = (startNote == 13) ? 25 : 13;
+                //startNote = (startNote == 13) ? 25 : 13;
+                if (startNote == 13) {
+                    startNote = (ninthNote == eighthNote) ? 13 : 25;
+                } else if (startNote == 25) {
+                    startNote = 25 + 12;
+                } else {
+                    startNote = 13;
+                }
                 wantsFlat = true;
             }
 
             if (randomTune.isChecked()) {
                 addRandomMajorSequence(startNote, model, 16);
             } else {
-                addAscDescMajorScale(startNote, model);
+                if (ninthNote == eighthNote) {
+                    if (startNote >= 15) {
+                        addDescTwoOctaveMajorScale(startNote, model);
+                    } else {
+                        addAscTwoOctaveMajorScale(startNote, model);
+                    }
+                } else {
+                    addAscDescMajorScale(startNote, model);
+                }
             }
             model.setFlat(wantsFlat);
             if (changeListener != null) {
@@ -155,5 +288,17 @@ public class TuneChoiceControl extends LinearLayout {
 
     private void addAscDescMajorScale(int startNote, NoteDocument model) {
         addMajorScale(addMajorScale(startNote, true, model), false, model);
+    }
+    
+    private void addAscTwoOctaveMajorScale(int startNote, NoteDocument model) {
+        int next = addMajorScale(startNote, true, model);
+        model.pop();
+        addMajorScale(next, true, model);
+    }
+    
+    private void addDescTwoOctaveMajorScale(int startNote, NoteDocument model) {
+        int next = addMajorScale(startNote, false, model);
+        model.pop();
+        addMajorScale(next, false, model);
     }
 }

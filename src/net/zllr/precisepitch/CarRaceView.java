@@ -86,7 +86,10 @@ public class CarRaceView extends SurfaceView
 
 
 
-    
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        if (!hasWindowFocus) thread.setRunning(false);
+    }
     
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format,

@@ -29,6 +29,7 @@ public class NoteDocument implements Serializable {
     public boolean isEmpty() { return notes.isEmpty(); }
     public int size() { return notes.size(); }
     public void clear() { notes.clear(); }
+    public void pop() { notes.remove(notes.size() - 1); }
     public DisplayNote get(int i) { return notes.get(i); }
     public void add(DisplayNote n) { notes.add(n); }
 

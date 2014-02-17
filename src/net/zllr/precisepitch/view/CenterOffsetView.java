@@ -175,12 +175,28 @@ public class CenterOffsetView extends View {
                                 filledRedCirclePaint);
             } else {
                 Paint paint;
-                if (i == 0 && Math.abs(highlightStep) <= 3)
+                /*
+                if (i == 0 && Math.abs(highlightStep) <= 3) {
                     paint = filledGreenCirclePaint;   // Show always on zero when highlight is in range.
-                else if (i != 0 && highlightStep == i)
+                } else if (i != 0 && highlightStep == i) {
                     paint = filledRedCirclePaint;
-                else
+                } else {
                     paint = emptyCirclePaint;
+                }
+                */
+                if (Math.abs(highlightStep) <= 3) {
+                    paint = filledGreenCirclePaint;
+                } else {
+                    paint = filledRedCirclePaint;
+                }
+                
+                if (highlightStep < 0 && (i < highlightStep || i > 0)) {
+                    paint = emptyCirclePaint;
+                }
+                
+                if (highlightStep >= 0 && (i > highlightStep || i < 0)) {
+                    paint = emptyCirclePaint;
+                }
                 canvas.drawCircle(centerX, kHeight/2, radius, paint);
             }
         }
