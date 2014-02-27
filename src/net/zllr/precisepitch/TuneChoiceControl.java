@@ -98,7 +98,7 @@ public class TuneChoiceControl extends LinearLayout {
                 if (fifthNote == 0 || fifthNote == 7) {
                     model.add(new DisplayNote(19, 4, Color.BLACK));
                     model.add(new DisplayNote(23, 4, Color.BLACK));
-                    model.add(new DisplayNote(20, 4, Color.BLACK));
+                    model.add(new DisplayNote(21, 4, Color.BLACK));
                     model.add(new DisplayNote(23, 4, Color.BLACK));
                     
                     model.add(new DisplayNote(17, 4, Color.BLACK));
@@ -108,7 +108,7 @@ public class TuneChoiceControl extends LinearLayout {
                     
                     model.add(new DisplayNote(19, 4, Color.BLACK));
                     model.add(new DisplayNote(23, 4, Color.BLACK));
-                    model.add(new DisplayNote(20, 4, Color.BLACK));
+                    model.add(new DisplayNote(21, 4, Color.BLACK));
                     model.add(new DisplayNote(19, 4, Color.BLACK));
                     
                     model.add(new DisplayNote(16, 4, Color.BLACK));
@@ -118,7 +118,7 @@ public class TuneChoiceControl extends LinearLayout {
                 } else if (fifthNote == 17) {
                     model.add(new DisplayNote(19, 4, Color.BLACK));
                     model.add(new DisplayNote(23, 4, Color.BLACK));
-                    model.add(new DisplayNote(20, 4, Color.BLACK));
+                    model.add(new DisplayNote(21, 4, Color.BLACK));
                     model.add(new DisplayNote(23, 4, Color.BLACK));
                     
                     model.add(new DisplayNote(19, 4, Color.BLACK));
