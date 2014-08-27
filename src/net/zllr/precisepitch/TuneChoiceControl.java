@@ -37,8 +37,13 @@ public class TuneChoiceControl extends LinearLayout {
     private Button cmajor;
     private Button gmajor;
     private Button dmajor;
+    private Button amajor;
+    private Button emajor;
+    private Button abmajor;
+    private Button ebmajor;
     private Button fmajor;
     private Button bbmajor;
+    
     
     private Button seq;
 
@@ -75,6 +80,14 @@ public class TuneChoiceControl extends LinearLayout {
         gmajor.setOnClickListener(noteCreator);
         dmajor = (Button) findViewById(R.id.tcNewDMajor);
         dmajor.setOnClickListener(noteCreator);
+        amajor = (Button) findViewById(R.id.tcNewAMajor);
+        amajor.setOnClickListener(noteCreator);
+        emajor = (Button) findViewById(R.id.tcNewEMajor);
+        emajor.setOnClickListener(noteCreator);
+        abmajor = (Button) findViewById(R.id.tcNewAbMajor);
+        abmajor.setOnClickListener(noteCreator);
+        ebmajor = (Button) findViewById(R.id.tcNewEbMajor);
+        ebmajor.setOnClickListener(noteCreator);
         fmajor = (Button) findViewById(R.id.tcNewFMajor);
         fmajor.setOnClickListener(noteCreator);
         bbmajor = (Button) findViewById(R.id.tcNewBbMajor);
@@ -206,6 +219,40 @@ public class TuneChoiceControl extends LinearLayout {
                 } else {
                     startNote = 5;
                 }
+            } else if (button == amajor) {
+                if (startNote == 12) {
+                    startNote = (ninthNote == eighthNote) ? 12 : 24;
+                } else if (startNote == 24) {
+                    startNote = 24 + 12;
+                } else {
+                    startNote = 12;
+                }
+            } else if (button == emajor) {
+                if (startNote == 7) {
+                    startNote = (ninthNote == eighthNote) ? 7 : 19;
+                } else if (startNote == 19) {
+                    startNote = 19 + 12;
+                } else {
+                    startNote = 7;
+                }
+            } else if (button == abmajor) {
+                if (startNote == 11) {
+                    startNote = (ninthNote == eighthNote) ? 11 : 23;
+                } else if (startNote == 23) {
+                    startNote = 23 + 12;
+                } else {
+                    startNote = 11;
+                }
+                wantsFlat = true;
+            } else if (button == ebmajor) {
+                if (startNote == 6) {
+                    startNote = (ninthNote == eighthNote) ? 6 : 18;
+                } else if (startNote == 18) {
+                    startNote = 18 + 12;
+                } else {
+                    startNote = 6;
+                }
+                wantsFlat = true;
             } else if (button == fmajor) {
                 //startNote = (startNote == 8) ? 20 : 8;
                 if (startNote == 8) {

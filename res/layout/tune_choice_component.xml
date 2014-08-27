@@ -49,6 +49,38 @@
                 android:layout_width="0px"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:text="A"
+                android:id="@+id/tcNewAMajor"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="E"
+                android:id="@+id/tcNewEMajor"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Ab"
+                android:id="@+id/tcNewAbMajor"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Eb"
+                android:id="@+id/tcNewEbMajor"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:text="F"
                 android:id="@+id/tcNewFMajor"
                 android:layout_marginTop="10dp"/>
