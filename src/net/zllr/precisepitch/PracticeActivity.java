@@ -129,9 +129,8 @@ public class PracticeActivity extends Activity {
             instructions.setText("Time starts with first note.");
         }
         public void onFinishedModel() {
-            final long duration = System.currentTimeMillis() - startPracticeTime;
-            instructions.setText(String.format("%3.1f seconds; When in range, average %.1f cent off.",
-                                               duration / 1000.0,
+            //final long duration = System.currentTimeMillis() - startPracticeTime;
+            instructions.setText(String.format("Average %.1f cent off.",
                                                sumAbsoluteOffset / absoluteOffsetCount));
             setActivityState(State.FINISHED);
         }
@@ -165,7 +164,7 @@ public class PracticeActivity extends Activity {
                 }
             } else if (startPracticeTime < 0 && ticksInTuneSoFar > 5) {
                 startPracticeTime = System.currentTimeMillis();
-                instructions.setText("Time starts now.");
+                instructions.setText("Now we are on.");
             }
 
             return true; // accept everything. Accuracy recorded in histogram.

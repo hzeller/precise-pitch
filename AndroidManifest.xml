@@ -35,7 +35,8 @@
         </activity>
         <activity
             android:name="net.zllr.precisepitch.PracticeActivity"
-            android:label="@string/practice_note_sequences" >
+            android:label="@string/practice_note_sequences"
+	    android:screenOrientation="landscape">
         </activity>
         <activity
             android:name="net.zllr.precisepitch.GameSetupActivity"
