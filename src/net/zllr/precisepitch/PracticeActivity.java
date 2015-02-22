@@ -27,6 +27,9 @@ import net.zllr.precisepitch.view.CenterOffsetView;
 import net.zllr.precisepitch.view.StaffView;
 
 import java.io.Serializable;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Stack;
 
 public class PracticeActivity extends Activity {
     private static final String BUNDLE_KEY_MODEL = "PracticeActivity.model";
@@ -48,8 +51,10 @@ public class PracticeActivity extends Activity {
     private CenterOffsetView ledview;
     private Button startbutton;
     private TextView instructions;
-    private Button restartbutton;
+    private Button newPractice;
+    private Button canDoBetter;
     private NoteFollowRecorder noteFollower;
+    private Deque<Double> practiceResult;
 
     private enum State {
         EMPTY_SCALE,     // initial state or after 'clear'
@@ -66,6 +71,7 @@ public class PracticeActivity extends Activity {
         staff = (StaffView) findViewById(R.id.practiceStaff);
         staff.setNotesPerStaff(16);
 
+        practiceResult = new ArrayDeque<Double>();
         // For now we have a couple of buttons to create some basics, but
         // these should be replaced by: (a) Spinner (for choosing scales and randomTune)
         // and (b) direct editing.
@@ -82,15 +88,26 @@ public class PracticeActivity extends Activity {
                 doPractice();
             }
         });
-        restartbutton = (Button) findViewById(R.id.practiceRestartButton);
-        restartbutton.setOnClickListener(new View.OnClickListener() {
+        newPractice = (Button) findViewById(R.id.newPractice);
+        newPractice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Walk our view to the start screen to choose tune, but also
+                // offer start-button, as things are already chosen.
                 setActivityState(State.FINISHED);
                 setActivityState(State.EMPTY_SCALE);
                 setActivityState(State.WAIT_FOR_START);  // We already have notes
             }
         });
+        canDoBetter = (Button) findViewById(R.id.canDoBetterButton);
+        canDoBetter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setActivityState(State.WAIT_FOR_START);
+                doPractice();
+            }
+        });
+
         instructions = (TextView) findViewById(R.id.practiceInstructions);
 
         if (savedInstanceState != null) {
@@ -122,17 +139,36 @@ public class PracticeActivity extends Activity {
         }
     }
 
+    // TODO: remember practice result per model and persist.
+    private void addPracticeResult(double centOff) {
+        practiceResult.addFirst(centOff);
+        while (practiceResult.size() > 3) {
+            practiceResult.removeLast();
+        }
+    }
+
     // Callbacks from the NoteFollowRecorder. We use this to record statistics.
     private class FollowEventListener implements NoteFollowRecorder.EventListener {
         public void onStartModel(NoteDocument model) {
             startPracticeTime = -1;
-            instructions.setText("Time starts with first note.");
+            instructions.setText("Game starts with first note.");
         }
         public void onFinishedModel() {
-            //final long duration = System.currentTimeMillis() - startPracticeTime;
-            instructions.setText(String.format("Average %.1f cent off.",
-                                               sumAbsoluteOffset / absoluteOffsetCount));
+            final double centOff = sumAbsoluteOffset / absoluteOffsetCount;
+            String result = String.format("Average %.1f¢ off", centOff);
+            if (practiceResult.size() > 0) {
+                result += " (last: ";
+                boolean isFirst = true;
+                for (Double d : practiceResult) {
+                    result += String.format("%s%.1f", isFirst ? "" : ", ", d);
+                    isFirst = false;
+                }
+                result += ")";
+            }
+            result += ".";
+            instructions.setText(result);
             setActivityState(State.FINISHED);
+            addPracticeResult(centOff);
         }
 
         public void onStartNote(int modelPos, DisplayNote note) {
@@ -217,11 +253,15 @@ public class PracticeActivity extends Activity {
         noteFollower = new NoteFollowRecorder(staff, new FollowEventListener());
     }
 
+    // Depending on the state we're in, enable/disable the
+    // visibility of things.
     private void setActivityState(State state) {
         switch (state) {
             case EMPTY_SCALE:
+                practiceResult.clear();
                 startbutton.setVisibility(View.INVISIBLE);
-                restartbutton.setVisibility(View.INVISIBLE);
+                newPractice.setVisibility(View.INVISIBLE);
+                canDoBetter.setVisibility(View.INVISIBLE);
                 ledview.setVisibility(View.INVISIBLE);
                 tuneChoice.setVisibility(View.VISIBLE);
                 instructions.setText("Choose your chant of doom.");
@@ -233,13 +273,14 @@ public class PracticeActivity extends Activity {
                 }
                 staff.ensureNoteInView(0);
                 staff.onModelChanged();
-                instructions.setText("Refine or start.");
+                instructions.setText("");
                 startbutton.setVisibility(View.VISIBLE);
                 tuneChoice.setVisibility(View.VISIBLE);
                 break;
             case PRACTICE:
                 startbutton.setVisibility(View.INVISIBLE);
-                restartbutton.setVisibility(View.VISIBLE);
+                newPractice.setVisibility(View.VISIBLE);
+                canDoBetter.setVisibility(View.INVISIBLE);
                 ledview.setVisibility(View.VISIBLE);
                 ledview.setDataValid(false);
                 tuneChoice.setVisibility(View.INVISIBLE);
@@ -250,7 +291,8 @@ public class PracticeActivity extends Activity {
                     noteFollower = null;
                 }
                 startbutton.setVisibility(View.INVISIBLE);
-                restartbutton.setVisibility(View.VISIBLE);
+                newPractice.setVisibility(View.VISIBLE);
+                canDoBetter.setVisibility(View.VISIBLE);
                 ledview.setVisibility(View.INVISIBLE);
                 ledview.setDataValid(false);
                 tuneChoice.setVisibility(View.INVISIBLE);

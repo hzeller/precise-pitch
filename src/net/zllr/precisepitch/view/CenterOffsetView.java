@@ -201,7 +201,7 @@ public class CenterOffsetView extends View {
             }
         }
         if (Math.abs(value) <= range) {
-            canvas.drawText(String.format("%+.0fc", value),
+            canvas.drawText(String.format("%+.0f¢", value),
                             kWidth/2, textY, centAnnotationPaint);
         }
     }
