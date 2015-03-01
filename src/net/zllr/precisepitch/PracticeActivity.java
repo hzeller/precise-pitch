@@ -24,16 +24,22 @@ import android.widget.TextView;
 import net.zllr.precisepitch.model.DisplayNote;
 import net.zllr.precisepitch.model.NoteDocument;
 import net.zllr.precisepitch.view.CenterOffsetView;
+import net.zllr.precisepitch.view.CombineAnnotator;
+import net.zllr.precisepitch.view.HighlightAnnotator;
 import net.zllr.precisepitch.view.StaffView;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Stack;
 
 public class PracticeActivity extends Activity {
     private static final String BUNDLE_KEY_MODEL = "PracticeActivity.model";
     private static final int kCentThreshold = 20;
+    private static final int kHighlightColors[] = {
+            Color.argb(70, 0xff, 0, 0),     // red
+            Color.argb(70, 0xff, 0x80, 0),  // orange
+            Color.argb(70, 0xff, 0xff, 0),   // yellow
+    };
 
     // All the activity state that we need to keep track of between teardown
     // restart.
@@ -151,9 +157,30 @@ public class PracticeActivity extends Activity {
     private class FollowEventListener implements NoteFollowRecorder.EventListener {
         public void onStartModel(NoteDocument model) {
             startPracticeTime = -1;
+            positionalResult = new float [model.size()];
             instructions.setText("Game starts with first note.");
         }
-        public void onFinishedModel() {
+
+        public void onFinishedModel(NoteDocument model) {
+            // Now, annotate the worst notes. We could sort the whole list, but for the handful
+            // of values in there, it is cheaper to just go through it
+            for (int hidx= 0; hidx < Math.min(kHighlightColors.length, positionalResult.length); hidx++) {
+                // Find worst
+                int worst = 0;
+                float val = -1;
+                for (int i = 0; i < positionalResult.length; ++i) {
+                    if (positionalResult[i] > val) {
+                        val = positionalResult[i];
+                        worst = i;
+                    }
+                }
+                positionalResult[worst] = -1;
+                DisplayNote.Annotator oldAnnotator = model.get(worst).annotator;
+                CombineAnnotator combined = new CombineAnnotator();
+                combined.addAnnotator(oldAnnotator);
+                combined.addAnnotator(new HighlightAnnotator(kHighlightColors[hidx]));
+                model.get(worst).annotator = combined;
+            }
             final double centOff = sumAbsoluteOffset / absoluteOffsetCount;
             String result = String.format("Average %.1f¢ off", centOff);
             if (practiceResult.size() > 0) {
@@ -173,23 +200,28 @@ public class PracticeActivity extends Activity {
 
         public void onStartNote(int modelPos, DisplayNote note) {
             currentHistogram = new Histogram(100);
+            currentNoteOffsetCount = 0;
+            sumCurrentNoteOffset = 0;
             currentModelPos = modelPos;
             currentNote = note;
         }
+
         public void onSilence() {
             ledview.setDataValid(false);
         }
+
         public void onNoteMiss(int diff) {
             ledview.setDataValid(true);
             ledview.setValue(diff * 100);  // displays too low/high arrows
         }
+
         public boolean isInTune(double cent, int ticksInTuneSoFar) {
             ledview.setDataValid(true);
             ledview.setValue(cent);
             // The following stat can probably go as we can determine a better
             // score out of the histogram data.
-            sumAbsoluteOffset += Math.abs(cent);
-            absoluteOffsetCount++;
+            sumCurrentNoteOffset += Math.abs(cent);
+            currentNoteOffsetCount++;
 
             currentHistogram.increment((int)(cent + 50.0));
 
@@ -205,14 +237,24 @@ public class PracticeActivity extends Activity {
 
             return true; // accept everything. Accuracy recorded in histogram.
         }
+
         public void onFinishedNote() {
+            sumAbsoluteOffset += sumCurrentNoteOffset;
+            absoluteOffsetCount += currentNoteOffsetCount;
             currentHistogram.filter(20);
             currentNote.annotator = new HistogramAnnotator(currentHistogram);
+            positionalResult[currentModelPos] = sumCurrentNoteOffset / currentNoteOffsetCount;
         }
 
         private long startPracticeTime;
         private float sumAbsoluteOffset;
         private long absoluteOffsetCount;
+
+        private float sumCurrentNoteOffset;
+        private long currentNoteOffsetCount;
+
+        float positionalResult[];
+
         private int currentModelPos;
         private DisplayNote currentNote;
         private Histogram currentHistogram;

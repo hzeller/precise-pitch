@@ -24,6 +24,8 @@ import android.os.Message;
 import net.zllr.precisepitch.model.DisplayNote;
 import net.zllr.precisepitch.model.MeasuredPitch;
 import net.zllr.precisepitch.model.NoteDocument;
+import net.zllr.precisepitch.view.CombineAnnotator;
+import net.zllr.precisepitch.view.HighlightAnnotator;
 import net.zllr.precisepitch.view.StaffView;
 
 // Given a note model and a staff view, listen to the player and make them
@@ -33,7 +35,7 @@ import net.zllr.precisepitch.view.StaffView;
 //  - moves on until it reaches the end.
 public class NoteFollowRecorder {
     // For debugging: less whisteling needed :)
-    private static boolean isAutoFollow = false;
+    private static boolean isAutoFollow = true;
 
     // Color of notes we already have finished (green).
     private static final int kFinishedNoteColor = Color.rgb(0, 180, 0);
@@ -42,12 +44,13 @@ public class NoteFollowRecorder {
     // Color of notes to play later (grayed out).
     private static final int kFutureNoteColor = Color.rgb(200, 200, 200);
 
+    private static final int kHightlightColor = Color.argb(70, 0xff, 0xff, 0);
     private final static int kHoldTime = 15;
 
     private final StaffView staff;
     private final NoteDocument model;
     private final EventListener eventListener;
-    private final HighlightAndClockAnnotator highlightAnnotator;
+    private final CombineAnnotator highlightAnnotator;
     private final PitchReceiver handler;
     private PitchSource pitchPoster;
     private int modelPos;
@@ -61,7 +64,7 @@ public class NoteFollowRecorder {
 
         // We're done following. Users might consider changing the colors of
         // the notes back.
-        void onFinishedModel();
+        void onFinishedModel(NoteDocument model);
 
         // Start a new note. The following calls until onFinishNote() will
         // be in this context.
@@ -92,7 +95,9 @@ public class NoteFollowRecorder {
         advanceNote();
 
         handler = new PitchReceiver();
-        highlightAnnotator = new HighlightAndClockAnnotator(handler);
+        highlightAnnotator = new CombineAnnotator();
+        highlightAnnotator.addAnnotator(new ClockAnnotator(handler));
+        highlightAnnotator.addAnnotator(new HighlightAnnotator(kHightlightColor));
         eventListener.onStartModel(model);
         resume(0);
     }
@@ -147,7 +152,7 @@ public class NoteFollowRecorder {
         if (modelPos >= model.size()) {
             pause();
             running = false;
-            eventListener.onFinishedModel();
+            eventListener.onFinishedModel(model);
             staff.onModelChanged();  // post the last change.
             return;
         }
@@ -218,16 +223,12 @@ public class NoteFollowRecorder {
     }
 
     // We provide our own annotator to display the timing information.
-    private static final class HighlightAndClockAnnotator implements DisplayNote.Annotator {
-        private final Paint highlightPaint;
-        private final Paint borderPaint;
+    private static final class ClockAnnotator implements DisplayNote.Annotator {
         private final Paint progressPaint;
+        private final Paint borderPaint;
         private final ProgressProvider progressProvider;
 
-        public HighlightAndClockAnnotator(ProgressProvider progress) {
-            highlightPaint = new Paint();
-            highlightPaint.setColor(Color.argb(70, 0xff, 0xff, 0));
-            highlightPaint.setStrokeWidth(0);
+        public ClockAnnotator(ProgressProvider progress) {
             borderPaint = new Paint();
             borderPaint.setColor(Color.BLACK);
             borderPaint.setStrokeWidth(0);
@@ -248,9 +249,6 @@ public class NoteFollowRecorder {
                           staffBoundingBox.top - lineWidth);
             drawBox.union(drawBox.right + 0.2f * lineWidth,
                           staffBoundingBox.bottom + lineWidth);
-            float radius = drawBox.width() / 3;
-            canvas.drawRoundRect(drawBox, radius, radius, highlightPaint);
-            canvas.drawRoundRect(drawBox, radius, radius, borderPaint);
 
             float centerY;
             float clearanceBottom = canvas.getHeight() - drawBox.bottom;

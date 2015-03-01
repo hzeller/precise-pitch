@@ -113,7 +113,7 @@ public class GamePlayActivity extends Activity {
             instructions.setText("Time starts with first note.");
         }
 
-        public void onFinishedModel() {
+        public void onFinishedModel(NoteDocument model) {
             playerResult.setPlayMillis(System.currentTimeMillis() - startPracticeTime);
             gameState.setPlayerResult(player, playerResult);
             nextInGame.setVisibility(View.VISIBLE);
