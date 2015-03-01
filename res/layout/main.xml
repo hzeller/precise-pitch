@@ -34,9 +34,8 @@
             android:textAlignment="center"
             android:textColor="#ffffff"
             android:textSize="16dp"
-            android:layout_below="@+id/noteDisplay"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="24dp"/>
+            android:layout_alignBottom="@+id/earIcon"
+            android:layout_toRightOf="@+id/noteDisplay"/>
 
     <TextView
             android:layout_width="wrap_content"
@@ -134,5 +133,13 @@
             android:src="@drawable/ear"
             android:layout_alignRight="@+id/sharpText"
             android:layout_below="@+id/noteDisplay"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/tunerInsruction"
+            android:layout_alignTop="@+id/earIcon"
+            android:text="(instruction)"/>
 
 </RelativeLayout>

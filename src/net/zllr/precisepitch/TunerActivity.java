@@ -27,7 +27,7 @@ import net.zllr.precisepitch.model.MeasuredPitch;
 import net.zllr.precisepitch.view.CenterOffsetView;
 
 public class TunerActivity extends Activity {
-    private static final int kCentThreshold = 15;  // TODO: make configurable
+    private static final int kCentThreshold = 10;  // TODO: make configurable
     private static final boolean kShowTechInfo = false;
 
     private TextView frequencyDisplay;
@@ -37,6 +37,7 @@ public class TunerActivity extends Activity {
     private TextView decibelView;
     private TextView prevNote;
     private TextView nextNote;
+    private TextView instruction;
     private CenterOffsetView offsetCentView;
 
     private PitchSource pitchPoster;
@@ -65,6 +66,9 @@ public class TunerActivity extends Activity {
         noteDisplay = (TextView) findViewById(R.id.noteDisplay);
         noteDisplay.setKeepScreenOn(true);
         noteDisplay.setText("");
+        instruction = (TextView) findViewById(R.id.tunerInsruction);
+        instruction.setText("");
+        
         offsetCentView = (CenterOffsetView) findViewById(R.id.centView);
         offsetCentView.setRange(25);
         offsetCentView.setQuantization(2.5f);
@@ -132,6 +136,7 @@ public class TunerActivity extends Activity {
             setAlphaOnText(frequencyDisplay, alpha);
             setAlphaOnText(prevNote, alpha);
             setAlphaOnText(nextNote, alpha);
+            setAlphaOnText(instruction, alpha);
             offsetCentView.setFadeAlpha(alpha);
         }
 
@@ -154,6 +159,11 @@ public class TunerActivity extends Activity {
                 noteDisplay.setTextColor(c);
                 flatDisplay.setTextColor(c);
                 sharpDisplay.setTextColor(c);
+                if (!inTune) {
+                    instruction.setText(data.cent < 0 ? "Too low" : "Too high");
+                } else {
+                    instruction.setText("");
+                }
                 setFadableComponentAlpha(1.0f);
                 offsetCentView.setValue((int) data.cent);
                 fadeCountdown = kMaxWait;
