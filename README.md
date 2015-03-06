@@ -14,7 +14,7 @@ With `ANDROID_HOME` set to the location of the sdk and
 
 These are the two interesting activities
 
-<img src="img/tuner.png" width="400px">
-<img src="img/practice.png" width="400px">
+<img src="img/tuner.png" width="300px">
+<img src="img/practice.png" height="300px">
 
 [icon]: ./res/drawable-mdpi/ic_launcher_pp.png
