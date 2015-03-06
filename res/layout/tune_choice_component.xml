@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+        <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Random"
+                android:id="@+id/tcRandomSequence"
+                android:layout_gravity="center_horizontal|bottom"
+                android:paddingEnd="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Seq"
+                android:id="@+id/tcNewSeq"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="C"
+                android:id="@+id/tcNewCMajor"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="G"
+                android:id="@+id/tcNewGMajor"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="D"
+                android:id="@+id/tcNewDMajor"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="A"
+                android:id="@+id/tcNewAMajor"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="E"
+                android:id="@+id/tcNewEMajor"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Ab"
+                android:id="@+id/tcNewAbMajor"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Eb"
+                android:id="@+id/tcNewEbMajor"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="F"
+                android:id="@+id/tcNewFMajor"
+                android:layout_marginTop="10dp"/>
+
+        <Button
+                android:layout_width="0px"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Bb"
+                android:id="@+id/tcNewBbMajor"
+                android:layout_marginTop="10dp"/>
+</LinearLayout>

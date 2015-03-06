@@ -15,5 +15,7 @@ You get something like this:
 
 ![screenshot]
 
+Debug build: https://github.com/ohazi/precise-pitch/raw/master/bin/PrecisePitch-debug.apk
+
 [icon]: https://github.com/hzeller/precise-pitch/raw/master/res/drawable-mdpi/ic_launcher_pp.png
 [screenshot]: https://github.com/hzeller/precise-pitch/raw/master/screenshot.png

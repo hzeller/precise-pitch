@@ -19,36 +19,16 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Handler;
-
-import java.io.Serializable;
+import net.zllr.precisepitch.model.MeasuredPitch;
 
 // Samples the microphone continuously and provides PitchData updates to the
 // handler.
-class MicrophonePitchPoster extends Thread {
-    // If positive, create notes with that time in-between. If negative,
-    // do the real pitch detection.
-    static final int kDebugMs = -1;
-
-    public static final class PitchData {
-        public PitchData(double f, int n, double c, double d) {
-            frequency = f;
-            note = n;
-            cent = c;
-            decibel = d;
-        }
-
-        // Raw frequency.
-        public final double frequency;
-
-        // (note % 12) returns a range from 0 (A) to 11 (Ab/G#).
-        // The absolute range starts with 0 (low A, 55Hz), 12 = 110Hz ...
-        public final int note;
-
-        public final double cent;     // How far off we are in cent.
-        public final double decibel;  // input level in decibel.
+class MicrophonePitchSource extends Thread implements PitchSource {
+    public MicrophonePitchSource() {
+        this(60);  // default frequency. Lower: wider window.
     }
 
-    public MicrophonePitchPoster(int minFrequency) {
+    public MicrophonePitchSource(int minFrequency) {
         sampleCount = DyWaPitchTrack.suggestedSamplecount(minFrequency);
         pitchTracker = new DyWaPitchTrack(sampleCount);
         final int internalBufferSize = 2 * Math.max(
@@ -66,11 +46,15 @@ class MicrophonePitchPoster extends Thread {
     }
 
     // Set handler for messages generated from this runnable.
+    @Override
     public void setHandler(Handler handler) { this.handler = handler; }
 
-    // Returns information how many samples are gathered.
-    public int getSampleCount() { return sampleCount; }
+    @Override
+    public void startSampling() {
+        start();
+    }
 
+    @Override
     public void stopSampling() {
     	try {
             synchronized (stateLock) {
@@ -86,37 +70,19 @@ class MicrophonePitchPoster extends Thread {
     // Runnable/Thread main method.
     @Override
     public void run() {
-        if (kDebugMs > 0) {
-            dummyLoop(kDebugMs);
-        } else {
-            audiorecorder.startRecording();
+        audiorecorder.startRecording();
 
-            samplingLoop();
+        samplingLoop();
 
-            audiorecorder.stop();
-            audiorecorder.release();
-            audiorecorder = null;
-        }
+        audiorecorder.stop();
+        audiorecorder.release();
+        audiorecorder = null;
         synchronized (stateLock) {
             state = SamplingState.STOPPED;
             stateLock.notify();
         }
     }
 
-    private void dummyLoop(int waitMs) {
-        final float minPitch = 65.2f;
-        final float maxPitch = 440f;
-        float pitch = minPitch;
-        while (isSamplingRunning()) {
-            try { Thread.sleep(waitMs); } catch (InterruptedException e) {}
-            final PitchData nc = createPitchData(pitch, 32766);
-            if (handler != null) {
-                handler.sendMessage(handler.obtainMessage(0, nc));
-            }
-            pitch *= 1.059464;
-            if (pitch > maxPitch) pitch = minPitch;
-        }
-    }
     private void samplingLoop() {
         final short buffer[] = new short[sampleCount];
         final double samples[] = new double[sampleCount];
@@ -133,7 +99,7 @@ class MicrophonePitchPoster extends Thread {
                 maxValue = maxValue < localMax ? localMax : maxValue;
             }
             final double pitch = pitchTracker.computePitch(samples);
-            final PitchData nc = createPitchData(pitch, maxValue);
+            final MeasuredPitch nc = MeasuredPitch.createPitchData(pitch, maxValue/32768.0);
             if (handler != null) {
                 handler.sendMessage(handler.obtainMessage(0, nc));
             }
@@ -147,24 +113,6 @@ class MicrophonePitchPoster extends Thread {
         }
     }
 
-    private PitchData createPitchData(double frequency, int maxValue) {
-        final double base = kPitchA / 8; // The A just below our C string (55Hz)
-        final double d = Math.exp(Math.log(2) / 1200);
-        final double cent_above_base = Math.log(frequency / base) / Math.log(d);
-        final int scale_above_C = (int)Math.round(cent_above_base / 100.0) - 3;
-        if (scale_above_C < 0) {
-            return null;
-        }
-
-        // Press into regular scale
-        double scale = cent_above_base / 100.0;
-        final int rounded = (int) Math.round(scale);
-        final double cent = 100 * (scale - rounded);
-        final double vu_db = 20 * (Math.log(maxValue / 32768.0) / Math.log(10));
-        return new PitchData(frequency, rounded, cent, vu_db);
-    }
-
-    private static final double kPitchA = 440.0; // Hz.
     private int sampleCount;
     private DyWaPitchTrack pitchTracker;
     private AudioRecord audiorecorder;

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <view android:layout_weight="1"
+          android:layout_width="match_parent"
+          android:layout_height="0px"
+          class="net.zllr.precisepitch.view.StaffView"
+          android:id="@+id/practiceStaff"/>
+
+
+    <RelativeLayout android:layout_weight="1"
+                  android:layout_height="60px"
+                  android:layout_width="match_parent">
+
+        <view
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                class="net.zllr.precisepitch.TuneChoiceControl"
+                android:id="@+id/tuneChoice"/>
+
+        <view
+                android:layout_width="wrap_content"
+                android:layout_height="22dp"
+                android:layout_marginTop="10dp"
+                class="net.zllr.precisepitch.view.CenterOffsetView"
+                android:id="@+id/practiceLedDisplay"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/practiceStaff"/>
+
+        <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="(instructions)"
+                android:id="@+id/practiceInstructions"
+                android:layout_gravity="center"
+                android:textSize="30dp"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/practiceLedDisplay"
+                android:layout_marginTop="10dp"
+                android:textIsSelectable="false"/>
+
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:id="@+id/startLayout"
+                      android:layout_below="@+id/practiceInstructions">
+            <Button
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Start"
+                    android:id="@+id/practiceStartButton"
+                    android:paddingEnd="40dp"
+                    android:paddingStart="40dp"/>
+
+            <Button
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="New Practice"
+                    android:id="@+id/newPractice"/>
+
+            <Button
+                    android:layout_width="0px"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="I can do better!"
+                    android:id="@+id/canDoBetterButton"/>
+        </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>
