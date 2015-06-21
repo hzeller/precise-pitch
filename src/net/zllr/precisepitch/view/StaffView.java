@@ -210,7 +210,15 @@ public class StaffView extends View {
             notePaint.setColor(Color.BLACK);
             notePaint.setStyle(Paint.Style.FILL);
             notePaint.setStrokeWidth(height / 10);
-            notePaint.setTextSize(1.8f * height);
+
+            // With Android L, the font started to have different size for b and #
+            sharpNotePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            sharpNotePaint.setColor(Color.BLACK);
+            sharpNotePaint.setTextSize(2.0f * height);
+
+            flatNotePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            flatNotePaint.setColor(Color.BLACK);
+            flatNotePaint.setTextSize(2.8f * height);
 
             // Drawing some oval in a bitmap. We use that later for the note.
             final Paint ovalPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -273,31 +281,41 @@ public class StaffView extends View {
             boundingBox.union(centerX, centerY - barLength);
 
             if (noteName.length() > 1) {
-                float accidentalOffsetY = 0.0f;
+                // Accidental writing is currently only tested on Android L. Might be off with
+                // earlier versions :/
+                float accidentalOffsetYFactor = 0.0f;
+                Paint textPaint = null;
                 String accidental = "";
                 switch (noteName.charAt(1)) {
                     case '#':
-                        accidental = "♯";
-                        accidentalOffsetY = 0.5f * noteBitmap.getHeight();
+                        accidental = "\u266F";  // ♯
+                        accidentalOffsetYFactor = 0.26f;
+                        textPaint = new Paint(sharpNotePaint);
                         break;
                     case 'b':
-                        accidental = "♭";
-                        accidentalOffsetY = 0.3f * noteBitmap.getHeight();
+                        accidental = "\u266D";  // ♭
+                        accidentalOffsetYFactor = 0.30f;
+                        textPaint = new Paint(flatNotePaint);
                         break;
                 }
-                c.drawText(accidental,
-                           centerX - 4.0f * noteOffsetX,
-                           centerY + accidentalOffsetY,
-                           localNotePaint);
-                boundingBox.union(centerX - 4.0f * noteOffsetX,
-                                  centerY + localNotePaint.getTextSize());
-                boundingBox.union(centerX - 4.0f * noteOffsetX,
-                                  centerY - localNotePaint.getTextSize());
+                if (textPaint != null) {
+                    textPaint.setColor(color);
+                    Rect tb = new Rect();
+                    textPaint.getTextBounds(accidental, 0, 1, tb);
+                    tb.offset((int) (centerX-0.7f * noteBitmap.getWidth() - tb.width()),
+                              (int) (centerY + accidentalOffsetYFactor * tb.height()));
+                    c.drawText(accidental, tb.left, tb.bottom, textPaint);
+                    RectF noteBoundingExtension = new RectF(tb);
+                    noteBoundingExtension.offset(-tb.width()/3, 0);
+                    boundingBox.union(noteBoundingExtension);
+                }
             }
             return noteOffsetX;
         }
 
         private final Paint notePaint;
+        private final Paint sharpNotePaint;
+        private final Paint flatNotePaint;
         private final Bitmap noteBitmap;
         private final float noteOffsetX;
         private final float noteOffsetY;

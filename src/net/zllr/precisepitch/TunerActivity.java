@@ -68,7 +68,7 @@ public class TunerActivity extends Activity {
         noteDisplay.setText("");
         instruction = (TextView) findViewById(R.id.tunerInsruction);
         instruction.setText("");
-        
+
         offsetCentView = (CenterOffsetView) findViewById(R.id.centView);
         offsetCentView.setRange(25);
         offsetCentView.setQuantization(2.5f);
@@ -129,7 +129,7 @@ public class TunerActivity extends Activity {
             v.setTextColor(v.getCurrentTextColor() & 0xFFFFFF | alpha_bits);
         }
 
-        private void setFadableComponentAlpha(float alpha) {
+        private void setFadeableComponentAlpha(float alpha) {
             setAlphaOnText(noteDisplay, alpha);
             setAlphaOnText(flatDisplay, alpha);
             setAlphaOnText(sharpDisplay, alpha);
@@ -164,13 +164,13 @@ public class TunerActivity extends Activity {
                 } else {
                     instruction.setText("");
                 }
-                setFadableComponentAlpha(1.0f);
+                setFadeableComponentAlpha(1.0f);
                 offsetCentView.setValue((int) data.cent);
                 fadeCountdown = kMaxWait;
             } else {
                 --fadeCountdown;
                 if (fadeCountdown < 0) fadeCountdown = 0;
-                setFadableComponentAlpha(1.0f * fadeCountdown / kMaxWait);
+                setFadeableComponentAlpha(1.0f * fadeCountdown / kMaxWait);
             }
             earIcon.setVisibility(data != null && data.decibel > -30
                                   ? View.VISIBLE : View.INVISIBLE);
