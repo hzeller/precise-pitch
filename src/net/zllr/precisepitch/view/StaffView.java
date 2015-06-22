@@ -60,6 +60,8 @@ public class StaffView extends View {
         noteInView = -1;
     }
 
+    public int getNoteWidth() { return noteRenderer != null ? noteRenderer.getWidth() : 0; }
+
     // Set model. A list of notes to display.
     public void setNoteModel(NoteDocument model) {
         if (model != this.model) {
@@ -215,9 +217,9 @@ public class StaffView extends View {
             sharpNotePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             sharpNotePaint.setColor(Color.BLACK);
             sharpNotePaint.setTextSize(2.0f * height);
+            sharpNotePaint.setStyle(Paint.Style.STROKE);
 
-            flatNotePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            flatNotePaint.setColor(Color.BLACK);
+            flatNotePaint = new Paint(sharpNotePaint);
             flatNotePaint.setTextSize(2.8f * height);
 
             // Drawing some oval in a bitmap. We use that later for the note.
@@ -304,6 +306,7 @@ public class StaffView extends View {
                     textPaint.getTextBounds(accidental, 0, 1, tb);
                     tb.offset((int) (centerX-0.7f * noteBitmap.getWidth() - tb.width()),
                               (int) (centerY + accidentalOffsetYFactor * tb.height()));
+                    //c.drawRect(tb, textPaint);
                     c.drawText(accidental, tb.left, tb.bottom, textPaint);
                     RectF noteBoundingExtension = new RectF(tb);
                     noteBoundingExtension.offset(-tb.width()/3, 0);

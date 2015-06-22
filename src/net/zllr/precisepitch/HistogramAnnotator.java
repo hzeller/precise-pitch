@@ -28,6 +28,7 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
     }
 
     private boolean twoPlayer;
+    private final float drawWidth;
     private final Histogram hist1;
     private final Histogram hist2;
 
@@ -37,14 +38,15 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
     // side-by-side.
     // Though: two at a time is probably ok for two players. Doing it generically
     // might be easier to code though.
-    public HistogramAnnotator(Histogram a, Histogram b) {
+    public HistogramAnnotator(float drawWidth, Histogram a, Histogram b) {
         hist1 = a;
         hist2 = b;
         twoPlayer = (a != null) && (b != null);
+        this.drawWidth = drawWidth;
     }
 
-    public HistogramAnnotator(Histogram a) {
-        this(a, null);
+    public HistogramAnnotator(float drawWidth, Histogram a) {
+        this(drawWidth, a, null);
     }
 
     // Something to set the two player colors.
@@ -79,10 +81,10 @@ public class HistogramAnnotator implements DisplayNote.Annotator {
 
     public void draw(DisplayNote note, Canvas canvas,
                      RectF staffBoundingBox, RectF noteBoundingBox) {
-        
-        float halfWidth = (noteBoundingBox.right - noteBoundingBox.left) / 2;
-        float centerX = noteBoundingBox.left + halfWidth;
-        
+        float halfWidth = 0.8f * drawWidth;
+        // The right side is the stable one, the left side might contain the accidental.
+        float centerX = noteBoundingBox.right - halfWidth;
+
         float histTop = .5f * halfWidth;
         float histBottom = staffBoundingBox.top - (1.2f * halfWidth);
         

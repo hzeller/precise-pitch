@@ -242,7 +242,7 @@ public class PracticeActivity extends Activity {
             sumAbsoluteOffset += sumCurrentNoteOffset;
             absoluteOffsetCount += currentNoteOffsetCount;
             currentHistogram.filter(20);
-            currentNote.annotator = new HistogramAnnotator(currentHistogram);
+            currentNote.annotator = new HistogramAnnotator(staff.getNoteWidth(), currentHistogram);
             positionalResult[currentModelPos] = sumCurrentNoteOffset / currentNoteOffsetCount;
         }
 
