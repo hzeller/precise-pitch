@@ -220,7 +220,8 @@ public class StaffView extends View {
             sharpNotePaint.setStyle(Paint.Style.STROKE);
 
             flatNotePaint = new Paint(sharpNotePaint);
-            flatNotePaint.setTextSize(2.8f * height);
+            // Old and new Androids are different here. Choose something in the middle.
+            flatNotePaint.setTextSize(2.2f * height);
 
             // Drawing some oval in a bitmap. We use that later for the note.
             final Paint ovalPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -291,7 +292,7 @@ public class StaffView extends View {
                 switch (noteName.charAt(1)) {
                     case '#':
                         accidental = "\u266F";  // ♯
-                        accidentalOffsetYFactor = 0.26f;
+                        accidentalOffsetYFactor = 0.5f;
                         textPaint = new Paint(sharpNotePaint);
                         break;
                     case 'b':
@@ -304,10 +305,13 @@ public class StaffView extends View {
                     textPaint.setColor(color);
                     Rect tb = new Rect();
                     textPaint.getTextBounds(accidental, 0, 1, tb);
-                    tb.offset((int) (centerX-0.7f * noteBitmap.getWidth() - tb.width()),
-                              (int) (centerY + accidentalOffsetYFactor * tb.height()));
+                    // Older Android versions seem to have an offset != (0,0)
+                    int tOffsetX = tb.left;
+                    int tOffsetY = tb.bottom;
+                    tb.offset((int) (centerX-0.5f * noteBitmap.getWidth() - tb.width() - tOffsetX),
+                            (int) (centerY + accidentalOffsetYFactor * tb.height() - tOffsetY));
                     //c.drawRect(tb, textPaint);
-                    c.drawText(accidental, tb.left, tb.bottom, textPaint);
+                    c.drawText(accidental, tb.left - tOffsetX, tb.bottom - tOffsetY, textPaint);
                     RectF noteBoundingExtension = new RectF(tb);
                     noteBoundingExtension.offset(-tb.width()/3, 0);
                     boundingBox.union(noteBoundingExtension);
