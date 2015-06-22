@@ -26,6 +26,7 @@ import net.zllr.precisepitch.model.NoteDocument;
 import net.zllr.precisepitch.view.CenterOffsetView;
 import net.zllr.precisepitch.view.CombineAnnotator;
 import net.zllr.precisepitch.view.HighlightAnnotator;
+import net.zllr.precisepitch.view.HistogramAnnotator;
 import net.zllr.precisepitch.view.StaffView;
 
 import java.io.Serializable;

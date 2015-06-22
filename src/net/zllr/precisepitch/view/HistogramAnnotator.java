@@ -1,5 +1,6 @@
-package net.zllr.precisepitch;
+package net.zllr.precisepitch.view;
 
+import net.zllr.precisepitch.Histogram;
 import net.zllr.precisepitch.model.DisplayNote;
 import android.graphics.Canvas;
 import android.graphics.Color;
