@@ -5,12 +5,18 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <view android:layout_weight="1"
-          android:layout_width="match_parent"
-          android:layout_height="0px"
-          class="net.zllr.precisepitch.view.StaffView"
-          android:id="@+id/practiceStaff"/>
 
+    <HorizontalScrollView android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+	    android:fillViewport="true"
+            android:id="@+id/horizontalScrollView">
+
+        <view android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              class="net.zllr.precisepitch.view.StaffView"
+              android:id="@+id/practiceStaff"/>
+    </HorizontalScrollView>
 
     <RelativeLayout android:layout_weight="1"
                   android:layout_height="60px"

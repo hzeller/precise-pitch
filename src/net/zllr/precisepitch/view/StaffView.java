@@ -21,6 +21,8 @@ import android.content.Context;
 import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.HorizontalScrollView;
+
 import net.zllr.precisepitch.model.DisplayNote;
 import net.zllr.precisepitch.model.NoteDocument;
 
@@ -80,19 +82,30 @@ public class StaffView extends View {
     // any element in the model.
     public void onModelChanged() {
         invalidate();
+        requestLayout();
     }
 
     public void ensureNoteInView(int n) {
-        if (n != noteInView) {
-            noteInView = n;
-            invalidate();
-        }
+        ((HorizontalScrollView) getParent()).scrollTo(n * getNoteDistance(), 0);
     }
 
     // Set number of notes to be displayed along the length of the staff.
     public void setNotesPerStaff(int maxnotes) {
         this.notesPerStaff = maxnotes;
         invalidate();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        //int width = model == null ? MeasureSpec.getSize(widthMeasureSpec) : (int)(model.size() * 100);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        if (model != null && model.size() > 0) {
+            width = model.size() * getNoteDistance() + getNoteDistance()/2;
+        }
+        if (width < getSuggestedMinimumWidth()) width = getSuggestedMinimumWidth();
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+        if (height < getSuggestedMinimumHeight()) height = getSuggestedMinimumHeight();
+        setMeasuredDimension(width, height);
     }
 
     @Override
@@ -109,6 +122,10 @@ public class StaffView extends View {
         final String noteName = noteNames[model.isFlat() ? 0 : 1][n.note % 12];
         final int position = (noteName.charAt(0) - 'A') + 7 * octave;
         return position - 6;  // relative to lowest line.
+    }
+
+    private int getNoteDistance() {
+        return getHeight() / 4;
     }
 
     protected void onDraw(Canvas canvas) {
@@ -131,21 +148,8 @@ public class StaffView extends View {
         if (notesPerStaff == 0 || model == null)
             return;
 
-        // We want notes not to be spaced too much apart
-        int maxNoteDistance = noteRenderer.getWidth() * 3;
-        int minNoteDistance = (int) (noteRenderer.getWidth() * 2.0f);
-        int notesToDisplay = notesPerStaff;
-        // We need to leave some space for accidentals in front of the first
-        // note, so it is like displaying notePerStaff + 0.5 notes in a row...
-        int noteDistance = (int) (getWidth() / (notesPerStaff + 0.5f));
-
-        if (noteDistance > maxNoteDistance) {
-            noteDistance = maxNoteDistance;
-        }
-        if (noteDistance < minNoteDistance) {
-            noteDistance = minNoteDistance;
-            notesToDisplay = Math.max(getWidth() / noteDistance, 1);
-        }
+        int noteDistance = getNoteDistance();
+        int notesToDisplay = model.size();
 
         int lastNoteInModelToDisplay = model.size() - 1;
         if (noteInView >= 0) {
