@@ -72,220 +72,103 @@ public class TuneChoiceControl extends LinearLayout {
     }
 
     private void InitializeListeners() {
-        final NoteGenerationListener noteCreator = new NoteGenerationListener();
         final FixedNoteSequenceListener seqCreator = new FixedNoteSequenceListener();
         randomTune = (CheckBox) findViewById(R.id.tcRandomSequence);
         cmajor = (Button) findViewById(R.id.tcNewCMajor);
-        cmajor.setOnClickListener(noteCreator);
+        cmajor.setOnClickListener(new NoteGenerationListener(Note.C, false));
         gmajor = (Button) findViewById(R.id.tcNewGMajor);
-        gmajor.setOnClickListener(noteCreator);
+        gmajor.setOnClickListener(new NoteGenerationListener(Note.G, false));
         dmajor = (Button) findViewById(R.id.tcNewDMajor);
-        dmajor.setOnClickListener(noteCreator);
+        dmajor.setOnClickListener(new NoteGenerationListener(Note.D, false));
         amajor = (Button) findViewById(R.id.tcNewAMajor);
-        amajor.setOnClickListener(noteCreator);
+        amajor.setOnClickListener(new NoteGenerationListener(Note.A, false));
         emajor = (Button) findViewById(R.id.tcNewEMajor);
-        emajor.setOnClickListener(noteCreator);
+        emajor.setOnClickListener(new NoteGenerationListener(Note.E, false));
         abmajor = (Button) findViewById(R.id.tcNewAbMajor);
-        abmajor.setOnClickListener(noteCreator);
+        abmajor.setOnClickListener(new NoteGenerationListener(Note.A_b, true));
         ebmajor = (Button) findViewById(R.id.tcNewEbMajor);
-        ebmajor.setOnClickListener(noteCreator);
+        ebmajor.setOnClickListener(new NoteGenerationListener(Note.E_b, true));
         fmajor = (Button) findViewById(R.id.tcNewFMajor);
-        fmajor.setOnClickListener(noteCreator);
+        fmajor.setOnClickListener(new NoteGenerationListener(Note.F, true));
         bbmajor = (Button) findViewById(R.id.tcNewBbMajor);
-        bbmajor.setOnClickListener(noteCreator);
+        bbmajor.setOnClickListener(new NoteGenerationListener(Note.B_b, true));
         
         seq = (Button) findViewById(R.id.tcNewSeq);
         seq.setOnClickListener(seqCreator);
     }
 
     private final class FixedNoteSequenceListener implements View.OnClickListener {
+        int sequenceNumber = 0;
         public void onClick(View button) {
             if (model == null) {
                 return;
             }
-            
-            int fifthNote = model.size() >= 5 ? model.get(4).note : 0;
+            final int[][] sequences = {
+                    {19, 23, 21, 23, 17, 16, 14, 16, 19, 23, 21, 19, 16, 12, 14, 16},
+                    {19, 23, 21, 23, 19, 16, 19, 16, 14, 16, 12, 16, 10, 16, 14, 16},
+                    { 5,  9, 12,  9,  7,  9,  5,  9,  7, 10, 16, 12,  9,  5,  9,  5}};
             model.clear();
-            // Not sure what this is all about. Is there a particular reason for this sequence?
-            // Some peculiar way to select various sequences depending on prior state
-            if (button == seq) {
-                if (fifthNote == 0 || fifthNote == 7) {
-                    model.add(new DisplayNote(19, 4));
-                    model.add(new DisplayNote(23, 4));
-                    model.add(new DisplayNote(21, 4));
-                    model.add(new DisplayNote(23, 4));
-                    
-                    model.add(new DisplayNote(17, 4));  // 5th, so next #2
-                    model.add(new DisplayNote(16, 4));
-                    model.add(new DisplayNote(14, 4));
-                    model.add(new DisplayNote(16, 4));
-                    
-                    model.add(new DisplayNote(19, 4));
-                    model.add(new DisplayNote(23, 4));
-                    model.add(new DisplayNote(21, 4));
-                    model.add(new DisplayNote(19, 4));
-                    
-                    model.add(new DisplayNote(16, 4));
-                    model.add(new DisplayNote(12, 4));
-                    model.add(new DisplayNote(14, 4));
-                    model.add(new DisplayNote(16, 4));
-                } else if (fifthNote == 17) {
-                    model.add(new DisplayNote(19, 4));
-                    model.add(new DisplayNote(23, 4));
-                    model.add(new DisplayNote(21, 4));
-                    model.add(new DisplayNote(23, 4));
-                    
-                    model.add(new DisplayNote(19, 4));  // 5th. So next #3
-                    model.add(new DisplayNote(16, 4));
-                    model.add(new DisplayNote(19, 4));
-                    model.add(new DisplayNote(16, 4));
-                    
-                    model.add(new DisplayNote(14, 4));
-                    model.add(new DisplayNote(16, 4));
-                    model.add(new DisplayNote(12, 4));
-                    model.add(new DisplayNote(16, 4));
-                    
-                    model.add(new DisplayNote(10, 4));
-                    model.add(new DisplayNote(16, 4));
-                    model.add(new DisplayNote(14, 4));
-                    model.add(new DisplayNote(16, 4));
-                } else if (fifthNote == 19) {
-                    model.add(new DisplayNote(5, 4));
-                    model.add(new DisplayNote(9, 4));
-                    model.add(new DisplayNote(12, 4));
-                    model.add(new DisplayNote(9, 4));
-                    
-                    model.add(new DisplayNote(7, 4));  // 5th. So Next #1
-                    model.add(new DisplayNote(9, 4));
-                    model.add(new DisplayNote(5, 4));
-                    model.add(new DisplayNote(9, 4));
-                    
-                    model.add(new DisplayNote(7, 4));
-                    model.add(new DisplayNote(10, 4));
-                    model.add(new DisplayNote(16, 4));
-                    model.add(new DisplayNote(12, 4));
-                    
-                    model.add(new DisplayNote(9, 4));
-                    model.add(new DisplayNote(5, 4));
-                    model.add(new DisplayNote(9, 4));
-                    model.add(new DisplayNote(5, 4));
-                }
-            }
-            
             model.setFlat(false);
+            for (int note : sequences[sequenceNumber]) {
+                model.add(new DisplayNote(note, 4));
+            }
+            sequenceNumber = (sequenceNumber + 1) % sequences.length;
             if (changeListener != null) {
                 changeListener.onChange();
             }
         }
     }
     
-    
-    // Kinda hardcoded now :)
+    private static enum State {
+        BASE_OCTAVE_UP_DOWN,
+        TWO_OCTAVE_UP,
+        HIGH_OCTAVE_UP_DOWN,
+        TWO_OCTAVE_DOWN,
+    };
+
     private final class NoteGenerationListener implements View.OnClickListener {
+        NoteGenerationListener(int baseNote, boolean wantsFlat) {
+            this.baseNote = baseNote;
+            this.wantsFlat = wantsFlat;
+        }
+
+        final boolean wantsFlat;
+        final int baseNote;
+
+        State state = State.BASE_OCTAVE_UP_DOWN;
+
         public void onClick(View button) {
             if (model == null)
                 return;
-            boolean wantsFlat = false;
-            int startNote = model.size() > 0 ? model.get(0).note : 0;
-            int eighthNote = model.size() >= 8 ? model.get(7).note : -1;
-            int ninthNote = model.size() >= 9 ? model.get(8).note : -2;
-            model.clear();
-
-            // Use lowest note unless that is already set: then choose one
-            // octave higher. That way, we can 'toggle' between two octaves.
-            if (button == cmajor) {
-                if (startNote == Note.C) {
-                    startNote = (ninthNote == eighthNote) ? Note.C : Note.c;
-                } else if (startNote == Note.c) {
-                    startNote = Note.c$;
-                } else {
-                    startNote = Note.C;
-                }
-            } else if (button == gmajor) {
-                if (startNote == Note.G) {
-                    startNote = (ninthNote == eighthNote) ? Note.G : Note.g;
-                } else if (startNote == Note.g) {
-                    startNote = Note.g$;
-                } else {
-                    startNote = Note.G;
-                }
-            } else if (button == dmajor) {
-                if (startNote == Note.D) {
-                    startNote = (ninthNote == eighthNote) ? Note.D : Note.d;
-                } else if (startNote == Note.d) {
-                    startNote = Note.d$;
-                } else {
-                    startNote = Note.D;
-                }
-            } else if (button == amajor) {
-                if (startNote == Note.A) {
-                    startNote = (ninthNote == eighthNote) ? Note.A : Note.a;
-                } else if (startNote == Note.a) {
-                    startNote = Note.a$;
-                } else {
-                    startNote = Note.A;
-                }
-            } else if (button == emajor) {
-                if (startNote == Note.E) {
-                    startNote = (ninthNote == eighthNote) ? Note.E : Note.e;
-                } else if (startNote == Note.e) {
-                    startNote = Note.e$;
-                } else {
-                    startNote = Note.E;
-                }
-            } else if (button == abmajor) {
-                if (startNote == Note.A_b) {
-                    startNote = (ninthNote == eighthNote) ? Note.A_b : Note.a_b;
-                } else if (startNote == Note.a_b) {
-                    startNote = Note.a$_b;
-                } else {
-                    startNote = Note.A_b;
-                }
-                wantsFlat = true;
-            } else if (button == ebmajor) {
-                if (startNote == Note.E_b) {
-                    startNote = (ninthNote == eighthNote) ? Note.E_b : Note.e_b;
-                } else if (startNote == Note.e_b) {
-                    startNote = Note.e$_b;
-                } else {
-                    startNote = Note.E_b;
-                }
-                wantsFlat = true;
-            } else if (button == fmajor) {
-                if (startNote == Note.F) {
-                    startNote = (ninthNote == eighthNote) ? Note.F: Note.f;
-                } else if (startNote == Note.f) {
-                    startNote = Note.f$;
-                } else {
-                    startNote = Note.F;
-                }
-                wantsFlat = true;
-            } else if (button == bbmajor) {
-                //startNote = (startNote == 13) ? 25 : 13;
-                if (startNote == Note.B_b) {
-                    startNote = (ninthNote == eighthNote) ? Note.B_b : Note.b_b;
-                } else if (startNote == Note.b_b) {
-                    startNote = Note.b$_b;
-                } else {
-                    startNote = Note.B_b;
-                }
-                wantsFlat = true;
-            }
-
-            if (randomTune.isChecked()) {
-                addRandomMajorSequence(startNote, model, 16);
-            } else {
-                if (ninthNote == eighthNote) {
-                    if (startNote >= Note.c) {
-                        addDescTwoOctaveMajorScale(startNote, model);
-                    } else {
-                        addAscTwoOctaveMajorScale(startNote, model);
-                    }
-                } else {
-                    addAscDescMajorScale(startNote, model);
-                }
-            }
             model.setFlat(wantsFlat);
+            model.clear();
+            if (randomTune.isChecked()) {
+                if (state == State.BASE_OCTAVE_UP_DOWN) {
+                    addRandomMajorSequence(baseNote, model, 16);
+                    state = State.HIGH_OCTAVE_UP_DOWN;
+                } else {
+                    addRandomMajorSequence(baseNote + 12, model, 16);
+                    state = State.BASE_OCTAVE_UP_DOWN;
+                }
+            } else {
+                switch (state) {
+                    case BASE_OCTAVE_UP_DOWN:
+                        addAscDescMajorScale(baseNote, model);
+                        state = State.TWO_OCTAVE_UP;
+                        break;
+                    case TWO_OCTAVE_UP:
+                        addAscTwoOctaveMajorScale(baseNote, model);
+                        state = State.HIGH_OCTAVE_UP_DOWN;
+                        break;
+                    case HIGH_OCTAVE_UP_DOWN:
+                        addAscDescMajorScale(baseNote + 12, model);
+                        state = State.TWO_OCTAVE_DOWN;
+                        break;
+                    case TWO_OCTAVE_DOWN:
+                        addDescTwoOctaveMajorScale(baseNote + 2*12, model);
+                        state = State.BASE_OCTAVE_UP_DOWN;
+                }
+            }
             if (changeListener != null) {
                 changeListener.onChange();
             }
