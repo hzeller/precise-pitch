@@ -139,8 +139,6 @@ public class StaffView extends View {
     }
 
     protected void onDraw(Canvas canvas) {
-        // todo: draw into some bitmap and cache that if there is no change.
-
         canvas.drawPaint(backgroundColor);
         // Interesting thing to find out: for some reason canvas.getHeight()
         // and this.getHeight() are different on the Android 2.3 device.
