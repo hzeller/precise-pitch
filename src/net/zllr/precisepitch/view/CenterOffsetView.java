@@ -19,6 +19,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -163,6 +164,7 @@ public class CenterOffsetView extends View {
         final int highlightStep = (int) Math.round(value / quantization);
         final boolean tooLow = value < -range;
         final boolean tooHigh = value > range;
+        final int centerY = kHeight/2;
         for (int i = -steps; i <= steps; ++i) {
             final float centerX = kWidth/2 + i * widthSteps;
             if (i == -steps && tooLow) {
@@ -175,21 +177,8 @@ public class CenterOffsetView extends View {
                                 filledRedCirclePaint);
             } else {
                 Paint paint;
-                /*
-                if (i == 0 && Math.abs(highlightStep) <= 3) {
-                    paint = filledGreenCirclePaint;   // Show always on zero when highlight is in range.
-                } else if (i != 0 && highlightStep == i) {
-                    paint = filledRedCirclePaint;
-                } else {
-                    paint = emptyCirclePaint;
-                }
-                */
-                if (Math.abs(highlightStep) <= 3) {
-                    paint = filledGreenCirclePaint;
-                } else {
-                    paint = filledRedCirclePaint;
-                }
-                
+                paint = (Math.abs(highlightStep) <= 3) ? filledGreenCirclePaint : filledRedCirclePaint;
+
                 if (highlightStep < 0 && (i < highlightStep || i > 0)) {
                     paint = emptyCirclePaint;
                 }
@@ -197,7 +186,13 @@ public class CenterOffsetView extends View {
                 if (highlightStep >= 0 && (i > highlightStep || i < 0)) {
                     paint = emptyCirclePaint;
                 }
-                canvas.drawCircle(centerX, kHeight/2, radius, paint);
+                if (i == 0) {
+                    RectF o = new RectF(centerX - radius, centerY - 1.5f * radius,
+                            centerX + radius, centerY + 1.5f * radius);
+                    canvas.drawOval(o, paint);
+                } else {
+                    canvas.drawCircle(centerX, centerY, radius, paint);
+                }
             }
         }
         if (Math.abs(value) <= range) {
