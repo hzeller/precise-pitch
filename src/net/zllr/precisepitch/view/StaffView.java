@@ -86,7 +86,16 @@ public class StaffView extends View {
     }
 
     public void ensureNoteInView(int n) {
-        ((HorizontalScrollView) getParent()).scrollTo(n * getNoteDistance(), 0);
+        if (model == null || model.size() == 0) return;
+        // The first couple of notes we show directly, then start to scroll gently.
+        final int kStartScrollingAt = 3;
+        n -= kStartScrollingAt;
+        if (n < 0) n = 0;
+        final int totalScroll = model.size() - kStartScrollingAt;
+        // We know that we're embedded in a HorizontalScrollView, cast is safe.
+        HorizontalScrollView scroller = (HorizontalScrollView) getParent();
+        int scrollLongerThanScreen = getWidth() - scroller.getWidth();
+        scroller.smoothScrollTo(scrollLongerThanScreen * n / totalScroll, 0);
     }
 
     // Set number of notes to be displayed along the length of the staff.
@@ -97,7 +106,6 @@ public class StaffView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        //int width = model == null ? MeasureSpec.getSize(widthMeasureSpec) : (int)(model.size() * 100);
         int width = MeasureSpec.getSize(widthMeasureSpec);
         if (model != null && model.size() > 0) {
             width = model.size() * getNoteDistance() + getNoteDistance()/2;
