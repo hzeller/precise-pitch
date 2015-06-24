@@ -36,6 +36,7 @@ public class NoteDocument implements Serializable {
     // Access to list representation of notes.
     public List<DisplayNote> getNotes() { return notes; }
 
+    // Set if semi-tones are shown as flat or sharp.
     public boolean isFlat() { return wantsFlat; }
     public void setFlat(boolean f) { wantsFlat = f; }
 

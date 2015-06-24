@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import net.zllr.precisepitch.model.DisplayNote;
+import net.zllr.precisepitch.model.Note;
 import net.zllr.precisepitch.model.NoteDocument;
 
 import java.util.List;
@@ -105,69 +106,69 @@ public class TuneChoiceControl extends LinearLayout {
             
             int fifthNote = model.size() >= 5 ? model.get(4).note : 0;
             model.clear();
-            
+            // Not sure what this is all about. Is there a particular reason for this sequence?
+            // Some peculiar way to select various sequences depending on prior state
             if (button == seq) {
-            
                 if (fifthNote == 0 || fifthNote == 7) {
-                    model.add(new DisplayNote(19, 4, Color.BLACK));
-                    model.add(new DisplayNote(23, 4, Color.BLACK));
-                    model.add(new DisplayNote(21, 4, Color.BLACK));
-                    model.add(new DisplayNote(23, 4, Color.BLACK));
+                    model.add(new DisplayNote(19, 4));
+                    model.add(new DisplayNote(23, 4));
+                    model.add(new DisplayNote(21, 4));
+                    model.add(new DisplayNote(23, 4));
                     
-                    model.add(new DisplayNote(17, 4, Color.BLACK));
-                    model.add(new DisplayNote(16, 4, Color.BLACK));
-                    model.add(new DisplayNote(14, 4, Color.BLACK));
-                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    model.add(new DisplayNote(17, 4));  // 5th, so next #2
+                    model.add(new DisplayNote(16, 4));
+                    model.add(new DisplayNote(14, 4));
+                    model.add(new DisplayNote(16, 4));
                     
-                    model.add(new DisplayNote(19, 4, Color.BLACK));
-                    model.add(new DisplayNote(23, 4, Color.BLACK));
-                    model.add(new DisplayNote(21, 4, Color.BLACK));
-                    model.add(new DisplayNote(19, 4, Color.BLACK));
+                    model.add(new DisplayNote(19, 4));
+                    model.add(new DisplayNote(23, 4));
+                    model.add(new DisplayNote(21, 4));
+                    model.add(new DisplayNote(19, 4));
                     
-                    model.add(new DisplayNote(16, 4, Color.BLACK));
-                    model.add(new DisplayNote(12, 4, Color.BLACK));
-                    model.add(new DisplayNote(14, 4, Color.BLACK));
-                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    model.add(new DisplayNote(16, 4));
+                    model.add(new DisplayNote(12, 4));
+                    model.add(new DisplayNote(14, 4));
+                    model.add(new DisplayNote(16, 4));
                 } else if (fifthNote == 17) {
-                    model.add(new DisplayNote(19, 4, Color.BLACK));
-                    model.add(new DisplayNote(23, 4, Color.BLACK));
-                    model.add(new DisplayNote(21, 4, Color.BLACK));
-                    model.add(new DisplayNote(23, 4, Color.BLACK));
+                    model.add(new DisplayNote(19, 4));
+                    model.add(new DisplayNote(23, 4));
+                    model.add(new DisplayNote(21, 4));
+                    model.add(new DisplayNote(23, 4));
                     
-                    model.add(new DisplayNote(19, 4, Color.BLACK));
-                    model.add(new DisplayNote(16, 4, Color.BLACK));
-                    model.add(new DisplayNote(19, 4, Color.BLACK));
-                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    model.add(new DisplayNote(19, 4));  // 5th. So next #3
+                    model.add(new DisplayNote(16, 4));
+                    model.add(new DisplayNote(19, 4));
+                    model.add(new DisplayNote(16, 4));
                     
-                    model.add(new DisplayNote(14, 4, Color.BLACK));
-                    model.add(new DisplayNote(16, 4, Color.BLACK));
-                    model.add(new DisplayNote(12, 4, Color.BLACK));
-                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    model.add(new DisplayNote(14, 4));
+                    model.add(new DisplayNote(16, 4));
+                    model.add(new DisplayNote(12, 4));
+                    model.add(new DisplayNote(16, 4));
                     
-                    model.add(new DisplayNote(10, 4, Color.BLACK));
-                    model.add(new DisplayNote(16, 4, Color.BLACK));
-                    model.add(new DisplayNote(14, 4, Color.BLACK));
-                    model.add(new DisplayNote(16, 4, Color.BLACK));
+                    model.add(new DisplayNote(10, 4));
+                    model.add(new DisplayNote(16, 4));
+                    model.add(new DisplayNote(14, 4));
+                    model.add(new DisplayNote(16, 4));
                 } else if (fifthNote == 19) {
-                    model.add(new DisplayNote(5, 4, Color.BLACK));
-                    model.add(new DisplayNote(9, 4, Color.BLACK));
-                    model.add(new DisplayNote(12, 4, Color.BLACK));
-                    model.add(new DisplayNote(9, 4, Color.BLACK));
+                    model.add(new DisplayNote(5, 4));
+                    model.add(new DisplayNote(9, 4));
+                    model.add(new DisplayNote(12, 4));
+                    model.add(new DisplayNote(9, 4));
                     
-                    model.add(new DisplayNote(7, 4, Color.BLACK));
-                    model.add(new DisplayNote(9, 4, Color.BLACK));
-                    model.add(new DisplayNote(5, 4, Color.BLACK));
-                    model.add(new DisplayNote(9, 4, Color.BLACK));
+                    model.add(new DisplayNote(7, 4));  // 5th. So Next #1
+                    model.add(new DisplayNote(9, 4));
+                    model.add(new DisplayNote(5, 4));
+                    model.add(new DisplayNote(9, 4));
                     
-                    model.add(new DisplayNote(7, 4, Color.BLACK));
-                    model.add(new DisplayNote(10, 4, Color.BLACK));
-                    model.add(new DisplayNote(16, 4, Color.BLACK));
-                    model.add(new DisplayNote(12, 4, Color.BLACK));
+                    model.add(new DisplayNote(7, 4));
+                    model.add(new DisplayNote(10, 4));
+                    model.add(new DisplayNote(16, 4));
+                    model.add(new DisplayNote(12, 4));
                     
-                    model.add(new DisplayNote(9, 4, Color.BLACK));
-                    model.add(new DisplayNote(5, 4, Color.BLACK));
-                    model.add(new DisplayNote(9, 4, Color.BLACK));
-                    model.add(new DisplayNote(5, 4, Color.BLACK));
+                    model.add(new DisplayNote(9, 4));
+                    model.add(new DisplayNote(5, 4));
+                    model.add(new DisplayNote(9, 4));
+                    model.add(new DisplayNote(5, 4));
                 }
             }
             
@@ -193,84 +194,80 @@ public class TuneChoiceControl extends LinearLayout {
             // Use lowest note unless that is already set: then choose one
             // octave higher. That way, we can 'toggle' between two octaves.
             if (button == cmajor) {
-                //startNote = (startNote == 3) ? 15 : 3;
-                if (startNote == 3) {
-                    startNote = (ninthNote == eighthNote) ? 3 : 15;
-                } else if (startNote == 15) {
-                    startNote = 15 + 12;
+                if (startNote == Note.C) {
+                    startNote = (ninthNote == eighthNote) ? Note.C : Note.c;
+                } else if (startNote == Note.c) {
+                    startNote = Note.c$;
                 } else {
-                    startNote = 3;
+                    startNote = Note.C;
                 }
             } else if (button == gmajor) {
-                //startNote = (startNote == 10) ? 22 : 10;
-                if (startNote == 10) {
-                    startNote = (ninthNote == eighthNote) ? 10 : 22;
-                } else if (startNote == 22) {
-                    startNote = 22 + 12;
+                if (startNote == Note.G) {
+                    startNote = (ninthNote == eighthNote) ? Note.G : Note.g;
+                } else if (startNote == Note.g) {
+                    startNote = Note.g$;
                 } else {
-                    startNote = 10;
+                    startNote = Note.G;
                 }
             } else if (button == dmajor) {
-                //startNote = (startNote == 5) ? 17 : 5;
-                if (startNote == 5) {
-                    startNote = (ninthNote == eighthNote) ? 5 : 17;
-                } else if (startNote == 17) {
-                    startNote = 17 + 12;
+                if (startNote == Note.D) {
+                    startNote = (ninthNote == eighthNote) ? Note.D : Note.d;
+                } else if (startNote == Note.d) {
+                    startNote = Note.d$;
                 } else {
-                    startNote = 5;
+                    startNote = Note.D;
                 }
             } else if (button == amajor) {
-                if (startNote == 12) {
-                    startNote = (ninthNote == eighthNote) ? 12 : 24;
-                } else if (startNote == 24) {
-                    startNote = 24 + 12;
+                if (startNote == Note.A) {
+                    startNote = (ninthNote == eighthNote) ? Note.A : Note.a;
+                } else if (startNote == Note.a) {
+                    startNote = Note.a$;
                 } else {
-                    startNote = 12;
+                    startNote = Note.A;
                 }
             } else if (button == emajor) {
-                if (startNote == 7) {
-                    startNote = (ninthNote == eighthNote) ? 7 : 19;
-                } else if (startNote == 19) {
-                    startNote = 19 + 12;
+                if (startNote == Note.E) {
+                    startNote = (ninthNote == eighthNote) ? Note.E : Note.e;
+                } else if (startNote == Note.e) {
+                    startNote = Note.e$;
                 } else {
-                    startNote = 7;
+                    startNote = Note.E;
                 }
             } else if (button == abmajor) {
-                if (startNote == 11) {
-                    startNote = (ninthNote == eighthNote) ? 11 : 23;
-                } else if (startNote == 23) {
-                    startNote = 23 + 12;
+                if (startNote == Note.A_b) {
+                    startNote = (ninthNote == eighthNote) ? Note.A_b : Note.a_b;
+                } else if (startNote == Note.a_b) {
+                    startNote = Note.a$_b;
                 } else {
-                    startNote = 11;
+                    startNote = Note.A_b;
                 }
                 wantsFlat = true;
             } else if (button == ebmajor) {
-                if (startNote == 6) {
-                    startNote = (ninthNote == eighthNote) ? 6 : 18;
-                } else if (startNote == 18) {
-                    startNote = 18 + 12;
+                if (startNote == Note.E_b) {
+                    startNote = (ninthNote == eighthNote) ? Note.E_b : Note.e_b;
+                } else if (startNote == Note.e_b) {
+                    startNote = Note.e$_b;
                 } else {
-                    startNote = 6;
+                    startNote = Note.E_b;
                 }
                 wantsFlat = true;
             } else if (button == fmajor) {
-                //startNote = (startNote == 8) ? 20 : 8;
-                if (startNote == 8) {
-                    startNote = (ninthNote == eighthNote) ? 8 : 20;
-                } else if (startNote == 20) {
-                    startNote = 20 + 12;
+                if (startNote == Note.F) {
+                    startNote = (ninthNote == eighthNote) ? Note.F: Note.f;
+                } else if (startNote == Note.f) {
+                    startNote = Note.f$;
                 } else {
-                    startNote = 8;
+                    startNote = Note.F;
                 }
                 wantsFlat = true;
             } else if (button == bbmajor) {
                 //startNote = (startNote == 13) ? 25 : 13;
-                if (startNote == 13) {
-                    startNote = (ninthNote == eighthNote) ? 13 : 25;
-                } else if (startNote == 25) {
-                    startNote = 25 + 12;
+                if (startNote == Note.B_b) {
+                    startNote = (ninthNote == eighthNote) ? Note.B_b : Note.b_b;
+                } else if (startNote == Note.b_b) {
+                    startNote = Note.b$_b;
                 } else {
-                    startNote = 13;
+                    startNote = Note.B_b;
                 }
                 wantsFlat = true;
             }
@@ -279,7 +276,7 @@ public class TuneChoiceControl extends LinearLayout {
                 addRandomMajorSequence(startNote, model, 16);
             } else {
                 if (ninthNote == eighthNote) {
-                    if (startNote >= 15) {
+                    if (startNote >= Note.c) {
                         addDescTwoOctaveMajorScale(startNote, model);
                     } else {
                         addAscTwoOctaveMajorScale(startNote, model);
@@ -299,14 +296,14 @@ public class TuneChoiceControl extends LinearLayout {
     private int addMajorScale(int startNote, boolean ascending,
                               NoteDocument model) {
         int note = startNote;
-        model.add(new DisplayNote(note, 4, Color.BLACK));
+        model.add(new DisplayNote(note, 4));
         for (int i = 0; i < kMajorScaleSequence.length; ++i) {
             if (ascending) {
                 note += kMajorScaleSequence[i];
             } else {
                 note -= kMajorScaleSequence[kMajorScaleSequence.length - 1 - i ];
             }
-            model.add(new DisplayNote(note, 4, Color.BLACK));
+            model.add(new DisplayNote(note, 4));
         }
         return note;
     }
@@ -315,6 +312,8 @@ public class TuneChoiceControl extends LinearLayout {
     private void addRandomMajorSequence(int baseNote,
                                         NoteDocument model,
                                         int count) {
+       while (baseNote > Note.a)
+            baseNote -= 12;
         int seq[] = new int[kMajorScaleSequence.length + 1];
         seq[0] = baseNote;
         for (int i = 0; i < kMajorScaleSequence.length; ++i) {
@@ -325,11 +324,11 @@ public class TuneChoiceControl extends LinearLayout {
         int randomIndex;
         for (int i = 0; i < count; ++i) {
             do {
-                // Don't do the same note twice in a sequence.
+                // Don't do the same note twice in a row.
                 randomIndex = (int) Math.round((seq.length-1)* Math.random());
             } while (randomIndex == previousIndex);
             previousIndex = randomIndex;
-            model.add(new DisplayNote(seq[randomIndex], 4, Color.BLACK));
+            model.add(new DisplayNote(seq[randomIndex], 4));
         }
     }
 

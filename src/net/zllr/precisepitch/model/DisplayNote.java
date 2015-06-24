@@ -16,10 +16,18 @@
 package net.zllr.precisepitch.model;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.RectF;
 
 import java.io.Serializable;
 
+// A DisplayNote represents a note to be displayed.
+// It mixes abstract note model with display hints
+//   - Note model is the pitch (integer semi-tone, starting with 0=low A at 55Hz) and duration
+//   - Color is the color this note should be displayed in
+//   - Optionally an Annotator is something that can add additional information to be displayed in
+//     the staff.
+// TODO: Mixing model and display information should be separated.
 public final class DisplayNote implements Serializable {
     // Optional annotator for users to implement to add arbitrary
     // annotations to the note.
@@ -29,10 +37,9 @@ public final class DisplayNote implements Serializable {
     }
 
     // Immutable struct to represent a note to display.
-    public DisplayNote(int note, int duration, int color) {
+    public DisplayNote(int note, int duration) {
         this.note = note;
         this.duration = duration;
-        this.color = color;
     }
 
     @Override
@@ -58,8 +65,9 @@ public final class DisplayNote implements Serializable {
     public final int duration;
 
     // Color to display. Standard Android color representation.
+    // Can change over the lifetime, but starts with black.
     // (should have a setter)
-    public int color;
+    public int color = Color.BLACK;
 
     // User provided annotator. If not null, is called when the note is
     // drawn.

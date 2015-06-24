@@ -15,6 +15,10 @@
  */
 package net.zllr.precisepitch.model;
 
+// Representation of a pitch and quality signals, such as how far off and volume.
+// This contains the raw frequency as well as the
+// semi-tone it translates to (though we all map everything to one octave as our algorithm is
+// not very robust in distinguishing octaves).
 public final class MeasuredPitch {
     public MeasuredPitch(double f, int n, double c, double d) {
         frequency = f;
