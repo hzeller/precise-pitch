@@ -35,17 +35,7 @@ public class TuneChoiceControl extends LinearLayout {
     private NoteDocument model;
     private OnChangeListener changeListener;
     private CheckBox randomTune;
-    private Button cmajor;
-    private Button gmajor;
-    private Button dmajor;
-    private Button amajor;
-    private Button emajor;
-    private Button abmajor;
-    private Button ebmajor;
-    private Button fmajor;
-    private Button bbmajor;
-    
-    
+
     private Button seq;
 
     public interface OnChangeListener {
@@ -74,23 +64,23 @@ public class TuneChoiceControl extends LinearLayout {
     private void InitializeListeners() {
         final FixedNoteSequenceListener seqCreator = new FixedNoteSequenceListener();
         randomTune = (CheckBox) findViewById(R.id.tcRandomSequence);
-        cmajor = (Button) findViewById(R.id.tcNewCMajor);
+        Button cmajor = (Button) findViewById(R.id.tcNewCMajor);
         cmajor.setOnClickListener(new NoteGenerationListener(Note.C, false));
-        gmajor = (Button) findViewById(R.id.tcNewGMajor);
+        Button gmajor = (Button) findViewById(R.id.tcNewGMajor);
         gmajor.setOnClickListener(new NoteGenerationListener(Note.G, false));
-        dmajor = (Button) findViewById(R.id.tcNewDMajor);
+        Button dmajor = (Button) findViewById(R.id.tcNewDMajor);
         dmajor.setOnClickListener(new NoteGenerationListener(Note.D, false));
-        amajor = (Button) findViewById(R.id.tcNewAMajor);
+        Button amajor = (Button) findViewById(R.id.tcNewAMajor);
         amajor.setOnClickListener(new NoteGenerationListener(Note.A, false));
-        emajor = (Button) findViewById(R.id.tcNewEMajor);
+        Button emajor = (Button) findViewById(R.id.tcNewEMajor);
         emajor.setOnClickListener(new NoteGenerationListener(Note.E, false));
-        abmajor = (Button) findViewById(R.id.tcNewAbMajor);
+        Button abmajor = (Button) findViewById(R.id.tcNewAbMajor);
         abmajor.setOnClickListener(new NoteGenerationListener(Note.A_b, true));
-        ebmajor = (Button) findViewById(R.id.tcNewEbMajor);
+        Button ebmajor = (Button) findViewById(R.id.tcNewEbMajor);
         ebmajor.setOnClickListener(new NoteGenerationListener(Note.E_b, true));
-        fmajor = (Button) findViewById(R.id.tcNewFMajor);
+        Button fmajor = (Button) findViewById(R.id.tcNewFMajor);
         fmajor.setOnClickListener(new NoteGenerationListener(Note.F, true));
-        bbmajor = (Button) findViewById(R.id.tcNewBbMajor);
+        Button bbmajor = (Button) findViewById(R.id.tcNewBbMajor);
         bbmajor.setOnClickListener(new NoteGenerationListener(Note.B_b, true));
         
         seq = (Button) findViewById(R.id.tcNewSeq);
