@@ -16,7 +16,6 @@
 package net.zllr.precisepitch;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,8 +34,6 @@ public class TuneChoiceControl extends LinearLayout {
     private NoteDocument model;
     private OnChangeListener changeListener;
     private CheckBox randomTune;
-
-    private Button seq;
 
     public interface OnChangeListener {
         void onChange();
@@ -83,7 +80,7 @@ public class TuneChoiceControl extends LinearLayout {
         Button bbmajor = (Button) findViewById(R.id.tcNewBbMajor);
         bbmajor.setOnClickListener(new NoteGenerationListener(Note.B_b, true));
         
-        seq = (Button) findViewById(R.id.tcNewSeq);
+        Button seq = (Button) findViewById(R.id.tcNewSeq);
         seq.setOnClickListener(seqCreator);
     }
 
@@ -110,10 +107,9 @@ public class TuneChoiceControl extends LinearLayout {
     }
     
     private static enum State {
-        BASE_OCTAVE_UP_DOWN,
-        TWO_OCTAVE_UP,
-        HIGH_OCTAVE_UP_DOWN,
-        TWO_OCTAVE_DOWN,
+        BASE_OCTAVE,
+        HIGH_OCTAVE,
+        TWO_OCTAVE,
     };
 
     private final class NoteGenerationListener implements View.OnClickListener {
@@ -125,7 +121,7 @@ public class TuneChoiceControl extends LinearLayout {
         final boolean wantsFlat;
         final int baseNote;
 
-        State state = State.BASE_OCTAVE_UP_DOWN;
+        State state = State.BASE_OCTAVE;
 
         public void onClick(View button) {
             if (model == null)
@@ -133,30 +129,27 @@ public class TuneChoiceControl extends LinearLayout {
             model.setFlat(wantsFlat);
             model.clear();
             if (randomTune.isChecked()) {
-                if (state == State.BASE_OCTAVE_UP_DOWN) {
+                if (state == State.BASE_OCTAVE) {
                     addRandomMajorSequence(baseNote, model, 16);
-                    state = State.HIGH_OCTAVE_UP_DOWN;
+                    state = State.HIGH_OCTAVE;
                 } else {
                     addRandomMajorSequence(baseNote + 12, model, 16);
-                    state = State.BASE_OCTAVE_UP_DOWN;
+                    state = State.BASE_OCTAVE;
                 }
             } else {
                 switch (state) {
-                    case BASE_OCTAVE_UP_DOWN:
-                        addAscDescMajorScale(baseNote, model);
-                        state = State.TWO_OCTAVE_UP;
+                    case BASE_OCTAVE:
+                        addAscDescMajorScale(baseNote, 1, model);
+                        state = State.HIGH_OCTAVE;
                         break;
-                    case TWO_OCTAVE_UP:
-                        addAscTwoOctaveMajorScale(baseNote, model);
-                        state = State.HIGH_OCTAVE_UP_DOWN;
+                    case HIGH_OCTAVE:
+                        addAscDescMajorScale(baseNote + 12, 1, model);
+                        state = State.TWO_OCTAVE;
                         break;
-                    case HIGH_OCTAVE_UP_DOWN:
-                        addAscDescMajorScale(baseNote + 12, model);
-                        state = State.TWO_OCTAVE_DOWN;
+                    case TWO_OCTAVE:
+                        addAscDescMajorScale(baseNote, 2, model);
+                        state = State.BASE_OCTAVE;
                         break;
-                    case TWO_OCTAVE_DOWN:
-                        addDescTwoOctaveMajorScale(baseNote + 2*12, model);
-                        state = State.BASE_OCTAVE_UP_DOWN;
                 }
             }
             if (changeListener != null) {
@@ -165,9 +158,8 @@ public class TuneChoiceControl extends LinearLayout {
         }
     }
 
-    // Add a major scale to the model. Returns last note.
-    private int addMajorScale(int startNote, boolean ascending,
-                              NoteDocument model) {
+    // Add a major scale to the model except the last note. Returns last note pitch.
+    private int addMajorScale(int startNote, boolean ascending, NoteDocument model) {
         int note = startNote;
         model.add(new DisplayNote(note, 4));
         for (int i = 0; i < kMajorScaleSequence.length; ++i) {
@@ -176,6 +168,8 @@ public class TuneChoiceControl extends LinearLayout {
             } else {
                 note -= kMajorScaleSequence[kMajorScaleSequence.length - 1 - i ];
             }
+            if (i == kMajorScaleSequence.length - 1)
+                break;
             model.add(new DisplayNote(note, 4));
         }
         return note;
@@ -205,19 +199,14 @@ public class TuneChoiceControl extends LinearLayout {
         }
     }
 
-    private void addAscDescMajorScale(int startNote, NoteDocument model) {
-        addMajorScale(addMajorScale(startNote, true, model), false, model);
-    }
-    
-    private void addAscTwoOctaveMajorScale(int startNote, NoteDocument model) {
-        int next = addMajorScale(startNote, true, model);
-        model.pop();
-        addMajorScale(next, true, model);
-    }
-    
-    private void addDescTwoOctaveMajorScale(int startNote, NoteDocument model) {
-        int next = addMajorScale(startNote, false, model);
-        model.pop();
-        addMajorScale(next, false, model);
+    private void addAscDescMajorScale(int startNote, int octaves, NoteDocument model) {
+        for (int octave = 0; octave < octaves; ++octave) {
+            startNote = addMajorScale(startNote, true, model);
+        }
+        model.add(new DisplayNote(startNote, 4));
+        for (int octave = 0; octave < octaves; ++octave) {
+            startNote = addMajorScale(startNote, false, model);
+        }
+        model.add(new DisplayNote(startNote, 4));
     }
 }
