@@ -71,23 +71,4 @@ public class Note {
     public static final int a$_s = a_s + 12;
     public static final int b$_b = b_b + 12;
     public static final int b$   = b   + 12;
-
-    public static final int c$$   = c$   + 12;
-    public static final int c$$_s = c$_s + 12;
-    public static final int d$$_b = d$_b + 12;
-    public static final int d$$   = d$   + 12;
-    public static final int d$$_s = d$_s + 12;
-    public static final int e$$_b = e$_b + 12;
-    public static final int e$$   = e$   + 12;
-    public static final int f$$   = f$   + 12;
-    public static final int f$$_s = f$_s + 12;
-    public static final int g$$_b = g$_b + 12;
-    public static final int g$$   = g$   + 12;
-    public static final int g$$_s = g$_s + 12;
-    public static final int a$$_b = a$_b + 12;
-    public static final int a$$   = a$   + 12;
-    public static final int a$$_s = a$_s + 12;
-    public static final int b$$_b = b$_b + 12;
-    public static final int b$$   = b$   + 12;
-
 }
