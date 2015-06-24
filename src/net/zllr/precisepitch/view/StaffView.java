@@ -88,10 +88,12 @@ public class StaffView extends View {
     public void ensureNoteInView(int n) {
         if (model == null || model.size() == 0) return;
         // The first couple of notes we show directly, then start to scroll gently.
-        final int kStartScrollingAt = 3;
+        final int kStartScrollingAt = 1;
+        final int kEndScrollingAt = 2;
         n -= kStartScrollingAt;
         if (n < 0) n = 0;
-        final int totalScroll = model.size() - kStartScrollingAt;
+        int totalScroll = model.size() - kStartScrollingAt - kEndScrollingAt;
+        if (totalScroll <= 0) totalScroll = 1;  // Uh, short model, heh?
         // We know that we're embedded in a HorizontalScrollView, cast is safe.
         HorizontalScrollView scroller = (HorizontalScrollView) getParent();
         int scrollLongerThanScreen = getWidth() - scroller.getWidth();
@@ -137,6 +139,8 @@ public class StaffView extends View {
     }
 
     protected void onDraw(Canvas canvas) {
+        // todo: draw into some bitmap and cache that if there is no change.
+
         canvas.drawPaint(backgroundColor);
         // Interesting thing to find out: for some reason canvas.getHeight()
         // and this.getHeight() are different on the Android 2.3 device.
